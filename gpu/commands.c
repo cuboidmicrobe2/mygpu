@@ -36,6 +36,7 @@ struct mygpu_command_buffer *mygpu_command_buffer_create(uint32_t size)
 
     buffer->size = size;
     buffer->used = 0;
+    buffer->refcount = 1;
 
     return buffer;
 }
