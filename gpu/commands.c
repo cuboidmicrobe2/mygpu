@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "../include/mygpu/commands.h"
-#include "../include/mygpu/gpu_internal.h"
+#include "mygpu/commands.h"
+#include "mygpu/gpu_internal.h"
 
 struct mygpu_command_buffer
 {

@@ -1,9 +1,9 @@
 #include <stdlib.h>
 
-#include "../include/mygpu/queue.h"
-#include "../include/mygpu/commands.h"
-#include "../include/mygpu/fence.h"
-#include "../include/mygpu/gpu_internal.h"
+#include "mygpu/queue.h"
+#include "mygpu/commands.h"
+#include "mygpu/fence.h"
+#include "mygpu/gpu_internal.h"
 
 struct mygpu_queue_entry {
     struct mygpu_command_buffer *buffer;

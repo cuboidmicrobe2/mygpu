@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
-#include "../include/mygpu/gpu_internal.h"
-#include "../include/mygpu/gpu.h"
-#include "../include/mygpu/fence.h"
+#include "mygpu/gpu_internal.h"
+#include "mygpu/gpu.h"
+#include "mygpu/fence.h"
 
 #define MYGPU_WIDTH 320u
 #define MYGPU_HEIGHT 200u

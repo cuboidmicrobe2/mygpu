@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "../include/mygpu/registers.h"
+#include "mygpu/registers.h"
 
 struct mygpu_registers {
     uint32_t status;
