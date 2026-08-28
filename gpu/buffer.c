@@ -6,6 +6,7 @@
 struct mygpu_buffer {
     uint8_t *data;
     size_t size;
+    uint32_t address;
 };
 
 struct mygpu_buffer *mygpu_buffer_create(struct mygpu *gpu, size_t size)
@@ -30,6 +31,7 @@ struct mygpu_buffer *mygpu_buffer_create(struct mygpu *gpu, size_t size)
     }
 
     buffer->size = size;
+    buffer->address = 0;
 
     memset(buffer->data, 0, size);
 
@@ -91,4 +93,13 @@ size_t mygpu_buffer_size(const struct mygpu_buffer *buffer)
     }
 
     return buffer->size;
+}
+
+uint32_t mygpu_buffer_address(const struct mygpu_buffer *buffer)
+{
+    if (buffer == NULL) {
+        return 0;
+    }
+
+    return buffer->address;
 }

@@ -18,4 +18,6 @@ int mygpu_buffer_write(struct mygpu_buffer *buffer, size_t offset, const void *d
 
 size_t mygpu_buffer_size(const struct mygpu_buffer *buffer);
 
+uint32_t mygpu_buffer_address(const struct mygpu_buffer *buffer);
+
 #endif

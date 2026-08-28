@@ -542,6 +542,48 @@ static void test_multiple_buffers(void)
     mygpu_destroy(gpu);
 }
 
+static void test_address(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *buffer;
+
+    check(
+        mygpu_buffer_address(NULL) == 0,
+        "NULL buffer address is zero"
+    );
+
+    gpu = mygpu_create();
+
+    check(
+        gpu != NULL,
+        "buffer address GPU setup"
+    );
+
+    if (gpu == NULL) {
+        return;
+    }
+
+    buffer = mygpu_buffer_create(gpu, 64);
+
+    check(
+        buffer != NULL,
+        "create buffer for address"
+    );
+
+    if (buffer == NULL) {
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    check(
+        mygpu_buffer_address(buffer) == 0,
+        "buffer has initial GPU address"
+    );
+
+    mygpu_buffer_destroy(buffer);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Buffer Tests ===\n\n");
@@ -558,6 +600,7 @@ int main(void)
     test_offset_past_end();
     test_null_arguments();
     test_multiple_buffers();
+    test_address();
 
     printf("\n=== Results ===\n");
 
