@@ -863,7 +863,7 @@ static void test_queue_recovery_after_failure(void)
     mygpu_destroy(gpu);
 }
 
-static void test_queue_does_not_own_resources(void)
+static void test_queue_retains_resources(void)
 {
     struct mygpu *gpu;
     struct mygpu_queue *queue;
@@ -1048,6 +1048,110 @@ static void test_queue_owns_resources(void)
     mygpu_destroy(gpu);
 }
 
+static void test_duplicate_submission(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_queue *queue;
+    struct mygpu_command_buffer *buffer;
+    struct mygpu_fence *fence;
+    struct mygpu_cmd_clear command;
+
+    int result;
+
+    gpu = mygpu_create();
+    queue = mygpu_queue_create();
+    buffer = mygpu_command_buffer_create(64);
+    fence = mygpu_fence_create(70);
+
+    if (gpu == NULL ||
+        queue == NULL ||
+        buffer == NULL ||
+        fence == NULL) {
+
+        check(0, "duplicate submission setup");
+
+        mygpu_destroy(gpu);
+        mygpu_queue_destroy(queue);
+        mygpu_command_buffer_destroy(buffer);
+        mygpu_fence_destroy(fence);
+
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_CLEAR;
+    command.color = 0x11223344u;
+
+    result = mygpu_command_buffer_write(
+        buffer,
+        &command,
+        sizeof(command)
+    );
+
+    check(
+        result == 0,
+        "write duplicate submission command"
+    );
+
+    result = mygpu_queue_submit(
+        queue,
+        buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit command first time"
+    );
+
+    /*
+     * Submit the same buffer and fence again.
+     * The queue must retain another reference.
+     */
+    result = mygpu_queue_submit(
+        queue,
+        buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit command second time"
+    );
+
+    /*
+     * Release the caller's references.
+     * Both queue entries must remain valid.
+     */
+    mygpu_command_buffer_destroy(buffer);
+    mygpu_fence_destroy(fence);
+
+    result = mygpu_queue_process(
+        gpu,
+        queue
+    );
+
+    check(
+        result == 0,
+        "process duplicate submissions"
+    );
+
+    /*
+     * Both entries used the same CLEAR command.
+     * The final framebuffer value confirms both entries
+     * were processed without invalidating the shared buffer.
+     */
+    check_pixel(
+        gpu,
+        10,
+        10,
+        0x11223344u,
+        "duplicate submissions execute correctly"
+    );
+
+    mygpu_queue_destroy(queue);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Queue Tests ===\n\n");
@@ -1061,8 +1165,9 @@ int main(void)
     test_invalid_command_fence();
     test_failed_command_stops_queue();
     test_queue_recovery_after_failure();
-    test_queue_does_not_own_resources();
+    test_queue_retains_resources();
     test_queue_owns_resources();
+    test_duplicate_submission();
 
     printf("\n=== Results ===\n");
 
