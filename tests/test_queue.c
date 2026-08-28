@@ -2,9 +2,9 @@
 #include <stdio.h>
 
 #include "../include/mygpu/gpu.h"
-#include "../gpu/commands.h"
-#include "../gpu/fence.h"
-#include "../gpu/queue.h"
+#include "../include/mygpu/commands.h"
+#include "../include/mygpu/fence.h"
+#include "../include/mygpu/queue.h"
 
 #define TEST_CLEAR_COLOR 0x000000FFu
 

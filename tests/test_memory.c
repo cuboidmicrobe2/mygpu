@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../gpu/memory.h"
+#include "../include/mygpu/memory.h"
 
 static int tests_run = 0;
 static int tests_passed = 0;

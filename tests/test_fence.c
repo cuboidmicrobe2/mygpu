@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "../gpu/fence.h"
+#include "../include/mygpu/fence.h"
 
 static int tests_run = 0;
 static int tests_passed = 0;

@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "../gpu/framebuffer.h"
+#include "../include/mygpu/framebuffer.h"
 
 static int tests_run = 0;
 static int tests_passed = 0;

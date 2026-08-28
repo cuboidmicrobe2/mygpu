@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "../include/mygpu/gpu.h"
-#include "../gpu/commands.h"
+#include "../include/mygpu/commands.h"
 
 #define TEST_CLEAR_COLOR 0x000000FFu
 

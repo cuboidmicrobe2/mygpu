@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "framebuffer.h"
+#include "../include/mygpu/framebuffer.h"
 
 struct mygpu_framebuffer {
     uint32_t width;

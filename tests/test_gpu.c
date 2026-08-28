@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 #include "mygpu/gpu.h"
-#include "../gpu/commands.h"
-#include "../gpu/fence.h"
+#include "../include/mygpu/commands.h"
+#include "../include/mygpu/fence.h"
 
 static int tests_run = 0;
 static int tests_passed = 0;

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "memory.h"
+#include "../include/mygpu/memory.h"
 
 struct mygpu_memory {
     uint8_t* data;
