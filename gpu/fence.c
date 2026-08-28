@@ -5,6 +5,7 @@
 struct mygpu_fence {
     uint64_t id;
     int signaled;
+    uint32_t refcount;
 };
 
 struct mygpu_fence *mygpu_fence_create(uint64_t id)
@@ -23,13 +24,39 @@ struct mygpu_fence *mygpu_fence_create(uint64_t id)
     return fence;
 }
 
-void mygpu_fence_destroy(struct mygpu_fence *fence)
+void mygpu_fence_retain(struct mygpu_fence *fence)
 {
     if (fence == NULL) {
         return;
     }
 
-    free(fence);
+    if (fence->refcount == UINT32_MAX) {
+        return;
+    }
+
+    fence->refcount++;
+}
+
+void mygpu_fence_release(struct mygpu_fence *fence)
+{
+    if (fence == NULL) {
+        return;
+    }
+
+    if (fence->refcount == 0) {
+        return;
+    }
+
+    fence->refcount--;
+
+    if (fence->refcount == 0) {
+        free(fence);
+    }
+}
+
+void mygpu_fence_destroy(struct mygpu_fence *fence)
+{
+    mygpu_fence_release(fence);
 }
 
 int mygpu_fence_is_signaled(const struct mygpu_fence *fence)
