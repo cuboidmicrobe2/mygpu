@@ -894,7 +894,7 @@ static void test_process_is_idempotent(void)
 
     gpu = mygpu_create();
     buffer = mygpu_command_buffer_create(64);
-    fence = mygpu_fence_create(300);
+    fence = mygpu_fence_create(310);
 
     if (gpu == NULL || buffer == NULL || fence == NULL) {
         check(0, "process idempotence setup");
@@ -986,6 +986,61 @@ static void test_process_is_idempotent(void)
     mygpu_destroy(gpu);
 }
 
+static void test_submit_empty_command_buffer(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_command_buffer *buffer;
+    struct mygpu_fence *fence;
+
+    int result;
+
+    gpu = mygpu_create();
+    buffer = mygpu_command_buffer_create(64);
+    fence = mygpu_fence_create(310);
+
+    if (gpu == NULL || buffer == NULL || fence == NULL) {
+        check(0, "empty command buffer setup");
+
+        mygpu_command_buffer_destroy(buffer);
+        mygpu_fence_destroy(fence);
+        mygpu_destroy(gpu);
+
+        return;
+    }
+
+    result = mygpu_submit(
+        gpu,
+        buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit empty command buffer"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "empty submission fence initially unsignaled"
+    );
+
+    result = mygpu_process(gpu);
+
+    check(
+        result != 0,
+        "reject empty submitted command buffer"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "empty submission fence remains unsignaled"
+    );
+
+    mygpu_command_buffer_destroy(buffer);
+    mygpu_fence_destroy(fence);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Tests ===\n\n");
@@ -1006,6 +1061,7 @@ int main(void)
     test_fence_reuse();
     test_fence_failure_recovery();
     test_process_is_idempotent();
+    test_submit_empty_command_buffer();
 
     printf("\n=== Results ===\n");
 

@@ -102,6 +102,10 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
         return -1;
     }
 
+    if (buffer->used == 0) {
+        return -1;
+    }
+
     while (offset < buffer->used) {
         uint32_t opcode;
 
