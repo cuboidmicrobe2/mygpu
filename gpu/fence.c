@@ -20,6 +20,7 @@ struct mygpu_fence *mygpu_fence_create(uint64_t id)
 
     fence->id = id;
     fence->signaled = 0;
+    fence->refcount = 1;
 
     return fence;
 }
