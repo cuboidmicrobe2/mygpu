@@ -961,6 +961,93 @@ static void test_queue_does_not_own_resources(void)
     mygpu_destroy(gpu);
 }
 
+static void test_queue_owns_resources(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_queue *queue;
+    struct mygpu_command_buffer *buffer;
+    struct mygpu_fence *fence;
+    struct mygpu_cmd_clear command;
+    int result;
+
+    gpu = mygpu_create();
+    queue = mygpu_queue_create();
+    buffer = mygpu_command_buffer_create(64);
+    fence = mygpu_fence_create(100);
+
+    if (gpu == NULL ||
+        queue == NULL ||
+        buffer == NULL ||
+        fence == NULL) {
+
+        check(0, "queue ownership setup");
+
+        mygpu_destroy(gpu);
+        mygpu_queue_destroy(queue);
+        mygpu_command_buffer_destroy(buffer);
+        mygpu_fence_destroy(fence);
+
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_CLEAR;
+    command.color = 0x12345678;
+
+    result = mygpu_command_buffer_write(
+        buffer,
+        &command,
+        sizeof(command)
+    );
+
+    check(
+        result == 0,
+        "write ownership command"
+    );
+
+    result = mygpu_queue_submit(
+        queue,
+        buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit ownership command"
+    );
+
+    /*
+     * The queue now owns references to both objects.
+     */
+    mygpu_command_buffer_destroy(buffer);
+    mygpu_fence_destroy(fence);
+
+    result = mygpu_queue_process(
+        gpu,
+        queue
+    );
+
+    check(
+        result == 0,
+        "process after caller releases resources"
+    );
+
+    check_pixel(
+        gpu,
+        10,
+        10,
+        0x12345678,
+        "queue-owned command still executes"
+    );
+
+    /*
+     * We can't safely inspect fence here because the caller
+     * released its reference and the queue released its
+     * reference during processing.
+     */
+    mygpu_queue_destroy(queue);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Queue Tests ===\n\n");
@@ -975,6 +1062,7 @@ int main(void)
     test_failed_command_stops_queue();
     test_queue_recovery_after_failure();
     test_queue_does_not_own_resources();
+    test_queue_owns_resources();
 
     printf("\n=== Results ===\n");
 

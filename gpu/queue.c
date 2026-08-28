@@ -43,6 +43,9 @@ void mygpu_queue_destroy(struct mygpu_queue *queue)
     while (entry != NULL) {
         next = entry->next;
 
+        mygpu_command_buffer_release(entry->buffer);
+        mygpu_fence_release(entry->fence);
+
         free(entry);
 
         entry = next;
@@ -64,6 +67,9 @@ int mygpu_queue_submit(struct mygpu_queue *queue, struct mygpu_command_buffer *b
     if (entry == NULL) {
         return -1;
     }
+
+    mygpu_command_buffer_retain(buffer);
+    mygpu_fence_retain(fence);
 
     entry->buffer = buffer;
     entry->fence = fence;
@@ -103,6 +109,9 @@ int mygpu_queue_process(struct mygpu *gpu, struct mygpu_queue *queue)
         if (result == 0) {
             mygpu_fence_signal(entry->fence);
         }
+
+        mygpu_command_buffer_release(entry->buffer);
+        mygpu_fence_release(entry->fence);
 
         free(entry);
 
