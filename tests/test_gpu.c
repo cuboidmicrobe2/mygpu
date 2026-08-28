@@ -647,6 +647,118 @@ static void test_fence_wait_invalid_arguments(void)
     mygpu_destroy(gpu);
 }
 
+static void test_fence_reuse(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_command_buffer *buffer;
+    struct mygpu_fence *fence;
+    struct mygpu_cmd_clear command;
+    int result;
+
+    gpu = mygpu_create();
+    buffer = mygpu_command_buffer_create(64);
+    fence = mygpu_fence_create(200);
+
+    if (gpu == NULL || buffer == NULL || fence == NULL) {
+        check(0, "fence reuse setup");
+
+        mygpu_command_buffer_destroy(buffer);
+        mygpu_fence_destroy(fence);
+        mygpu_destroy(gpu);
+
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_CLEAR;
+    command.color = 0x11223344;
+
+    result = mygpu_command_buffer_write(
+        buffer,
+        &command,
+        sizeof(command)
+    );
+
+    check(
+        result == 0,
+        "write first fence reuse command"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "reuse fence initially unsignaled"
+    );
+
+    result = mygpu_submit(gpu, buffer, fence);
+
+    check(
+        result == 0,
+        "submit first fence reuse command"
+    );
+
+    result = mygpu_process(gpu);
+
+    check(
+        result == 0,
+        "process first fence reuse command"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 1,
+        "reuse fence signals after first process"
+    );
+
+    mygpu_fence_reset(fence);
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "reuse fence is unsignaled after reset"
+    );
+
+    command.color = 0x55667788;
+
+    result = mygpu_command_buffer_write(
+        buffer,
+        &command,
+        sizeof(command)
+    );
+
+    check(
+        result == 0,
+        "write second fence reuse command"
+    );
+
+    result = mygpu_submit(gpu, buffer, fence);
+
+    check(
+        result == 0,
+        "submit second fence reuse command"
+    );
+
+    result = mygpu_process(gpu);
+
+    check(
+        result == 0,
+        "process second fence reuse command"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 1,
+        "reuse fence signals after second process"
+    );
+
+    check_pixel(
+        gpu,
+        0,
+        0,
+        0x55667788,
+        "second fence reuse command executes"
+    );
+
+    mygpu_command_buffer_destroy(buffer);
+    mygpu_fence_destroy(fence);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Tests ===\n\n");
@@ -664,6 +776,7 @@ int main(void)
     test_fence_wait();
     test_fence_wait_already_signaled();
     test_fence_wait_invalid_arguments();
+    test_fence_reuse();
 
     printf("\n=== Results ===\n");
 
