@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "../include/mygpu/fence.h"
+#include "mygpu/fence.h"
 
 struct mygpu_fence {
     uint64_t id;
