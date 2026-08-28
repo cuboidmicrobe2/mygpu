@@ -10,7 +10,7 @@ GPU_SOURCES = \
 	gpu/gpu.c \
 	gpu/memory.c \
 	gpu/registers.c \
-	gpu/framebuffer.c
+	gpu/framebuffer.c \
 
 COMMANDS_SOURCES = \
 	$(GPU_SOURCES) \
@@ -71,8 +71,8 @@ all: $(GPU_TEST) \
 # Build tests
 # --------------------------------------------------
 
-$(GPU_TEST): $(GPU_SOURCES) $(GPU_TEST_SOURCE)
-	$(CC) $(CFLAGS) $(GPU_SOURCES) $(GPU_TEST_SOURCE) -o $@
+$(GPU_TEST): $(QUEUE_SOURCES) $(GPU_TEST_SOURCE)
+	$(CC) $(CFLAGS) $(QUEUE_SOURCES) $(GPU_TEST_SOURCE) -o $@
 
 $(MEMORY_TEST): gpu/memory.c $(MEMORY_TEST_SOURCE)
 	$(CC) $(CFLAGS) gpu/memory.c $(MEMORY_TEST_SOURCE) -o $@

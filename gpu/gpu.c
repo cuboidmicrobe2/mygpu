@@ -44,6 +44,16 @@ struct mygpu *mygpu_create(void)
         return NULL;
     }
 
+    gpu->queue = mygpu_queue_create();
+
+    if(gpu->queue == NULL) {
+        mygpu_framebuffer_destroy(gpu->framebuffer);
+        mygpu_registers_destroy(gpu->registers);
+        mygpu_memory_destroy(gpu->memory);
+        free(gpu);
+        return NULL;
+    }
+
     mygpu_reset(gpu);
 
     return gpu;
@@ -55,6 +65,7 @@ void mygpu_destroy(struct mygpu *gpu)
         return;
     }
 
+    mygpu_queue_destroy(gpu->queue);
     mygpu_framebuffer_destroy(gpu->framebuffer);
     mygpu_registers_destroy(gpu->registers);
     mygpu_memory_destroy(gpu->memory);
@@ -110,4 +121,23 @@ int mygpu_is_presented(const struct mygpu *gpu)
     }
 
     return gpu->presented;
+}
+
+int mygpu_submit(struct mygpu *gpu, struct mygpu_command_buffer *buffer, struct mygpu_fence *fence)
+{
+    if (gpu == NULL || buffer == NULL || fence == NULL) {
+        return -1;
+    }
+
+    return mygpu_queue_submit(gpu->queue, buffer, fence);
+}
+
+
+int mygpu_process(struct mygpu *gpu)
+{
+    if (gpu == NULL) {
+        return -1;
+    }
+
+    return mygpu_queue_process(gpu, gpu->queue);
 }
