@@ -2,6 +2,7 @@
 
 #include "gpu_internal.h"
 #include "mygpu/gpu.h"
+#include "fence.h"
 
 #define MYGPU_WIDTH 320u
 #define MYGPU_HEIGHT 200u
@@ -140,4 +141,19 @@ int mygpu_process(struct mygpu *gpu)
     }
 
     return mygpu_queue_process(gpu, gpu->queue);
+}
+
+int mygpu_fence_wait(struct mygpu *gpu, struct mygpu_fence *fence)
+{
+    if (gpu == NULL || fence == NULL) {
+        return -1;
+    }
+
+    while (!mygpu_fence_is_signaled(fence)) {
+        if (mygpu_process(gpu) != 0) {
+            return -1;
+        }
+    }
+
+    return 0;
 }

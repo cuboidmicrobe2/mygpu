@@ -495,6 +495,158 @@ static void test_submit_fifo(void)
     mygpu_destroy(gpu);
 }
 
+static void test_fence_wait(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_command_buffer *buffer;
+    struct mygpu_fence *fence;
+    struct mygpu_cmd_clear command;
+
+    int result;
+
+    gpu = mygpu_create();
+    buffer = mygpu_command_buffer_create(64);
+    fence = mygpu_fence_create(100);
+
+    if (gpu == NULL || buffer == NULL || fence == NULL) {
+        check(0, "fence wait setup");
+
+        mygpu_command_buffer_destroy(buffer);
+        mygpu_fence_destroy(fence);
+        mygpu_destroy(gpu);
+
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_CLEAR;
+    command.color = 0xFF0000FF;
+
+    result = mygpu_command_buffer_write(
+        buffer,
+        &command,
+        sizeof(command)
+    );
+
+    check(
+        result == 0,
+        "write command for fence wait"
+    );
+
+    result = mygpu_submit(
+        gpu,
+        buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit command for fence wait"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "wait fence initially unsignaled"
+    );
+
+    result = mygpu_fence_wait(
+        gpu,
+        fence
+    );
+
+    check(
+        result == 0,
+        "wait for submitted fence"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 1,
+        "wait signals fence"
+    );
+
+    check_pixel(
+        gpu,
+        10,
+        10,
+        0xFF0000FF,
+        "wait executes submitted command"
+    );
+
+    mygpu_command_buffer_destroy(buffer);
+    mygpu_fence_destroy(fence);
+    mygpu_destroy(gpu);
+}
+
+static void test_fence_wait_already_signaled(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_fence *fence;
+
+    int result;
+
+    gpu = mygpu_create();
+    fence = mygpu_fence_create(101);
+
+    if (gpu == NULL || fence == NULL) {
+        check(0, "already-signaled fence wait setup");
+
+        mygpu_fence_destroy(fence);
+        mygpu_destroy(gpu);
+
+        return;
+    }
+
+    mygpu_fence_signal(fence);
+
+    result = mygpu_fence_wait(
+        gpu,
+        fence
+    );
+
+    check(
+        result == 0,
+        "wait on already-signaled fence"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 1,
+        "already-signaled fence remains signaled"
+    );
+
+    mygpu_fence_destroy(fence);
+    mygpu_destroy(gpu);
+}
+
+static void test_fence_wait_invalid_arguments(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_fence *fence;
+
+    gpu = mygpu_create();
+    fence = mygpu_fence_create(102);
+
+    if (gpu == NULL || fence == NULL) {
+        check(0, "fence wait invalid argument setup");
+
+        mygpu_fence_destroy(fence);
+        mygpu_destroy(gpu);
+
+        return;
+    }
+
+    check(
+        mygpu_fence_wait(NULL, fence) != 0,
+        "reject NULL GPU in fence wait"
+    );
+
+    check(
+        mygpu_fence_wait(gpu, NULL) != 0,
+        "reject NULL fence in fence wait"
+    );
+
+    mygpu_fence_destroy(fence);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Tests ===\n\n");
@@ -509,6 +661,9 @@ int main(void)
     test_submit_invalid_arguments();
     test_submit_invalid_command();
     test_submit_fifo();
+    test_fence_wait();
+    test_fence_wait_already_signaled();
+    test_fence_wait_invalid_arguments();
 
     printf("\n=== Results ===\n");
 

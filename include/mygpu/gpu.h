@@ -25,4 +25,6 @@ int mygpu_submit(struct mygpu *gpu, struct mygpu_command_buffer *buffer, struct 
 
 int mygpu_process(struct mygpu *gpu);
 
+int mygpu_fence_wait(struct mygpu *gpu, struct mygpu_fence *fence);
+
 #endif
