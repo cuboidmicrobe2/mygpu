@@ -18,6 +18,10 @@ GPU_DEVICE_SOURCES = \
 	gpu/fence.c \
 	gpu/queue.c
 
+BUFFER_SOURCES = \
+	$(GPU_DEVICE_SOURCES) \
+	gpu/buffer.c
+
 COMMANDS_SOURCES = \
 	$(GPU_DEVICE_SOURCES)
 
@@ -32,6 +36,7 @@ GPU_TEST = test_gpu
 MEMORY_TEST = test_memory
 REGISTERS_TEST = test_registers
 FRAMEBUFFER_TEST = test_framebuffer
+BUFFER_TEST = test_buffer
 COMMANDS_TEST = test_commands
 QUEUE_TEST = test_queue
 
@@ -43,6 +48,7 @@ GPU_TEST_SOURCE = tests/test_gpu.c
 MEMORY_TEST_SOURCE = tests/test_memory.c
 REGISTERS_TEST_SOURCE = tests/test_registers.c
 FRAMEBUFFER_TEST_SOURCE = tests/test_framebuffer.c
+BUFFER_TEST_SOURCE = tests/test_buffer.c
 COMMANDS_TEST_SOURCE = tests/test_commands.c
 QUEUE_TEST_SOURCE = tests/test_queue.c
 
@@ -55,6 +61,7 @@ QUEUE_TEST_SOURCE = tests/test_queue.c
 	test-memory \
 	test-registers \
 	test-framebuffer \
+	test-buffer \
 	test-commands \
 	test-queue \
 	clean
@@ -67,6 +74,7 @@ all: $(GPU_TEST) \
 	$(MEMORY_TEST) \
 	$(REGISTERS_TEST) \
 	$(FRAMEBUFFER_TEST) \
+	$(BUFFER_TEST) \
 	$(COMMANDS_TEST) \
 	$(QUEUE_TEST)
 
@@ -86,6 +94,9 @@ $(REGISTERS_TEST): gpu/registers.c $(REGISTERS_TEST_SOURCE)
 $(FRAMEBUFFER_TEST): gpu/framebuffer.c $(FRAMEBUFFER_TEST_SOURCE)
 	$(CC) $(CFLAGS) gpu/framebuffer.c $(FRAMEBUFFER_TEST_SOURCE) -o $@
 
+$(BUFFER_TEST): $(BUFFER_SOURCES) $(BUFFER_TEST_SOURCE)
+	$(CC) $(CFLAGS) $(BUFFER_SOURCES) $(BUFFER_TEST_SOURCE) -o $@
+
 $(COMMANDS_TEST): $(COMMANDS_SOURCES) $(COMMANDS_TEST_SOURCE)
 	$(CC) $(CFLAGS) $(COMMANDS_SOURCES) $(COMMANDS_TEST_SOURCE) -o $@
 
@@ -100,6 +111,7 @@ test: test-gpu \
 	test-memory \
 	test-registers \
 	test-framebuffer \
+	test-buffer \
 	test-commands \
 	test-queue
 
@@ -114,6 +126,9 @@ test-registers: $(REGISTERS_TEST)
 
 test-framebuffer: $(FRAMEBUFFER_TEST)
 	./$(FRAMEBUFFER_TEST)
+
+test-buffer: $(BUFFER_TEST)
+	./$(BUFFER_TEST)
 
 test-commands: $(COMMANDS_TEST)
 	./$(COMMANDS_TEST)
@@ -131,5 +146,6 @@ clean:
 	$(MEMORY_TEST) \
 	$(REGISTERS_TEST) \
 	$(FRAMEBUFFER_TEST) \
+	$(BUFFER_TEST) \
 	$(COMMANDS_TEST) \
 	$(QUEUE_TEST)
