@@ -883,6 +883,109 @@ static void test_fence_failure_recovery(void)
     mygpu_destroy(gpu);
 }
 
+static void test_process_is_idempotent(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_command_buffer *buffer;
+    struct mygpu_fence *fence;
+    struct mygpu_cmd_clear command;
+
+    int result;
+
+    gpu = mygpu_create();
+    buffer = mygpu_command_buffer_create(64);
+    fence = mygpu_fence_create(300);
+
+    if (gpu == NULL || buffer == NULL || fence == NULL) {
+        check(0, "process idempotence setup");
+
+        mygpu_command_buffer_destroy(buffer);
+        mygpu_fence_destroy(fence);
+        mygpu_destroy(gpu);
+
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_CLEAR;
+    command.color = 0xAABBCCDDu;
+
+    result = mygpu_command_buffer_write(
+        buffer,
+        &command,
+        sizeof(command)
+    );
+
+    check(
+        result == 0,
+        "write command for repeated process"
+    );
+
+    result = mygpu_submit(
+        gpu,
+        buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit command for repeated process"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "repeated process fence initially unsignaled"
+    );
+
+    result = mygpu_process(gpu);
+
+    check(
+        result == 0,
+        "first GPU process succeeds"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 1,
+        "first GPU process signals fence"
+    );
+
+    check_pixel(
+        gpu,
+        10,
+        10,
+        0xAABBCCDDu,
+        "first GPU process executes command"
+    );
+
+    /*
+     * The queue entry should have been removed.
+     * Processing again must succeed without
+     * executing the command a second time.
+     */
+    result = mygpu_process(gpu);
+
+    check(
+        result == 0,
+        "second GPU process succeeds"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 1,
+        "fence remains signaled after second process"
+    );
+
+    check_pixel(
+        gpu,
+        10,
+        10,
+        0xAABBCCDDu,
+        "second GPU process does not replay command"
+    );
+
+    mygpu_command_buffer_destroy(buffer);
+    mygpu_fence_destroy(fence);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Tests ===\n\n");
@@ -902,6 +1005,7 @@ int main(void)
     test_fence_wait_invalid_arguments();
     test_fence_reuse();
     test_fence_failure_recovery();
+    test_process_is_idempotent();
 
     printf("\n=== Results ===\n");
 
