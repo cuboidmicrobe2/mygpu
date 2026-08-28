@@ -40,6 +40,10 @@ struct mygpu_cmd_copy {
 
 struct mygpu_command_buffer *mygpu_command_buffer_create(uint32_t size);
 
+void mygpu_command_buffer_retain(struct mygpu_command_buffer *buffer);
+
+void mygpu_command_buffer_release(struct mygpu_command_buffer *buffer);
+
 void mygpu_command_buffer_destroy(struct mygpu_command_buffer *buffer);
 
 int mygpu_command_buffer_write(struct mygpu_command_buffer *buffer, const void *data, uint32_t size);

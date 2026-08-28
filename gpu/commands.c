@@ -10,6 +10,7 @@ struct mygpu_command_buffer
     uint8_t *data;
     uint32_t size;
     uint32_t used;
+    uint32_t refcount;
 };
 
 struct mygpu_command_buffer *mygpu_command_buffer_create(uint32_t size)
@@ -39,14 +40,40 @@ struct mygpu_command_buffer *mygpu_command_buffer_create(uint32_t size)
     return buffer;
 }
 
-void mygpu_command_buffer_destroy(struct mygpu_command_buffer *buffer)
+void mygpu_command_buffer_retain(struct mygpu_command_buffer *buffer)
 {
     if (buffer == NULL) {
         return;
     }
 
-    free(buffer->data);
-    free(buffer);
+    if (buffer->refcount == UINT32_MAX) {
+        return;
+    }
+
+    buffer->refcount++;
+}
+
+void mygpu_command_buffer_release(struct mygpu_command_buffer *buffer)
+{
+    if (buffer == NULL) {
+        return;
+    }
+
+    if (buffer->refcount == 0) {
+        return;
+    }
+
+    buffer->refcount--;
+
+    if (buffer->refcount == 0) {
+        free(buffer->data);
+        free(buffer);
+    }
+}
+
+void mygpu_command_buffer_destroy(struct mygpu_command_buffer *buffer)
+{
+    mygpu_command_buffer_release(buffer);
 }
 
 int mygpu_command_buffer_write(struct mygpu_command_buffer *buffer, const void *data, uint32_t size)
