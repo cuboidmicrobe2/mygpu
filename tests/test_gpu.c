@@ -759,6 +759,130 @@ static void test_fence_reuse(void)
     mygpu_destroy(gpu);
 }
 
+static void test_fence_failure_recovery(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_command_buffer *invalid_buffer;
+    struct mygpu_command_buffer *valid_buffer;
+    struct mygpu_fence *fence;
+
+    uint32_t invalid_opcode = 0xFFFFFFFFu;
+    struct mygpu_cmd_clear command;
+
+    int result;
+
+    gpu = mygpu_create();
+    invalid_buffer = mygpu_command_buffer_create(64);
+    valid_buffer = mygpu_command_buffer_create(64);
+    fence = mygpu_fence_create(300);
+
+    if (gpu == NULL ||
+        invalid_buffer == NULL ||
+        valid_buffer == NULL ||
+        fence == NULL) {
+
+        check(0, "fence failure recovery setup");
+
+        mygpu_command_buffer_destroy(invalid_buffer);
+        mygpu_command_buffer_destroy(valid_buffer);
+        mygpu_fence_destroy(fence);
+        mygpu_destroy(gpu);
+
+        return;
+    }
+
+    result = mygpu_command_buffer_write(
+        invalid_buffer,
+        &invalid_opcode,
+        sizeof(invalid_opcode)
+    );
+
+    check(
+        result == 0,
+        "write invalid command for fence failure"
+    );
+
+    result = mygpu_submit(
+        gpu,
+        invalid_buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit invalid command for fence failure"
+    );
+
+    result = mygpu_process(gpu);
+
+    check(
+        result != 0,
+        "failed command reports failure"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "failed command fence remains unsignaled"
+    );
+
+    mygpu_fence_reset(fence);
+
+    check(
+        mygpu_fence_is_signaled(fence) == 0,
+        "failed fence remains unsignaled after reset"
+    );
+
+    command.opcode = MYGPU_CMD_CLEAR;
+    command.color = 0xAABBCCDD;
+
+    result = mygpu_command_buffer_write(
+        valid_buffer,
+        &command,
+        sizeof(command)
+    );
+
+    check(
+        result == 0,
+        "write recovery command"
+    );
+
+    result = mygpu_submit(
+        gpu,
+        valid_buffer,
+        fence
+    );
+
+    check(
+        result == 0,
+        "submit recovery command"
+    );
+
+    result = mygpu_process(gpu);
+
+    check(
+        result == 0,
+        "recovery command processes successfully"
+    );
+
+    check(
+        mygpu_fence_is_signaled(fence) == 1,
+        "recovery fence signals"
+    );
+
+    check_pixel(
+        gpu,
+        0,
+        0,
+        0xAABBCCDD,
+        "recovery command executes"
+    );
+
+    mygpu_command_buffer_destroy(invalid_buffer);
+    mygpu_command_buffer_destroy(valid_buffer);
+    mygpu_fence_destroy(fence);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Tests ===\n\n");
@@ -777,6 +901,7 @@ int main(void)
     test_fence_wait_already_signaled();
     test_fence_wait_invalid_arguments();
     test_fence_reuse();
+    test_fence_failure_recovery();
 
     printf("\n=== Results ===\n");
 
