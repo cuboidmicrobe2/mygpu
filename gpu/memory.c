@@ -7,6 +7,7 @@
 struct mygpu_memory {
     uint8_t* data;
     size_t size;
+    size_t next_free;
 };
 
 struct mygpu_memory *mygpu_memory_create(void)
@@ -27,6 +28,7 @@ struct mygpu_memory *mygpu_memory_create(void)
     }
 
     memory->size = MYGPU_MEMORY_SIZE;
+    memory->next_free = 0;
 
     memset(memory->data, 0, memory->size);
 
@@ -69,6 +71,23 @@ int mygpu_memory_write(struct mygpu_memory *memory, uint32_t address, const void
     }
 
     memcpy(memory->data + address, data, size);
+
+    return 0;
+}
+
+int mygpu_memory_alloc(struct mygpu_memory *memory, size_t size, uint32_t *address)
+{
+    if (memory == NULL || address == NULL || size == 0) {
+        return -1;
+    }
+
+    if (size > memory->size - memory->next_free) {
+        return -1;
+    }
+
+    *address = (uint32_t)memory->next_free;
+
+    memory->next_free += size;
 
     return 0;
 }

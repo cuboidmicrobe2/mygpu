@@ -584,6 +584,116 @@ static void test_address(void)
     mygpu_destroy(gpu);
 }
 
+static void test_buffer_addresses_and_isolation(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *buffer_a;
+    struct mygpu_buffer *buffer_b;
+
+    uint32_t value_a = 0xAAAAAAAA;
+    uint32_t value_b = 0xBBBBBBBB;
+
+    uint32_t read_a = 0;
+    uint32_t read_b = 0;
+
+    uint32_t address_a;
+    uint32_t address_b;
+
+    gpu = mygpu_create();
+
+    if (gpu == NULL) {
+        check(0, "buffer isolation GPU setup");
+        return;
+    }
+
+    buffer_a = mygpu_buffer_create(gpu, 64);
+    buffer_b = mygpu_buffer_create(gpu, 64);
+
+    check(
+        buffer_a != NULL,
+        "create first buffer for isolation"
+    );
+
+    check(
+        buffer_b != NULL,
+        "create second buffer for isolation"
+    );
+
+    if (buffer_a == NULL || buffer_b == NULL) {
+        mygpu_buffer_destroy(buffer_a);
+        mygpu_buffer_destroy(buffer_b);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    address_a = mygpu_buffer_address(buffer_a);
+    address_b = mygpu_buffer_address(buffer_b);
+
+    check(
+        address_a != address_b,
+        "buffers have different GPU addresses"
+    );
+
+    check(
+        address_b >= address_a + mygpu_buffer_size(buffer_a),
+        "buffer addresses do not overlap"
+    );
+
+    check(
+        mygpu_buffer_write(
+            buffer_a,
+            0,
+            &value_a,
+            sizeof(value_a)
+        ) == 0,
+        "write first buffer"
+    );
+
+    check(
+        mygpu_buffer_write(
+            buffer_b,
+            0,
+            &value_b,
+            sizeof(value_b)
+        ) == 0,
+        "write second buffer"
+    );
+
+    check(
+        mygpu_buffer_read(
+            buffer_a,
+            0,
+            &read_a,
+            sizeof(read_a)
+        ) == 0,
+        "read first buffer"
+    );
+
+    check(
+        mygpu_buffer_read(
+            buffer_b,
+            0,
+            &read_b,
+            sizeof(read_b)
+        ) == 0,
+        "read second buffer"
+    );
+
+    check(
+        read_a == value_a,
+        "first buffer data is isolated"
+    );
+
+    check(
+        read_b == value_b,
+        "second buffer data is isolated"
+    );
+
+    mygpu_buffer_destroy(buffer_a);
+    mygpu_buffer_destroy(buffer_b);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Buffer Tests ===\n\n");
@@ -601,6 +711,7 @@ int main(void)
     test_null_arguments();
     test_multiple_buffers();
     test_address();
+    test_buffer_addresses_and_isolation();
 
     printf("\n=== Results ===\n");
 

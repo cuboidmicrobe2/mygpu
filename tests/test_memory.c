@@ -413,6 +413,149 @@ static void test_zero_size_operations(void)
     mygpu_memory_destroy(memory);
 }
 
+static void test_alloc(void)
+{
+    struct mygpu_memory *memory;
+    uint32_t address_a;
+    uint32_t address_b;
+
+    memory = mygpu_memory_create();
+
+    check(
+        memory != NULL,
+        "create memory for allocation"
+    );
+
+    if (memory == NULL) {
+        return;
+    }
+
+    check(
+        mygpu_memory_alloc(
+            memory,
+            64,
+            &address_a
+        ) == 0,
+        "allocate first block"
+    );
+
+    check(
+        address_a == 0,
+        "first allocation starts at address zero"
+    );
+
+    check(
+        mygpu_memory_alloc(
+            memory,
+            128,
+            &address_b
+        ) == 0,
+        "allocate second block"
+    );
+
+    check(
+        address_b == 64,
+        "second allocation follows first"
+    );
+
+    check(
+        address_b >= address_a + 64,
+        "allocations do not overlap"
+    );
+
+    mygpu_memory_destroy(memory);
+}
+
+static void test_alloc_zero_size(void)
+{
+    struct mygpu_memory *memory;
+    uint32_t address;
+
+    memory = mygpu_memory_create();
+
+    if (memory == NULL) {
+        check(0, "zero-size allocation memory setup");
+        return;
+    }
+
+    check(
+        mygpu_memory_alloc(
+            memory,
+            0,
+            &address
+        ) != 0,
+        "reject zero-size allocation"
+    );
+
+    mygpu_memory_destroy(memory);
+}
+
+static void test_alloc_out_of_memory(void)
+{
+    struct mygpu_memory *memory;
+    uint32_t address;
+
+    memory = mygpu_memory_create();
+
+    if (memory == NULL) {
+        check(0, "out-of-memory allocation setup");
+        return;
+    }
+
+    check(
+        mygpu_memory_alloc(
+            memory,
+            MYGPU_MEMORY_SIZE,
+            &address
+        ) == 0,
+        "allocate entire memory"
+    );
+
+    check(
+        mygpu_memory_alloc(
+            memory,
+            1,
+            &address
+        ) != 0,
+        "reject allocation past memory"
+    );
+
+    mygpu_memory_destroy(memory);
+}
+
+static void test_alloc_null_arguments(void)
+{
+    struct mygpu_memory *memory;
+    uint32_t address;
+
+    memory = mygpu_memory_create();
+
+    if (memory == NULL) {
+        check(0, "NULL allocation memory setup");
+        return;
+    }
+
+    check(
+        mygpu_memory_alloc(
+            NULL,
+            16,
+            &address
+        ) != 0,
+        "reject NULL memory"
+    );
+
+    check(
+        mygpu_memory_alloc(
+            memory,
+            16,
+            NULL
+        ) != 0,
+        "reject NULL address"
+    );
+
+    mygpu_memory_destroy(memory);
+}
+
 int main(void)
 {
     printf("=== MyGPU Memory Tests ===\n\n");
@@ -427,6 +570,11 @@ int main(void)
     test_read_out_of_bounds();
     test_null_arguments();
     test_zero_size_operations();
+
+    test_alloc();
+    test_alloc_zero_size();
+    test_alloc_out_of_memory();
+    test_alloc_null_arguments();
 
     printf("\n=== Results ===\n");
     printf(

@@ -15,4 +15,6 @@ void mygpu_memory_destroy(struct mygpu_memory *memory);
 int mygpu_memory_read(struct mygpu_memory *memory, uint32_t address, void *data, size_t size);
 int mygpu_memory_write(struct mygpu_memory *memory, uint32_t address, const void *data, size_t size);
 
+int mygpu_memory_alloc(struct mygpu_memory *memory, size_t size, uint32_t *address);
+
 #endif
