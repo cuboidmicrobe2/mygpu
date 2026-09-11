@@ -151,6 +151,16 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
             offset += sizeof(uint32_t);
             break;
 
+        case MYGPU_CMD_BUFFER_COPY:
+            if (buffer->used - offset <
+                sizeof(struct mygpu_cmd_buffer_copy)) {
+            
+                return -1;
+            }
+
+            offset += sizeof(struct mygpu_cmd_buffer_copy);
+            break;
+
         default:
             return -1;
         }
@@ -364,6 +374,53 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             gpu->presented = 1;
 
             offset += sizeof(uint32_t);
+            break;
+        }
+
+        case MYGPU_CMD_BUFFER_COPY: {
+            struct mygpu_cmd_buffer_copy command;
+            uint8_t *data;
+
+            memcpy(
+                &command,
+                buffer->data + offset,
+                sizeof(command)
+            );
+
+            if (command.size == 0) {
+                offset += sizeof(command);
+                break;
+            }
+
+            data = malloc(command.size);
+
+            if (data == NULL) {
+                return -1;
+            }
+
+            if (mygpu_memory_read(
+                gpu->memory,
+                command.src_address,
+                data,
+                command.size) != 0) {
+
+                free(data);
+                return -1;
+            }
+
+            if (mygpu_memory_write(
+                gpu->memory,
+                command.dst_address,
+                data,
+                command.size) != 0) {
+                
+                free(data);
+                return -1;
+            }
+
+            free(data);
+
+            offset += sizeof(command);
             break;
         }
         

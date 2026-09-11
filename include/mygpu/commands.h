@@ -8,7 +8,8 @@ enum mygpu_opcode
     MYGPU_CMD_CLEAR = 0x01,
     MYGPU_CMD_DRAW_RECT = 0x02,
     MYGPU_CMD_COPY = 0x03,
-    MYGPU_CMD_PRESENT = 0x04
+    MYGPU_CMD_PRESENT = 0x04,
+    MYGPU_CMD_BUFFER_COPY = 0x05
 };
 
 struct mygpu;
@@ -36,6 +37,13 @@ struct mygpu_cmd_copy {
     uint32_t dst_y;
     uint32_t width;
     uint32_t height;
+};
+
+struct mygpu_cmd_buffer_copy {
+    uint32_t opcode;
+    uint32_t src_address;
+    uint32_t dst_address;
+    uint32_t size;
 };
 
 struct mygpu_command_buffer *mygpu_command_buffer_create(uint32_t size);
