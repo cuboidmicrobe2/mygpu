@@ -161,6 +161,27 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
             offset += sizeof(struct mygpu_cmd_buffer_copy);
             break;
 
+        case MYGPU_CMD_DRAW_TRIANGLES: {
+            struct mygpu_cmd_draw_triangles command;
+
+            if (buffer->used < sizeof(struct mygpu_cmd_draw_triangles)) {
+                return -1;
+            }
+
+            memcpy(
+                &command, 
+                buffer->data + offset, 
+                sizeof(command))
+            ;
+
+            if (command.vertex_count != 3) {
+                return -1;
+            }
+
+            offset += sizeof(command);
+            break;
+        }
+        
         default:
             return -1;
         }
