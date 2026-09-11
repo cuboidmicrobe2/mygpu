@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+struct mygpu_buffer;
+
 struct mygpu_vertex
 {
     float x;
