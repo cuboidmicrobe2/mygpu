@@ -22,6 +22,10 @@ BUFFER_SOURCES = \
 	$(GPU_DEVICE_SOURCES) \
 	gpu/buffer.c
 
+VERTEX_SOURCES = \
+	$(BUFFER_SOURCES) \
+	gpu/vertex.c
+
 COMMANDS_SOURCES = \
 	$(GPU_DEVICE_SOURCES)
 
@@ -37,6 +41,7 @@ MEMORY_TEST = test_memory
 REGISTERS_TEST = test_registers
 FRAMEBUFFER_TEST = test_framebuffer
 BUFFER_TEST = test_buffer
+VERTEX_BUFFER_TEST = test_vertex_buffer
 COMMANDS_TEST = test_commands
 QUEUE_TEST = test_queue
 
@@ -49,6 +54,7 @@ MEMORY_TEST_SOURCE = tests/test_memory.c
 REGISTERS_TEST_SOURCE = tests/test_registers.c
 FRAMEBUFFER_TEST_SOURCE = tests/test_framebuffer.c
 BUFFER_TEST_SOURCE = tests/test_buffer.c
+VERTEX_BUFFER_TEST_SOURCE = tests/test_vertex_buffer.c
 COMMANDS_TEST_SOURCE = tests/test_commands.c
 QUEUE_TEST_SOURCE = tests/test_queue.c
 
@@ -62,6 +68,7 @@ QUEUE_TEST_SOURCE = tests/test_queue.c
 	test-registers \
 	test-framebuffer \
 	test-buffer \
+	test-vertex-buffer \
 	test-commands \
 	test-queue \
 	clean
@@ -75,6 +82,7 @@ all: $(GPU_TEST) \
 	$(REGISTERS_TEST) \
 	$(FRAMEBUFFER_TEST) \
 	$(BUFFER_TEST) \
+	$(VERTEX_BUFFER_TEST) \
 	$(COMMANDS_TEST) \
 	$(QUEUE_TEST)
 
@@ -97,6 +105,9 @@ $(FRAMEBUFFER_TEST): gpu/framebuffer.c $(FRAMEBUFFER_TEST_SOURCE)
 $(BUFFER_TEST): $(BUFFER_SOURCES) $(BUFFER_TEST_SOURCE)
 	$(CC) $(CFLAGS) $(BUFFER_SOURCES) $(BUFFER_TEST_SOURCE) -o $@
 
+$(VERTEX_BUFFER_TEST): $(VERTEX_SOURCES) $(VERTEX_BUFFER_TEST_SOURCE)
+	$(CC) $(CFLAGS) $(VERTEX_SOURCES) $(VERTEX_BUFFER_TEST_SOURCE) -o $@
+
 $(COMMANDS_TEST): $(COMMANDS_SOURCES) $(COMMANDS_TEST_SOURCE)
 	$(CC) $(CFLAGS) $(COMMANDS_SOURCES) $(COMMANDS_TEST_SOURCE) -o $@
 
@@ -112,6 +123,7 @@ test: test-gpu \
 	test-registers \
 	test-framebuffer \
 	test-buffer \
+	test-vertex-buffer \
 	test-commands \
 	test-queue
 
@@ -130,6 +142,9 @@ test-framebuffer: $(FRAMEBUFFER_TEST)
 test-buffer: $(BUFFER_TEST)
 	./$(BUFFER_TEST)
 
+test-vertex-buffer: $(VERTEX_BUFFER_TEST)
+	./$(VERTEX_BUFFER_TEST)
+
 test-commands: $(COMMANDS_TEST)
 	./$(COMMANDS_TEST)
 
@@ -147,5 +162,6 @@ clean:
 	$(REGISTERS_TEST) \
 	$(FRAMEBUFFER_TEST) \
 	$(BUFFER_TEST) \
+	$(VERTEX_BUFFER_TEST) \
 	$(COMMANDS_TEST) \
 	$(QUEUE_TEST)
