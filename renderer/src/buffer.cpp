@@ -54,4 +54,14 @@ namespace myrenderer
         return mygpu_buffer_read(m_buffer, offset, data, size) == 0;
     }
 
+    uint32_t Buffer::Address() const
+    {
+        if (m_buffer == nullptr)
+        {
+            return 0;
+        }
+
+        return mygpu_buffer_address(m_buffer);
+    }
+
 } // namespace myrenderer

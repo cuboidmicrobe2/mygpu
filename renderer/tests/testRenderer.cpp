@@ -59,5 +59,38 @@ int main()
     assert(renderer.GetPixel(0, 0, color));
     assert(color == commandClearColor);
 
+    struct TestVertex
+    {
+        float x;
+        float y;
+        uint32_t color;
+    };
+
+    const TestVertex vertices[3] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {50.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 50.0f, 0xFFFFFFFFu}};
+
+    auto vertexBuffer = renderer.CreateBuffer(sizeof(vertices));
+
+    assert(vertexBuffer != nullptr);
+    assert(vertexBuffer->Valid());
+
+    assert(vertexBuffer->Write(0, vertices, sizeof(vertices)));
+
+    auto triangleCommandBuffer = renderer.CreateCommandBuffer(1024);
+
+    assert(triangleCommandBuffer != nullptr);
+    assert(triangleCommandBuffer->Valid());
+
+    assert(triangleCommandBuffer->Clear(0x00000000u));
+
+    assert(triangleCommandBuffer->DrawTriangles(*vertexBuffer, 3));
+
+    assert(renderer.Submit(*triangleCommandBuffer));
+
+    assert(renderer.GetPixel(30, 20, color));
+    assert(color == 0xFFFFFFFFu);
+
     return 0;
 }

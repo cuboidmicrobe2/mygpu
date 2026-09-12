@@ -1,3 +1,4 @@
+#include "myrenderer/buffer.hpp"
 #include "myrenderer/commandBuffer.hpp"
 
 extern "C"
@@ -34,6 +35,22 @@ namespace myrenderer
 
         command.opcode = MYGPU_CMD_CLEAR;
         command.color = color;
+
+        return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
+    }
+
+    bool CommandBuffer::DrawTriangles(const Buffer &vertexBuffer, uint32_t vertexCount)
+    {
+        if (m_commandBuffer == nullptr || !vertexBuffer.Valid())
+        {
+            return false;
+        }
+
+        struct mygpu_cmd_draw_triangles command;
+
+        command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
+        command.vertex_address = vertexBuffer.Address();
+        command.vertex_count = vertexCount;
 
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }

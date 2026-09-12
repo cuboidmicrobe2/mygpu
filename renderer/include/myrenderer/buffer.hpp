@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
 struct mygpu_buffer;
 
@@ -24,6 +25,8 @@ namespace myrenderer
         bool Write(size_t offset, const void *data, size_t size);
 
         bool Read(size_t offset, void *data, size_t size) const;
+
+        uint32_t Address() const;
 
     private:
         friend class Renderer;

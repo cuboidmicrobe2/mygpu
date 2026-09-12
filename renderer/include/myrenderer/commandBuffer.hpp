@@ -5,6 +5,8 @@
 
 struct mygpu_command_buffer;
 
+class Buffer;
+
 namespace myrenderer
 {
     class CommandBuffer
@@ -21,6 +23,8 @@ namespace myrenderer
         bool Valid() const;
 
         bool Clear(uint32_t color);
+
+        bool DrawTriangles(const Buffer &vertexBuffer, uint32_t vertexCount);
 
     private:
         friend class Renderer;
