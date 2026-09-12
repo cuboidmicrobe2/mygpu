@@ -5,6 +5,7 @@
 #include "myrenderer/buffer.hpp"
 #include "myrenderer/commandBuffer.hpp"
 #include "myrenderer/renderer.hpp"
+#include "myrenderer/vertex.hpp"
 
 int main()
 {
@@ -59,14 +60,7 @@ int main()
     assert(renderer.GetPixel(0, 0, color));
     assert(color == commandClearColor);
 
-    struct TestVertex
-    {
-        float x;
-        float y;
-        uint32_t color;
-    };
-
-    const TestVertex vertices[3] = {
+    myrenderer::Vertex vertices[3] = {
         {10.0f, 10.0f, 0xFFFFFFFFu},
         {50.0f, 10.0f, 0xFFFFFFFFu},
         {30.0f, 50.0f, 0xFFFFFFFFu}};
