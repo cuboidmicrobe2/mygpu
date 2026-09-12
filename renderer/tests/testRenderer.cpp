@@ -86,5 +86,11 @@ int main()
     assert(renderer.GetPixel(30, 20, color));
     assert(color == 0xFFFFFFFFu);
 
+    auto tooSmallVertexBuffer = renderer.CreateBuffer(sizeof(myrenderer::Vertex) * 2);
+
+    assert(tooSmallVertexBuffer != nullptr);
+
+    assert(!triangleCommandBuffer->DrawTriangles(*tooSmallVertexBuffer, 3));
+
     return 0;
 }
