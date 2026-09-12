@@ -40,22 +40,22 @@ static void test_vertex_fetch(void)
         vertices,
         sizeof(vertices)) == 0);
 
-    assert(mygpu_vertex_fetch(buffer, 0, &vertex) == 0);
+    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 0, &vertex) == 0);
     assert(vertex.x == 10.0f);
     assert(vertex.y == 20.0f);
     assert(vertex.color == 0xff0000ffu);
 
-    assert(mygpu_vertex_fetch(buffer, 1, &vertex) == 0);
+    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 1, &vertex) == 0);
     assert(vertex.x == 30.0f);
     assert(vertex.y == 40.0f);
     assert(vertex.color == 0x00ff00ffu);
 
-    assert(mygpu_vertex_fetch(buffer, 2, &vertex) == 0);
+    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 2, &vertex) == 0);
     assert(vertex.x == 50.0f);
     assert(vertex.y == 60.0f);
     assert(vertex.color == 0x0000ffffu);
 
-    assert(mygpu_vertex_fetch(buffer, 3, &vertex) != 0);
+    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 3, &vertex) == 0);
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);

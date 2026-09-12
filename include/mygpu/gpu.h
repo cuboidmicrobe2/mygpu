@@ -6,6 +6,8 @@
 struct mygpu;
 struct mygpu_command_buffer;
 struct mygpu_fence;
+struct mygpu_framebuffer;
+struct mygpu_memory;
 
 struct mygpu *mygpu_create(void);
 
@@ -26,5 +28,9 @@ int mygpu_submit(struct mygpu *gpu, struct mygpu_command_buffer *buffer, struct 
 int mygpu_process(struct mygpu *gpu);
 
 int mygpu_fence_wait(struct mygpu *gpu, struct mygpu_fence *fence);
+
+struct mygpu_framebuffer *mygpu_get_framebuffer(struct mygpu *gpu);
+
+struct mygpu_memory *mygpu_get_memory(struct mygpu *gpu);
 
 #endif

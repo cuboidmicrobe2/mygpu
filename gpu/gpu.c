@@ -157,3 +157,21 @@ int mygpu_fence_wait(struct mygpu *gpu, struct mygpu_fence *fence)
 
     return 0;
 }
+
+struct mygpu_framebuffer *mygpu_get_framebuffer(struct mygpu *gpu)
+{
+    if (gpu == NULL) {
+        return NULL;
+    }
+
+    return gpu->framebuffer;
+}
+
+struct mygpu_memory *mygpu_get_memory(struct mygpu *gpu)
+{
+    if (gpu == NULL) {
+        return NULL;
+    }
+
+    return gpu->memory;
+}
