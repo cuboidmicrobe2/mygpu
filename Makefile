@@ -2,6 +2,10 @@ CC = gcc
 
 CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -g -Iinclude
 
+BUILD_DIR = build
+TEST_BUILD_DIR = $(BUILD_DIR)/tests
+LIBRARY = $(BUILD_DIR)/libmygpu.a
+
 # --------------------------------------------------
 # GPU sources
 # --------------------------------------------------
@@ -21,31 +25,36 @@ GPU_SOURCES = \
 	gpu/vertex.c \
 	gpu/rasterizer.c
 
-BUFFER_SOURCES = \
-	$(GPU_SOURCES)
+GPU_OBJECTS = \
+	$(GPU_SOURCES:gpu/%.c=$(BUILD_DIR)/gpu/%.o)
 
-VERTEX_SOURCES = \
-	$(GPU_SOURCES)
+# --------------------------------------------------
+# Library
+# --------------------------------------------------
 
-COMMANDS_SOURCES = \
-	$(GPU_SOURCES)
+$(BUILD_DIR)/gpu/%.o: gpu/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-QUEUE_SOURCES = \
-	$(GPU_SOURCES)
+$(LIBRARY): $(GPU_OBJECTS)
+	@mkdir -p $(dir $@)
+	ar rcs $@ $^
+
+library: $(LIBRARY)
 
 # --------------------------------------------------
 # Test executables
 # --------------------------------------------------
 
-GPU_TEST = test_gpu
-MEMORY_TEST = test_memory
-REGISTERS_TEST = test_registers
-FRAMEBUFFER_TEST = test_framebuffer
-BUFFER_TEST = test_buffer
-VERTEX_BUFFER_TEST = test_vertex_buffer
-COMMANDS_TEST = test_commands
-QUEUE_TEST = test_queue
-DRAW_TRIANGLES_TEST = test_draw_triangles
+GPU_TEST = $(TEST_BUILD_DIR)/test_gpu
+MEMORY_TEST = $(TEST_BUILD_DIR)/test_memory
+REGISTERS_TEST = $(TEST_BUILD_DIR)/test_registers
+FRAMEBUFFER_TEST = $(TEST_BUILD_DIR)/test_framebuffer
+BUFFER_TEST = $(TEST_BUILD_DIR)/test_buffer
+VERTEX_BUFFER_TEST = $(TEST_BUILD_DIR)/test_vertex_buffer
+COMMANDS_TEST = $(TEST_BUILD_DIR)/test_commands
+QUEUE_TEST = $(TEST_BUILD_DIR)/test_queue
+DRAW_TRIANGLES_TEST = $(TEST_BUILD_DIR)/test_draw_triangles
 
 # --------------------------------------------------
 # Test source files
@@ -65,7 +74,7 @@ DRAW_TRIANGLES_TEST_SOURCE = tests/test_draw_triangles.c
 # Phony targets
 # --------------------------------------------------
 
-.PHONY: all test \
+.PHONY: all library test \
 	test-gpu \
 	test-memory \
 	test-registers \
@@ -81,7 +90,8 @@ DRAW_TRIANGLES_TEST_SOURCE = tests/test_draw_triangles.c
 # Default
 # --------------------------------------------------
 
-all: $(GPU_TEST) \
+all: $(LIBRARY) \
+	$(GPU_TEST) \
 	$(MEMORY_TEST) \
 	$(REGISTERS_TEST) \
 	$(FRAMEBUFFER_TEST) \
@@ -95,32 +105,41 @@ all: $(GPU_TEST) \
 # Build tests
 # --------------------------------------------------
 
-$(GPU_TEST): $(GPU_SOURCES) $(GPU_TEST_SOURCE)
-	$(CC) $(CFLAGS) $(GPU_SOURCES) $(GPU_TEST_SOURCE) -o $@
+$(GPU_TEST): $(LIBRARY) $(GPU_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(GPU_TEST_SOURCE) $(LIBRARY) -o $@
 
 $(MEMORY_TEST): gpu/memory.c $(MEMORY_TEST_SOURCE)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) gpu/memory.c $(MEMORY_TEST_SOURCE) -o $@
 
 $(REGISTERS_TEST): gpu/registers.c $(REGISTERS_TEST_SOURCE)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) gpu/registers.c $(REGISTERS_TEST_SOURCE) -o $@
 
 $(FRAMEBUFFER_TEST): gpu/framebuffer.c $(FRAMEBUFFER_TEST_SOURCE)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) gpu/framebuffer.c $(FRAMEBUFFER_TEST_SOURCE) -o $@
 
-$(BUFFER_TEST): $(BUFFER_SOURCES) $(BUFFER_TEST_SOURCE)
-	$(CC) $(CFLAGS) $(BUFFER_SOURCES) $(BUFFER_TEST_SOURCE) -o $@
+$(BUFFER_TEST): $(LIBRARY) $(BUFFER_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(BUFFER_TEST_SOURCE) $(LIBRARY) -o $@
 
-$(VERTEX_BUFFER_TEST): $(VERTEX_SOURCES) $(VERTEX_BUFFER_TEST_SOURCE)
-	$(CC) $(CFLAGS) $(VERTEX_SOURCES) $(VERTEX_BUFFER_TEST_SOURCE) -o $@
+$(VERTEX_BUFFER_TEST): $(LIBRARY) $(VERTEX_BUFFER_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(VERTEX_BUFFER_TEST_SOURCE) $(LIBRARY) -o $@
 
-$(COMMANDS_TEST): $(COMMANDS_SOURCES) $(COMMANDS_TEST_SOURCE)
-	$(CC) $(CFLAGS) $(COMMANDS_SOURCES) $(COMMANDS_TEST_SOURCE) -o $@
+$(COMMANDS_TEST): $(LIBRARY) $(COMMANDS_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(COMMANDS_TEST_SOURCE) $(LIBRARY) -o $@
 
-$(QUEUE_TEST): $(QUEUE_SOURCES) $(QUEUE_TEST_SOURCE)
-	$(CC) $(CFLAGS) $(QUEUE_SOURCES) $(QUEUE_TEST_SOURCE) -o $@
+$(QUEUE_TEST): $(LIBRARY) $(QUEUE_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(QUEUE_TEST_SOURCE) $(LIBRARY) -o $@
 
-$(DRAW_TRIANGLES_TEST): $(GPU_SOURCES) $(DRAW_TRIANGLES_TEST_SOURCE)
-	$(CC) $(CFLAGS) $(GPU_SOURCES) $(DRAW_TRIANGLES_TEST_SOURCE) -o $@
+$(DRAW_TRIANGLES_TEST): $(LIBRARY) $(DRAW_TRIANGLES_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(DRAW_TRIANGLES_TEST_SOURCE) $(LIBRARY) -o $@
 
 # --------------------------------------------------
 # Run tests
@@ -134,7 +153,7 @@ test: test-gpu \
 	test-vertex-buffer \
 	test-commands \
 	test-queue \
-	test_draw_triangles
+	test-draw-triangles
 
 test-gpu: $(GPU_TEST)
 	./$(GPU_TEST)
@@ -168,13 +187,4 @@ test-draw-triangles: $(DRAW_TRIANGLES_TEST)
 # --------------------------------------------------
 
 clean:
-	rm -f \
-	$(GPU_TEST) \
-	$(MEMORY_TEST) \
-	$(REGISTERS_TEST) \
-	$(FRAMEBUFFER_TEST) \
-	$(BUFFER_TEST) \
-	$(VERTEX_BUFFER_TEST) \
-	$(COMMANDS_TEST) \
-	$(QUEUE_TEST) \
-	$(DRAW_TRIANGLES_TEST)
+	rm -rf $(BUILD_DIR)
