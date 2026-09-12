@@ -1,5 +1,6 @@
 #include "myrenderer/buffer.hpp"
 #include "myrenderer/commandBuffer.hpp"
+#include "myrenderer/vertex.hpp"
 
 extern "C"
 {
@@ -41,7 +42,19 @@ namespace myrenderer
 
     bool CommandBuffer::DrawTriangles(const Buffer &vertexBuffer, uint32_t vertexCount)
     {
-        if (m_commandBuffer == nullptr || !vertexBuffer.Valid())
+        if (m_commandBuffer == nullptr || !vertexBuffer.Valid() || vertexCount == 0)
+        {
+            return false;
+        }
+
+        if (vertexCount > SIZE_MAX / sizeof(Vertex))
+        {
+            return false;
+        }
+
+        const size_t requiredSize = static_cast<size_t>(vertexCount) * sizeof(Vertex);
+
+        if (vertexBuffer.Size() < requiredSize)
         {
             return false;
         }
