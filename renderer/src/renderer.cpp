@@ -1,4 +1,5 @@
 #include "myrenderer/buffer.hpp"
+#include "myrenderer/commandBuffer.hpp"
 #include "myrenderer/renderer.hpp"
 
 extern "C"
@@ -171,6 +172,23 @@ namespace myrenderer
         }
 
         return std::unique_ptr<Buffer>(new Buffer(buffer));
+    }
+
+    std::unique_ptr<CommandBuffer> Renderer::CreateCommandBuffer(size_t size)
+    {
+        if (m_gpu == nullptr)
+        {
+            return nullptr;
+        }
+
+        struct mygpu_command_buffer *commandBuffer = mygpu_command_buffer_create(static_cast<uint32_t>(size));
+
+        if (commandBuffer == nullptr)
+        {
+            return nullptr;
+        }
+
+        return std::unique_ptr<CommandBuffer>(new CommandBuffer(commandBuffer));
     }
 
 } // namespace myrenderer

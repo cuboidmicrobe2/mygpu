@@ -8,6 +8,7 @@ struct mygpu;
 namespace myrenderer
 {
     class Buffer;
+    class CommandBuffer;
 
     class Renderer
     {
@@ -31,6 +32,7 @@ namespace myrenderer
         bool GetPixel(uint32_t x, uint32_t y, uint32_t &color) const;
 
         std::unique_ptr<Buffer> CreateBuffer(size_t size);
+        std::unique_ptr<CommandBuffer> CreateCommandBuffer(size_t size);
 
     private:
         struct mygpu *m_gpu;

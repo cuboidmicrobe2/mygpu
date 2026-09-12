@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "myrenderer/buffer.hpp"
+#include "myrenderer/commandBuffer.hpp"
 #include "myrenderer/renderer.hpp"
 
 int main()
@@ -43,6 +44,11 @@ int main()
     assert(result[0] == values[0]);
     assert(result[1] == values[1]);
     assert(result[2] == values[2]);
+
+    auto commandBuffer = renderer.CreateCommandBuffer(1024);
+
+    assert(commandBuffer != nullptr);
+    assert(commandBuffer->Valid());
 
     return 0;
 }

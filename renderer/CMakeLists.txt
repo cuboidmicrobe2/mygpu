@@ -25,6 +25,7 @@ set_target_properties(mygpu PROPERTIES
 add_library(myrenderer STATIC
     src/renderer.cpp 
     src/buffer.cpp 
+    src/commandBuffer.cpp
 )
 
 target_include_directories(myrenderer
@@ -46,7 +47,7 @@ target_compile_options(myrenderer
 # --------------------------------------------------
 
 add_executable(test_renderer
-    tests/test_renderer.cpp 
+    tests/testRenderer.cpp 
 )
 
 target_link_libraries(test_renderer PRIVATE myrenderer)
