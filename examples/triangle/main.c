@@ -17,6 +17,7 @@ int main(void)
     struct mygpu_queue *queue;
     struct mygpu_fence *fence;
     struct mygpu_framebuffer *framebuffer;
+
     uint32_t color;
 
     struct mygpu_vertex vertices[3] = {
@@ -37,6 +38,7 @@ int main(void)
         }
     };
 
+    struct mygpu_cmd_clear clear_command;
     struct mygpu_cmd_draw_triangles draw_command;
 
     gpu = mygpu_create();
@@ -82,6 +84,23 @@ int main(void)
         return 1;
     }
 
+    clear_command.opcode = MYGPU_CMD_CLEAR;
+    clear_command.color = 0x12345678u;
+
+    if (mygpu_command_buffer_write(
+            command_buffer,
+            &clear_command,
+            sizeof(clear_command)) != 0) {
+
+        fprintf(stderr, "failed to write clear command\n");
+
+        mygpu_command_buffer_destroy(command_buffer);
+        mygpu_buffer_destroy(vertex_buffer);
+        mygpu_destroy(gpu);
+
+        return 1;
+    }
+
     draw_command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     draw_command.vertex_address =
         mygpu_buffer_address(vertex_buffer);
@@ -92,7 +111,7 @@ int main(void)
             &draw_command,
             sizeof(draw_command)) != 0) {
 
-        fprintf(stderr, "failed to write command buffer\n");
+        fprintf(stderr, "failed to write draw command\n");
 
         mygpu_command_buffer_destroy(command_buffer);
         mygpu_buffer_destroy(vertex_buffer);
@@ -187,7 +206,7 @@ int main(void)
 
         return 1;
     }
-    
+
     framebuffer = mygpu_get_framebuffer(gpu);
 
     if (framebuffer == NULL) {
@@ -202,13 +221,17 @@ int main(void)
         return 1;
     }
 
+    /*
+     * Pixel inside the triangle should contain
+     * the triangle's color.
+     */
     if (mygpu_framebuffer_get_pixel(
-        framebuffer,
-        6,
-        4,
-        &color) != 0) {
+            framebuffer,
+            6,
+            4,
+            &color) != 0) {
 
-        fprintf(stderr, "failed to read framebuffer pixel\n");
+        fprintf(stderr, "failed to read triangle pixel\n");
 
         mygpu_fence_destroy(fence);
         mygpu_queue_destroy(queue);
@@ -221,7 +244,44 @@ int main(void)
 
     if (color != 0xFFFFFFFFu) {
         fprintf(
-            stderr, "triangle pixel has wrong color: 0x%08X\n",
+            stderr,
+            "triangle pixel has wrong color: 0x%08X\n",
+            color);
+
+        mygpu_fence_destroy(fence);
+        mygpu_queue_destroy(queue);
+        mygpu_command_buffer_destroy(command_buffer);
+        mygpu_buffer_destroy(vertex_buffer);
+        mygpu_destroy(gpu);
+
+        return 1;
+    }
+
+    /*
+     * Pixel outside the triangle should still
+     * contain the clear color.
+     */
+    if (mygpu_framebuffer_get_pixel(
+            framebuffer,
+            0,
+            0,
+            &color) != 0) {
+
+        fprintf(stderr, "failed to read outside pixel\n");
+
+        mygpu_fence_destroy(fence);
+        mygpu_queue_destroy(queue);
+        mygpu_command_buffer_destroy(command_buffer);
+        mygpu_buffer_destroy(vertex_buffer);
+        mygpu_destroy(gpu);
+
+        return 1;
+    }
+
+    if (color != 0x12345678u) {
+        fprintf(
+            stderr,
+            "outside pixel was modified: 0x%08X\n",
             color);
 
         mygpu_fence_destroy(fence);
