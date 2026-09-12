@@ -70,7 +70,7 @@ int main()
     assert(vertexBuffer != nullptr);
     assert(vertexBuffer->Valid());
 
-    assert(vertexBuffer->Write(0, vertices, sizeof(vertices)));
+    assert(vertexBuffer->WriteVertices(vertices, 3));
 
     auto triangleCommandBuffer = renderer.CreateCommandBuffer(1024);
 

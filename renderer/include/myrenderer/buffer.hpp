@@ -7,6 +7,8 @@ struct mygpu_buffer;
 
 namespace myrenderer
 {
+    struct Vertex;
+
     class Buffer
     {
     public:
@@ -25,6 +27,8 @@ namespace myrenderer
         bool Write(size_t offset, const void *data, size_t size);
 
         bool Read(size_t offset, void *data, size_t size) const;
+
+        bool WriteVertices(const Vertex *vertices, size_t vertexCount);
 
         uint32_t Address() const;
 

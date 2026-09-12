@@ -1,4 +1,5 @@
 #include "myrenderer/buffer.hpp"
+#include "myrenderer/vertex.hpp"
 
 extern "C"
 {
@@ -52,6 +53,21 @@ namespace myrenderer
         }
 
         return mygpu_buffer_read(m_buffer, offset, data, size) == 0;
+    }
+
+    bool Buffer::WriteVertices(const Vertex *vertices, size_t vertexCount)
+    {
+        if (m_buffer == nullptr || vertices == nullptr || vertexCount == 0)
+        {
+            return false;
+        }
+
+        if (vertexCount > SIZE_MAX / sizeof(Vertex))
+        {
+            return false;
+        }
+
+        return Write(0, vertices, vertexCount * sizeof(Vertex));
     }
 
     uint32_t Buffer::Address() const
