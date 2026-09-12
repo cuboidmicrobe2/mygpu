@@ -79,6 +79,17 @@ void mygpu_command_buffer_destroy(struct mygpu_command_buffer *buffer)
     mygpu_command_buffer_release(buffer);
 }
 
+int mygpu_command_buffer_reset(struct mygpu_command_buffer *buffer)
+{
+    if (buffer == NULL) {
+        return -1;
+    }
+
+    buffer->used = 0;
+
+    return 0;
+}
+
 int mygpu_command_buffer_write(struct mygpu_command_buffer *buffer, const void *data, uint32_t size)
 {
     if (buffer == NULL || data == NULL) {

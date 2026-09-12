@@ -16,12 +16,14 @@ enum mygpu_opcode
 struct mygpu;
 struct mygpu_command_buffer;
 
-struct mygpu_cmd_clear {
+struct mygpu_cmd_clear
+{
     uint32_t opcode;
     uint32_t color;
 };
 
-struct mygpu_cmd_draw_rect {
+struct mygpu_cmd_draw_rect
+{
     uint32_t opcode;
     uint32_t x;
     uint32_t y;
@@ -30,7 +32,8 @@ struct mygpu_cmd_draw_rect {
     uint32_t color;
 };
 
-struct mygpu_cmd_copy {
+struct mygpu_cmd_copy
+{
     uint32_t opcode;
     uint32_t src_x;
     uint32_t src_y;
@@ -40,14 +43,16 @@ struct mygpu_cmd_copy {
     uint32_t height;
 };
 
-struct mygpu_cmd_buffer_copy {
+struct mygpu_cmd_buffer_copy
+{
     uint32_t opcode;
     uint32_t src_address;
     uint32_t dst_address;
     uint32_t size;
 };
 
-struct mygpu_cmd_draw_triangles {
+struct mygpu_cmd_draw_triangles
+{
     uint32_t opcode;
     uint32_t vertex_address;
     uint32_t vertex_count;
@@ -60,6 +65,8 @@ void mygpu_command_buffer_retain(struct mygpu_command_buffer *buffer);
 void mygpu_command_buffer_release(struct mygpu_command_buffer *buffer);
 
 void mygpu_command_buffer_destroy(struct mygpu_command_buffer *buffer);
+
+int mygpu_command_buffer_reset(struct mygpu_command_buffer *buffer);
 
 int mygpu_command_buffer_write(struct mygpu_command_buffer *buffer, const void *data, uint32_t size);
 

@@ -60,6 +60,15 @@ int main()
     assert(renderer.GetPixel(0, 0, color));
     assert(color == commandClearColor);
 
+    assert(commandBuffer->Reset());
+
+    assert(commandBuffer->Clear(0x11223344u));
+
+    assert(renderer.Submit(*commandBuffer));
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0x11223344u);
+
     const myrenderer::Vertex vertices[6] = {
         {10.0f, 10.0f, 0xFFFFFFFFu},
         {30.0f, 10.0f, 0xFFFFFFFFu},

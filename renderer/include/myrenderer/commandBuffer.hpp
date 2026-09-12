@@ -22,6 +22,8 @@ namespace myrenderer
 
         bool Valid() const;
 
+        bool Reset();
+
         bool Clear(uint32_t color);
 
         bool DrawTriangles(const Buffer &vertexBuffer, uint32_t vertexCount);
