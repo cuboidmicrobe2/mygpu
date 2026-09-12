@@ -60,17 +60,21 @@ int main()
     assert(renderer.GetPixel(0, 0, color));
     assert(color == commandClearColor);
 
-    myrenderer::Vertex vertices[3] = {
+    const myrenderer::Vertex vertices[6] = {
         {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu},
+
         {50.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 50.0f, 0xFFFFFFFFu}};
+        {70.0f, 10.0f, 0xFFFFFFFFu},
+        {60.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateBuffer(sizeof(vertices));
 
     assert(vertexBuffer != nullptr);
     assert(vertexBuffer->Valid());
 
-    assert(vertexBuffer->WriteVertices(vertices, 3));
+    assert(vertexBuffer->WriteVertices(vertices, 6));
 
     auto triangleCommandBuffer = renderer.CreateCommandBuffer(1024);
 
@@ -79,11 +83,14 @@ int main()
 
     assert(triangleCommandBuffer->Clear(0x00000000u));
 
-    assert(triangleCommandBuffer->DrawTriangles(*vertexBuffer, 3));
+    assert(triangleCommandBuffer->DrawTriangles(*vertexBuffer, 6));
 
     assert(renderer.Submit(*triangleCommandBuffer));
 
-    assert(renderer.GetPixel(30, 20, color));
+    assert(renderer.GetPixel(20, 15, color));
+    assert(color == 0xFFFFFFFFu);
+
+    assert(renderer.GetPixel(60, 15, color));
     assert(color == 0xFFFFFFFFu);
 
     auto tooSmallVertexBuffer = renderer.CreateBuffer(sizeof(myrenderer::Vertex) * 2);
