@@ -50,5 +50,14 @@ int main()
     assert(commandBuffer != nullptr);
     assert(commandBuffer->Valid());
 
+    constexpr uint32_t commandClearColor = 0x12345678u;
+
+    assert(commandBuffer->Clear(commandClearColor));
+
+    assert(renderer.Submit(*commandBuffer));
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == commandClearColor);
+
     return 0;
 }

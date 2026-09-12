@@ -34,6 +34,8 @@ namespace myrenderer
         std::unique_ptr<Buffer> CreateBuffer(size_t size);
         std::unique_ptr<CommandBuffer> CreateCommandBuffer(size_t size);
 
+        bool Submit(const CommandBuffer &commandBuffer);
+
     private:
         struct mygpu *m_gpu;
     };

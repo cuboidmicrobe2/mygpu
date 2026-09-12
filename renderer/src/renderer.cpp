@@ -191,4 +191,48 @@ namespace myrenderer
         return std::unique_ptr<CommandBuffer>(new CommandBuffer(commandBuffer));
     }
 
+    bool Renderer::Submit(const CommandBuffer &commandBuffer)
+    {
+        if (m_gpu == nullptr || !commandBuffer.Valid())
+        {
+            return false;
+        }
+
+        struct mygpu_queue *queue = mygpu_queue_create();
+
+        if (queue == nullptr)
+        {
+            return false;
+        }
+
+        struct mygpu_fence *fence = mygpu_fence_create(1);
+
+        if (fence == nullptr)
+        {
+            mygpu_queue_destroy(queue);
+            return false;
+        }
+
+        if (mygpu_queue_submit(queue, commandBuffer.m_commandBuffer, fence) != 0)
+        {
+            mygpu_fence_destroy(fence);
+            mygpu_queue_destroy(queue);
+            return false;
+        }
+
+        if (mygpu_queue_process(m_gpu, queue) != 0)
+        {
+            mygpu_fence_destroy(fence);
+            mygpu_queue_destroy(queue);
+            return false;
+        }
+
+        bool success = mygpu_fence_is_signaled(fence) != 0;
+
+        mygpu_fence_destroy(fence);
+        mygpu_queue_destroy(queue);
+
+        return success;
+    }
+
 } // namespace myrenderer
