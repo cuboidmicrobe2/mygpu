@@ -1,5 +1,8 @@
 #include <cassert>
+#include <cstdint>
+#include <memory>
 
+#include "myrenderer/buffer.hpp"
 #include "myrenderer/renderer.hpp"
 
 int main()
@@ -18,8 +21,28 @@ int main()
     uint32_t color = 0;
 
     assert(renderer.GetPixel(0, 0, color));
-
     assert(color == clearColor);
+
+    auto buffer = renderer.CreateBuffer(3 * sizeof(uint32_t));
+
+    assert(buffer != nullptr);
+    assert(buffer->Valid());
+    assert(buffer->Size() == 3 * sizeof(uint32_t));
+
+    const uint32_t values[3] = {
+        0x011111111u,
+        0x022222222u,
+        0x033333333u};
+
+    assert(buffer->Write(0, values, sizeof(values)));
+
+    uint32_t result[3] = {};
+
+    assert(buffer->Read(0, result, sizeof(result)));
+
+    assert(result[0] == values[0]);
+    assert(result[1] == values[1]);
+    assert(result[2] == values[2]);
 
     return 0;
 }

@@ -1,7 +1,9 @@
+#include "myrenderer/buffer.hpp"
 #include "myrenderer/renderer.hpp"
 
 extern "C"
 {
+#include "mygpu/buffer.h"
 #include "mygpu/commands.h"
 #include "mygpu/fence.h"
 #include "mygpu/framebuffer.h"
@@ -152,6 +154,23 @@ namespace myrenderer
         }
 
         return mygpu_framebuffer_get_pixel(framebuffer, x, y, &color) == 0;
+    }
+
+    std::unique_ptr<Buffer> Renderer::CreateBuffer(size_t size)
+    {
+        if (m_gpu == nullptr)
+        {
+            return nullptr;
+        }
+
+        struct mygpu_buffer *buffer = mygpu_buffer_create(m_gpu, size);
+
+        if (buffer == nullptr)
+        {
+            return nullptr;
+        }
+
+        return std::unique_ptr<Buffer>(new Buffer(buffer));
     }
 
 } // namespace myrenderer
