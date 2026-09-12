@@ -176,7 +176,8 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
                 sizeof(command))
             ;
 
-            if (command.vertex_count != 3) {
+            if (command.vertex_count == 0 ||
+                command.vertex_count % 3 != 0) {
                 return -1;
             }
 
@@ -449,9 +450,6 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
         case MYGPU_CMD_DRAW_TRIANGLES: {
             struct mygpu_cmd_draw_triangles command;
-            struct mygpu_vertex v0;
-            struct mygpu_vertex v1;
-            struct mygpu_vertex v2;
 
             memcpy(
                 &command, 
@@ -459,44 +457,51 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                 sizeof(command)
             );
 
-            if (command.vertex_count != 3) {
+            if (command.vertex_count == 0 ||
+                command.vertex_count % 3 != 0) {
                 return -1;
             }
 
-            if (mygpu_vertex_fetch(
-                gpu->memory, 
-                command.vertex_address, 
-                0, 
-                &v0) != 0) {
+            for (uint32_t i = 0; i < command.vertex_count; i += 3) {
+                struct mygpu_vertex v0;
+                struct mygpu_vertex v1;
+                struct mygpu_vertex v2;
 
-                return -1;
-            }
+                if (mygpu_vertex_fetch(
+                    gpu->memory, 
+                    command.vertex_address, 
+                    i, 
+                    &v0) != 0) {
 
-            if (mygpu_vertex_fetch(
-                gpu->memory, 
-                command.vertex_address, 
-                1, 
-                &v1) != 0) {
+                    return -1;
+                }
 
-                return -1;
-            }
+                if (mygpu_vertex_fetch(
+                    gpu->memory, 
+                    command.vertex_address, 
+                    i + 1, 
+                    &v1) != 0) {
 
-            if (mygpu_vertex_fetch(
-                gpu->memory, 
-                command.vertex_address, 
-                2, 
-                &v2) != 0) {
+                    return -1;
+                }
 
-                return -1;
-            }
+                if (mygpu_vertex_fetch(
+                    gpu->memory, 
+                    command.vertex_address, 
+                    i + 2, 
+                    &v2) != 0) {
 
-            if (mygpu_rasterize_triangle(
-                gpu->framebuffer,
-                &v0,
-                &v1,
-                &v2) != 0) {
+                    return -1;
+                }
 
-                return -1;
+                if (mygpu_rasterize_triangle(
+                    gpu->framebuffer,
+                    &v0,
+                    &v1,
+                    &v2) != 0) {
+
+                    return -1;
+                }
             }
 
             offset += sizeof(command);
