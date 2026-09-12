@@ -30,9 +30,9 @@ int main()
     assert(buffer->Size() == 3 * sizeof(uint32_t));
 
     const uint32_t values[3] = {
-        0x011111111u,
-        0x022222222u,
-        0x033333333u};
+        0x11111111u,
+        0x22222222u,
+        0x33333333u};
 
     assert(buffer->Write(0, values, sizeof(values)));
 
