@@ -90,6 +90,15 @@ int mygpu_command_buffer_reset(struct mygpu_command_buffer *buffer)
     return 0;
 }
 
+int mygpu_command_buffer_is_empty(const struct mygpu_command_buffer *buffer)
+{
+    if (buffer == NULL) {
+        return -1;
+    }
+
+    return buffer->used == 0;
+}
+
 int mygpu_command_buffer_write(struct mygpu_command_buffer *buffer, const void *data, uint32_t size)
 {
     if (buffer == NULL || data == NULL) {

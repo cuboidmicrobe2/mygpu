@@ -22,6 +22,8 @@ namespace myrenderer
 
         bool Valid() const;
 
+        bool IsEmpty() const;
+
         bool Reset();
 
         bool Clear(uint32_t color);

@@ -50,10 +50,12 @@ int main()
 
     assert(commandBuffer != nullptr);
     assert(commandBuffer->Valid());
+    assert(commandBuffer->IsEmpty());
 
     constexpr uint32_t commandClearColor = 0x12345678u;
 
     assert(commandBuffer->Clear(commandClearColor));
+    assert(!commandBuffer->IsEmpty());
 
     assert(renderer.Submit(*commandBuffer));
 
@@ -61,8 +63,10 @@ int main()
     assert(color == commandClearColor);
 
     assert(commandBuffer->Reset());
+    assert(commandBuffer->IsEmpty());
 
     assert(commandBuffer->Clear(0x11223344u));
+    assert(!commandBuffer->IsEmpty());
 
     assert(renderer.Submit(*commandBuffer));
 
@@ -89,10 +93,13 @@ int main()
 
     assert(triangleCommandBuffer != nullptr);
     assert(triangleCommandBuffer->Valid());
+    assert(triangleCommandBuffer->IsEmpty());
 
     assert(triangleCommandBuffer->Clear(0x00000000u));
+    assert(!triangleCommandBuffer->IsEmpty());
 
     assert(triangleCommandBuffer->DrawTriangles(*vertexBuffer, 6));
+    assert(!triangleCommandBuffer->IsEmpty());
 
     assert(renderer.Submit(*triangleCommandBuffer));
 

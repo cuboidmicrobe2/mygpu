@@ -68,6 +68,8 @@ void mygpu_command_buffer_destroy(struct mygpu_command_buffer *buffer);
 
 int mygpu_command_buffer_reset(struct mygpu_command_buffer *buffer);
 
+int mygpu_command_buffer_is_empty(const struct mygpu_command_buffer *buffer);
+
 int mygpu_command_buffer_write(struct mygpu_command_buffer *buffer, const void *data, uint32_t size);
 
 int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer);

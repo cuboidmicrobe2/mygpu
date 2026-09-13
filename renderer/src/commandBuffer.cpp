@@ -25,6 +25,16 @@ namespace myrenderer
         return m_commandBuffer != nullptr;
     }
 
+    bool CommandBuffer::IsEmpty() const
+    {
+        if (m_commandBuffer == nullptr)
+        {
+            return false;
+        }
+
+        return mygpu_command_buffer_is_empty(m_commandBuffer) == 1;
+    }
+
     bool CommandBuffer::Reset()
     {
         if (m_commandBuffer == nullptr)
