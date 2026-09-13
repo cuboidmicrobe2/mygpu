@@ -156,6 +156,25 @@ int main()
     assert(renderer.GetPixel(60, 15, color));
     assert(color == 0xFFFFFFFFu);
 
+    const myrenderer::Vertex lifetimeVertices[3] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto lifetimeVertexBuffer = renderer.CreateVertexBuffer(lifetimeVertices, 3);
+
+    assert(lifetimeVertexBuffer != nullptr);
+
+    auto lifetimeCommands = renderer.CreateCommandBuffer(256);
+
+    assert(lifetimeCommands != nullptr);
+
+    assert(lifetimeCommands->DrawTriangles(*lifetimeVertexBuffer, 3));
+
+    lifetimeVertexBuffer.reset();
+
+    assert(renderer.Submit(*lifetimeCommands));
+
     // Test triangle-only command buffer.
     auto triangleCommandBuffer = renderer.CreateCommandBuffer(1024);
 
