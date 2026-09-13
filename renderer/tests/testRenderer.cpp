@@ -238,5 +238,22 @@ int main()
     assert(renderer.EndFrame(*frameCommands));
     assert(!renderer.EndFrame(*frameCommands));
 
+    // Test frame command buffer validation.
+    auto stateCommands = renderer.CreateCommandBuffer(256);
+
+    assert(stateCommands != nullptr);
+    assert(stateCommands->Valid());
+
+    assert(stateCommands->Clear(0x01020304u));
+
+    assert(!renderer.EndFrame(*stateCommands));
+
+    assert(renderer.BeginFrame());
+
+    assert(renderer.EndFrame(*stateCommands));
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0x01020304u);
+
     return 0;
 }
