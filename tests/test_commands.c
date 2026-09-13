@@ -1559,6 +1559,120 @@ static void test_validate_truncated_present(void)
     mygpu_command_buffer_destroy(buffer);
 }
 
+static void test_draw_indexed_validation_zero_count(void)
+{
+    struct mygpu_command_buffer *command_buffer;
+    struct mygpu_cmd_draw_indexed command;
+
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create zero-count DRAW_INDEXED buffer"
+    );
+
+    if (command_buffer == NULL) {
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_DRAW_INDEXED;
+    command.vertex_address = 0;
+    command.index_address = 0;
+    command.index_count = 0;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)
+        ) == 0,
+        "write zero-count DRAW_INDEXED"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) != 0,
+        "reject zero-count DRAW_INDEXED"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+}
+
+static void test_draw_indexed_validation_invalid_count(void)
+{
+    struct mygpu_command_buffer *command_buffer;
+    struct mygpu_cmd_draw_indexed command;
+
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create invalid-count DRAW_INDEXED buffer"
+    );
+
+    if (command_buffer == NULL) {
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_DRAW_INDEXED;
+    command.vertex_address = 0;
+    command.index_address = 0;
+    command.index_count = 4;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)
+        ) == 0,
+        "write invalid-count DRAW_INDEXED"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) != 0,
+        "reject invalid-count DRAW_INDEXED"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+}
+
+static void test_draw_indexed_validation_truncated(void)
+{
+    struct mygpu_command_buffer *command_buffer;
+    struct mygpu_cmd_draw_indexed command;
+
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create truncated DRAW_INDEXED buffer"
+    );
+
+    if (command_buffer == NULL) {
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_DRAW_INDEXED;
+    command.vertex_address = 0;
+    command.index_address = 0;
+    command.index_count = 3;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command) - 1
+        ) == 0,
+        "write truncated DRAW_INDEXED"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) != 0,
+        "reject truncated DRAW_INDEXED"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+}
+
 int main(void)
 {
     printf("=== MyGPU Command Tests ===\n\n");
@@ -1593,6 +1707,10 @@ int main(void)
     test_validate_truncated_draw_rect();
     test_validate_truncated_copy();
     test_validate_truncated_present();
+
+    test_draw_indexed_validation_zero_count();
+    test_draw_indexed_validation_invalid_count();
+    test_draw_indexed_validation_truncated();
 
     printf("\n=== Results ===\n");
 
