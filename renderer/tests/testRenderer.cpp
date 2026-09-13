@@ -106,6 +106,32 @@ int main()
 
     assert(!commandBuffer->DrawRect(10, 10, 20, 0, rectColor));
 
+    // Test multiple commands in one command buffer.
+    constexpr uint32_t firstRectColor = 0x11112222u;
+    constexpr uint32_t secondRectColor = 0x33334444u;
+
+    assert(commandBuffer->Reset());
+    assert(commandBuffer->IsEmpty());
+
+    assert(commandBuffer->Clear(0x00000000u));
+
+    assert(commandBuffer->DrawRect(5, 5, 10, 10, firstRectColor));
+
+    assert(commandBuffer->DrawRect(30, 5, 10, 10, secondRectColor));
+
+    assert(!commandBuffer->IsEmpty());
+
+    assert(renderer.Submit(*commandBuffer));
+
+    assert(renderer.GetPixel(5, 5, color));
+    assert(color == firstRectColor);
+
+    assert(renderer.GetPixel(30, 5, color));
+    assert(color == secondRectColor);
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0x00000000u);
+
     const myrenderer::Vertex vertices[6] = {
         {10.0f, 10.0f, 0xFFFFFFFFu},
         {30.0f, 10.0f, 0xFFFFFFFFu},
