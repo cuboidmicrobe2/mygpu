@@ -490,9 +490,17 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                 return -1;
             }
 
+            size_t vertex_offset;
+
+            vertex_offset = mygpu_buffer_offset(vertex_buffer, command.vertex_address);
+
+            if (vertex_offset == SIZE_MAX) {
+                return -1;
+            }
+
             required_size = (size_t)command.vertex_count * sizeof(struct mygpu_vertex);
 
-            if (required_size > mygpu_buffer_size(vertex_buffer)) {
+            if (required_size > mygpu_buffer_size(vertex_buffer) - vertex_offset) {
                 return -1;
             }
 

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "mygpu/buffer.h"
@@ -140,4 +141,22 @@ struct mygpu_buffer *mygpu_buffer_lookup(struct mygpu *gpu, uint32_t address)
     }
 
     return NULL;
+}
+
+
+size_t mygpu_buffer_offset(const struct mygpu_buffer *buffer, uint32_t address)
+{
+    if (buffer == NULL) {
+        return SIZE_MAX;
+    }
+
+    if (address < buffer->address) {
+        return SIZE_MAX;
+    }
+
+    if (address - buffer->address >= buffer->size) {
+        return SIZE_MAX;
+    }
+
+    return address - buffer->address;
 }

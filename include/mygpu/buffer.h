@@ -22,4 +22,6 @@ uint32_t mygpu_buffer_address(const struct mygpu_buffer *buffer);
 
 struct mygpu_buffer *mygpu_buffer_lookup(struct mygpu *gpu, uint32_t address);
 
+size_t mygpu_buffer_offset(const struct mygpu_buffer *buffer, uint32_t address);
+
 #endif
