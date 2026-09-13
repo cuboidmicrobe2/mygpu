@@ -5,6 +5,7 @@
 
 struct mygpu;
 struct mygpu_queue;
+struct mygpu_fence;
 
 namespace myrenderer
 {
@@ -40,5 +41,6 @@ namespace myrenderer
     private:
         struct mygpu *m_gpu;
         struct mygpu_queue *m_queue;
+        struct mygpu_fence *m_fence;
     };
 } // namespace myrenderer

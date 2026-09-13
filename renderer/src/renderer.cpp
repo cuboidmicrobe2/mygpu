@@ -15,16 +15,27 @@ extern "C"
 namespace myrenderer
 {
 
-    Renderer::Renderer() : m_gpu(mygpu_create()), m_queue(nullptr)
+    Renderer::Renderer() : m_gpu(mygpu_create()), m_queue(nullptr), m_fence(nullptr)
     {
         if (m_gpu != nullptr)
         {
             m_queue = mygpu_queue_create();
         }
+
+        if (m_queue != nullptr)
+        {
+            m_fence = mygpu_fence_create(1);
+        }
     }
 
     Renderer::~Renderer()
     {
+        if (m_fence != nullptr)
+        {
+            mygpu_fence_destroy(m_fence);
+            m_fence = nullptr;
+        }
+
         if (m_queue != nullptr)
         {
             mygpu_queue_destroy(m_queue);
@@ -40,7 +51,7 @@ namespace myrenderer
 
     bool Renderer::Valid() const
     {
-        return m_gpu != nullptr && m_queue != nullptr;
+        return m_gpu != nullptr && m_queue != nullptr && m_fence != nullptr;
     }
 
     uint32_t Renderer::Width() const
@@ -210,30 +221,19 @@ namespace myrenderer
             return false;
         }
 
-        struct mygpu_fence *fence = mygpu_fence_create(1);
+        mygpu_fence_reset(m_fence);
 
-        if (fence == nullptr)
+        if (mygpu_queue_submit(m_queue, commandBuffer.m_commandBuffer, m_fence) != 0)
         {
-            return false;
-        }
-
-        if (mygpu_queue_submit(m_queue, commandBuffer.m_commandBuffer, fence) != 0)
-        {
-            mygpu_fence_destroy(fence);
             return false;
         }
 
         if (mygpu_queue_process(m_gpu, m_queue) != 0)
         {
-            mygpu_fence_destroy(fence);
             return false;
         }
 
-        const bool signaled = mygpu_fence_is_signaled(fence) != 0;
-
-        mygpu_fence_destroy(fence);
-
-        return signaled;
+        return mygpu_fence_is_signaled(m_fence) != 0;
     }
 
 } // namespace myrenderer
