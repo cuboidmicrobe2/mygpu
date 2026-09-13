@@ -15,10 +15,22 @@ extern "C"
 namespace myrenderer
 {
 
-    Renderer::Renderer() : m_gpu(mygpu_create()) {}
+    Renderer::Renderer() : m_gpu(mygpu_create()), m_queue(nullptr)
+    {
+        if (m_gpu != nullptr)
+        {
+            m_queue = mygpu_queue_create();
+        }
+    }
 
     Renderer::~Renderer()
     {
+        if (m_queue != nullptr)
+        {
+            mygpu_queue_destroy(m_queue);
+            m_queue = nullptr;
+        }
+
         if (m_gpu != nullptr)
         {
             mygpu_destroy(m_gpu);
@@ -28,7 +40,7 @@ namespace myrenderer
 
     bool Renderer::Valid() const
     {
-        return m_gpu != nullptr;
+        return m_gpu != nullptr && m_queue != nullptr;
     }
 
     uint32_t Renderer::Width() const
@@ -193,14 +205,7 @@ namespace myrenderer
 
     bool Renderer::Submit(const CommandBuffer &commandBuffer)
     {
-        if (m_gpu == nullptr || !commandBuffer.Valid())
-        {
-            return false;
-        }
-
-        struct mygpu_queue *queue = mygpu_queue_create();
-
-        if (queue == nullptr)
+        if (!Valid() || !commandBuffer.Valid())
         {
             return false;
         }
@@ -209,30 +214,26 @@ namespace myrenderer
 
         if (fence == nullptr)
         {
-            mygpu_queue_destroy(queue);
             return false;
         }
 
-        if (mygpu_queue_submit(queue, commandBuffer.m_commandBuffer, fence) != 0)
+        if (mygpu_queue_submit(m_queue, commandBuffer.m_commandBuffer, fence) != 0)
         {
             mygpu_fence_destroy(fence);
-            mygpu_queue_destroy(queue);
             return false;
         }
 
-        if (mygpu_queue_process(m_gpu, queue) != 0)
+        if (mygpu_queue_process(m_gpu, m_queue) != 0)
         {
             mygpu_fence_destroy(fence);
-            mygpu_queue_destroy(queue);
             return false;
         }
 
-        bool success = mygpu_fence_is_signaled(fence) != 0;
+        const bool signaled = mygpu_fence_is_signaled(fence) != 0;
 
         mygpu_fence_destroy(fence);
-        mygpu_queue_destroy(queue);
 
-        return success;
+        return signaled;
     }
 
 } // namespace myrenderer

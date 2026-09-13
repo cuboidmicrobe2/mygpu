@@ -4,6 +4,7 @@
 #include <memory>
 
 struct mygpu;
+struct mygpu_queue;
 
 namespace myrenderer
 {
@@ -38,5 +39,6 @@ namespace myrenderer
 
     private:
         struct mygpu *m_gpu;
+        struct mygpu_queue *m_queue;
     };
 } // namespace myrenderer
