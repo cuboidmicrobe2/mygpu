@@ -50,5 +50,6 @@ namespace myrenderer
         struct mygpu *m_gpu;
         struct mygpu_queue *m_queue;
         struct mygpu_fence *m_fence;
+        bool m_frameActive;
     };
 } // namespace myrenderer

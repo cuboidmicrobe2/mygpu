@@ -16,7 +16,11 @@ extern "C"
 namespace myrenderer
 {
 
-    Renderer::Renderer() : m_gpu(mygpu_create()), m_queue(nullptr), m_fence(nullptr)
+    Renderer::Renderer()
+        : m_gpu(mygpu_create()),
+          m_queue(nullptr),
+          m_fence(nullptr),
+          m_frameActive(false)
     {
         if (m_gpu != nullptr)
         {
@@ -166,17 +170,28 @@ namespace myrenderer
 
     bool Renderer::BeginFrame()
     {
-        return Valid();
-    }
-
-    bool Renderer::EndFrame(const CommandBuffer &commandBuffer)
-    {
-        if (!Valid() || !commandBuffer.Valid())
+        if (!Valid() || m_frameActive)
         {
             return false;
         }
 
-        return Submit(commandBuffer);
+        m_frameActive = true;
+
+        return true;
+    }
+
+    bool Renderer::EndFrame(const CommandBuffer &commandBuffer)
+    {
+        if (!Valid() || !m_frameActive || !commandBuffer.Valid())
+        {
+            return false;
+        }
+
+        const bool success = Submit(commandBuffer);
+
+        m_frameActive = false;
+
+        return success;
     }
 
     bool Renderer::GetPixel(uint32_t x, uint32_t y, uint32_t &color) const

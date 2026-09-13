@@ -226,5 +226,17 @@ int main()
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0xCAFEBABEu);
 
+    // Test frame lifecycle.
+    assert(!renderer.EndFrame(*frameCommands));
+
+    assert(renderer.BeginFrame());
+    assert(!renderer.BeginFrame());
+
+    assert(frameCommands->Reset());
+    assert(frameCommands->Clear(0xDEADBEEFu));
+
+    assert(renderer.EndFrame(*frameCommands));
+    assert(!renderer.EndFrame(*frameCommands));
+
     return 0;
 }
