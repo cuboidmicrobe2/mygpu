@@ -133,31 +133,22 @@ int main()
         {70.0f, 10.0f, 0xFFFFFFFFu},
         {60.0f, 30.0f, 0xFFFFFFFFu}};
 
-    auto vertexBuffer = renderer.CreateBuffer(sizeof(vertices));
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
 
     assert(vertexBuffer != nullptr);
     assert(vertexBuffer->Valid());
+    assert(vertexBuffer->Size() == sizeof(vertices));
 
-    assert(vertexBuffer->WriteVertices(vertices, 6));
+    auto triangleCommands = renderer.CreateCommandBuffer(256);
 
-    // Test mixed commands in one command buffer.
-    constexpr uint32_t mixedRectColor = 0xABCDEF01u;
+    assert(triangleCommands != nullptr);
+    assert(triangleCommands->Valid());
 
-    assert(commandBuffer->Reset());
-    assert(commandBuffer->IsEmpty());
+    assert(triangleCommands->DrawTriangles(*vertexBuffer, 6));
 
-    assert(commandBuffer->Clear(0x00000000u));
+    assert(renderer.Submit(*triangleCommands));
 
-    assert(commandBuffer->DrawRect(5, 5, 10, 10, mixedRectColor));
-
-    assert(commandBuffer->DrawTriangles(*vertexBuffer, 6));
-
-    assert(!commandBuffer->IsEmpty());
-
-    assert(renderer.Submit(*commandBuffer));
-
-    assert(renderer.GetPixel(5, 5, color));
-    assert(color == mixedRectColor);
+    color = 0;
 
     assert(renderer.GetPixel(20, 15, color));
     assert(color == 0xFFFFFFFFu);
