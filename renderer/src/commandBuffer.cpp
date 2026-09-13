@@ -9,7 +9,7 @@ extern "C"
 
 namespace myrenderer
 {
-    CommandBuffer::CommandBuffer(struct mygpu_command_buffer *CommandBuffer) : m_commandBuffer(CommandBuffer) {}
+    CommandBuffer::CommandBuffer(struct mygpu_command_buffer *CommandBuffer) : m_commandBuffer(CommandBuffer), m_vertexBuffer(nullptr) {}
 
     CommandBuffer::~CommandBuffer()
     {
@@ -42,7 +42,14 @@ namespace myrenderer
             return false;
         }
 
-        return mygpu_command_buffer_reset(m_commandBuffer) == 0;
+        if (mygpu_command_buffer_reset(m_commandBuffer) != 0)
+        {
+            return false;
+        }
+
+        m_vertexBuffer = nullptr;
+
+        return true;
     }
 
     bool CommandBuffer::Clear(uint32_t color)
@@ -79,9 +86,21 @@ namespace myrenderer
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }
 
-    bool CommandBuffer::DrawTriangles(const Buffer &vertexBuffer, uint32_t vertexCount)
+    bool CommandBuffer::BindVertexBuffer(const Buffer &vertexBuffer)
     {
-        if (m_commandBuffer == nullptr || !vertexBuffer.Valid() || vertexCount == 0)
+        if (m_commandBuffer == nullptr || !vertexBuffer.Valid())
+        {
+            return false;
+        }
+
+        m_vertexBuffer = &vertexBuffer;
+
+        return true;
+    }
+
+    bool CommandBuffer::DrawTriangles(uint32_t vertexCount)
+    {
+        if (m_commandBuffer == nullptr || m_vertexBuffer == nullptr || vertexCount == 0)
         {
             return false;
         }
@@ -91,9 +110,14 @@ namespace myrenderer
             return false;
         }
 
+        if (vertexCount % 3 != 0)
+        {
+            return false;
+        }
+
         const size_t requiredSize = static_cast<size_t>(vertexCount) * sizeof(Vertex);
 
-        if (vertexBuffer.Size() < requiredSize)
+        if (m_vertexBuffer->Size() < requiredSize)
         {
             return false;
         }
@@ -101,7 +125,7 @@ namespace myrenderer
         struct mygpu_cmd_draw_triangles command;
 
         command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
-        command.vertex_address = vertexBuffer.Address();
+        command.vertex_address = m_vertexBuffer->Address();
         command.vertex_count = vertexCount;
 
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;

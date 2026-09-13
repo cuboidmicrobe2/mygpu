@@ -147,7 +147,8 @@ int main()
     assert(triangleCommands != nullptr);
     assert(triangleCommands->Valid());
 
-    assert(triangleCommands->DrawTriangles(*vertexBuffer, 6));
+    assert(triangleCommands->BindVertexBuffer(*vertexBuffer));
+    assert(triangleCommands->DrawTriangles(6));
 
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*triangleCommands));
@@ -173,7 +174,8 @@ int main()
 
     assert(lifetimeCommands != nullptr);
 
-    assert(lifetimeCommands->DrawTriangles(*lifetimeVertexBuffer, 3));
+    assert(lifetimeCommands->BindVertexBuffer(*lifetimeVertexBuffer));
+    assert(lifetimeCommands->DrawTriangles(3));
 
     lifetimeVertexBuffer.reset();
 
@@ -190,7 +192,8 @@ int main()
     assert(triangleCommandBuffer->Clear(0x00000000u));
     assert(!triangleCommandBuffer->IsEmpty());
 
-    assert(triangleCommandBuffer->DrawTriangles(*vertexBuffer, 6));
+    assert(triangleCommandBuffer->BindVertexBuffer(*vertexBuffer));
+    assert(triangleCommandBuffer->DrawTriangles(6));
 
     assert(!triangleCommandBuffer->IsEmpty());
 
@@ -207,7 +210,8 @@ int main()
 
     assert(tooSmallVertexBuffer != nullptr);
 
-    assert(!triangleCommandBuffer->DrawTriangles(*tooSmallVertexBuffer, 3));
+    assert(triangleCommandBuffer->BindVertexBuffer(*tooSmallVertexBuffer));
+    assert(!triangleCommandBuffer->DrawTriangles(3));
 
     // Test BeginFrame / EndFrame.
     auto frameCommands = renderer.CreateCommandBuffer(256);
@@ -254,6 +258,14 @@ int main()
 
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0x01020304u);
+
+    assert(commandBuffer->BindVertexBuffer(*vertexBuffer));
+    assert(commandBuffer->DrawTriangles(3));
+
+    assert(commandBuffer->Reset());
+    assert(commandBuffer->IsEmpty());
+
+    assert(!commandBuffer->DrawTriangles(3));
 
     return 0;
 }
