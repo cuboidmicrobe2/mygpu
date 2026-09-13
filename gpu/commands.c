@@ -470,6 +470,8 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
         case MYGPU_CMD_DRAW_TRIANGLES: {
             struct mygpu_cmd_draw_triangles command;
+            struct mygpu_buffer *vertex_buffer;
+            size_t required_size;
 
             memcpy(
                 &command, 
@@ -479,6 +481,18 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
             if (command.vertex_count == 0 ||
                 command.vertex_count % 3 != 0) {
+                return -1;
+            }
+
+            vertex_buffer = mygpu_buffer_lookup(gpu, command.vertex_address);
+
+            if (vertex_buffer == NULL) {
+                return -1;
+            }
+
+            required_size = (size_t)command.vertex_count * sizeof(struct mygpu_vertex);
+
+            if (required_size > mygpu_buffer_size(vertex_buffer)) {
                 return -1;
             }
 

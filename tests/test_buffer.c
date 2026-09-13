@@ -694,6 +694,118 @@ static void test_buffer_addresses_and_isolation(void)
     mygpu_destroy(gpu);
 }
 
+static void test_buffer_lookup(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *buffer_a;
+    struct mygpu_buffer *buffer_b;
+
+    uint32_t address_a;
+    uint32_t address_b;
+
+    gpu = mygpu_create();
+
+    if (gpu == NULL) {
+        check(0, "buffer lookup GPU setup");
+        return;
+    }
+
+    buffer_a = mygpu_buffer_create(gpu, 64);
+    buffer_b = mygpu_buffer_create(gpu, 128);
+
+    check(
+        buffer_a != NULL,
+        "create first buffer for lookup"
+    );
+
+    check(
+        buffer_b != NULL,
+        "create second buffer for lookup"
+    );
+
+    if (buffer_a == NULL || buffer_b == NULL) {
+        mygpu_buffer_destroy(buffer_a);
+        mygpu_buffer_destroy(buffer_b);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    address_a = mygpu_buffer_address(buffer_a);
+    address_b = mygpu_buffer_address(buffer_b);
+
+    check(
+        mygpu_buffer_lookup(gpu, address_a) == buffer_a,
+        "lookup finds first buffer"
+    );
+
+    check(
+        mygpu_buffer_lookup(gpu, address_b) == buffer_b,
+        "lookup finds second buffer"
+    );
+
+    mygpu_buffer_destroy(buffer_a);
+    mygpu_buffer_destroy(buffer_b);
+    mygpu_destroy(gpu);
+}
+
+static void test_buffer_lookup_unknown(void)
+{
+    struct mygpu *gpu;
+
+    gpu = mygpu_create();
+
+    if (gpu == NULL) {
+        check(0, "unknown buffer lookup GPU setup");
+        return;
+    }
+
+    check(
+        mygpu_buffer_lookup(gpu, 0xFFFFFFFFu) == NULL,
+        "lookup rejects unknown address"
+    );
+
+    mygpu_destroy(gpu);
+}
+
+static void test_buffer_lookup_after_destroy(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *buffer;
+
+    uint32_t address;
+
+    gpu = mygpu_create();
+
+    if (gpu == NULL) {
+        check(0, "lookup after destroy GPU setup");
+        return;
+    }
+
+    buffer = mygpu_buffer_create(gpu, 64);
+
+    if (buffer == NULL) {
+        check(0, "lookup after destroy buffer setup");
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    address = mygpu_buffer_address(buffer);
+
+    check(
+        mygpu_buffer_lookup(gpu, address) == buffer,
+        "lookup finds buffer before destroy"
+    );
+
+    mygpu_buffer_destroy(buffer);
+
+    check(
+        mygpu_buffer_lookup(gpu, address) == NULL,
+        "lookup rejects destroyed buffer"
+    );
+
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Buffer Tests ===\n\n");
@@ -712,6 +824,9 @@ int main(void)
     test_multiple_buffers();
     test_address();
     test_buffer_addresses_and_isolation();
+    test_buffer_lookup();
+    test_buffer_lookup_unknown();
+    test_buffer_lookup_after_destroy();
 
     printf("\n=== Results ===\n");
 

@@ -8,6 +8,7 @@ struct mygpu_buffer {
     struct mygpu *gpu;
     uint32_t address;
     size_t size;
+    struct mygpu_buffer *next;
 };
 
 struct mygpu_buffer *mygpu_buffer_create(struct mygpu *gpu, size_t size)
@@ -31,14 +32,37 @@ struct mygpu_buffer *mygpu_buffer_create(struct mygpu *gpu, size_t size)
 
     buffer->gpu = gpu;
     buffer->size = size;
+    buffer->next = gpu->buffers;
+    gpu->buffers = buffer;
 
     return buffer;
 }
 
 void mygpu_buffer_destroy(struct mygpu_buffer *buffer)
 {
+    struct mygpu_buffer *current;
+    struct mygpu_buffer *previous;
+
     if (buffer == NULL) {
         return;
+    }
+
+    current = buffer->gpu->buffers;
+    previous = NULL;
+
+    while(current != NULL) {
+        if (current == buffer) {
+            if (previous == NULL) {
+                buffer->gpu->buffers = current->next;
+            } else {
+                previous->next = current->next;
+            }
+
+            break;
+        }
+
+        previous = current;
+        current = current->next;
     }
 
     free(buffer);
@@ -94,4 +118,26 @@ uint32_t mygpu_buffer_address(const struct mygpu_buffer *buffer)
     }
 
     return buffer->address;
+}
+
+struct mygpu_buffer *mygpu_buffer_lookup(struct mygpu *gpu, uint32_t address)
+{
+    struct mygpu_buffer *buffer;
+
+    if (gpu == NULL) {
+        return NULL;
+    }
+
+    buffer = gpu->buffers;
+
+    while (buffer != NULL) {
+        if (address >= buffer->address &&
+            address - buffer->address < buffer->size) {
+            return buffer;
+        }
+
+        buffer = buffer->next;
+    }
+
+    return NULL;
 }

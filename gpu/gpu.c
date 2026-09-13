@@ -20,6 +20,7 @@ struct mygpu *mygpu_create(void)
     gpu->memory = NULL;
     gpu->registers = NULL;
     gpu->framebuffer = NULL;
+    gpu->buffers = NULL;
 
     gpu->memory = mygpu_memory_create();
 
@@ -64,6 +65,10 @@ void mygpu_destroy(struct mygpu *gpu)
 {
     if (gpu == NULL) {
         return;
+    }
+
+    while (gpu->buffers != NULL) {
+        mygpu_buffer_destroy(gpu->buffers);
     }
 
     mygpu_queue_destroy(gpu->queue);

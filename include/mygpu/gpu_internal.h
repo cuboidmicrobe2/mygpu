@@ -5,6 +5,7 @@
 #include "registers.h"
 #include "framebuffer.h"
 #include "queue.h"
+#include "buffer.h"
 
 struct mygpu
 {
@@ -15,6 +16,8 @@ struct mygpu
     struct mygpu_registers *registers;
     struct mygpu_framebuffer *framebuffer;
     struct mygpu_queue *queue;
+
+    struct mygpu_buffer *buffers;
 };
 
 #endif
