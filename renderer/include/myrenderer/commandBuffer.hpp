@@ -28,6 +28,8 @@ namespace myrenderer
 
         bool Clear(uint32_t color);
 
+        bool DrawRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color);
+
         bool DrawTriangles(const Buffer &vertexBuffer, uint32_t vertexCount);
 
     private:

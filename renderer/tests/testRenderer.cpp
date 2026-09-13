@@ -73,6 +73,39 @@ int main()
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0x11223344u);
 
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0x11223344u);
+
+    // Test DrawRect.
+    constexpr uint32_t rectColor = 0x55667788u;
+
+    assert(commandBuffer->Reset());
+    assert(commandBuffer->IsEmpty());
+
+    assert(commandBuffer->DrawRect(
+        10,
+        10,
+        20,
+        20,
+        rectColor));
+
+    assert(!commandBuffer->IsEmpty());
+
+    assert(renderer.Submit(*commandBuffer));
+
+    assert(renderer.GetPixel(10, 10, color));
+    assert(color == rectColor);
+
+    assert(renderer.GetPixel(20, 20, color));
+    assert(color == rectColor);
+
+    assert(commandBuffer->Reset());
+    assert(commandBuffer->IsEmpty());
+
+    assert(!commandBuffer->DrawRect(10, 10, 0, 20, rectColor));
+
+    assert(!commandBuffer->DrawRect(10, 10, 20, 0, rectColor));
+
     const myrenderer::Vertex vertices[6] = {
         {10.0f, 10.0f, 0xFFFFFFFFu},
         {30.0f, 10.0f, 0xFFFFFFFFu},

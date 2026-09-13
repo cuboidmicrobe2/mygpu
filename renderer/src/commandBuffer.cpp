@@ -60,6 +60,25 @@ namespace myrenderer
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }
 
+    bool CommandBuffer::DrawRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color)
+    {
+        if (m_commandBuffer == nullptr || width == 0 || height == 0)
+        {
+            return false;
+        }
+
+        struct mygpu_cmd_draw_rect command;
+
+        command.opcode = MYGPU_CMD_DRAW_RECT;
+        command.x = x;
+        command.y = y;
+        command.width = width;
+        command.height = height;
+        command.color = color;
+
+        return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
+    }
+
     bool CommandBuffer::DrawTriangles(const Buffer &vertexBuffer, uint32_t vertexCount)
     {
         if (m_commandBuffer == nullptr || !vertexBuffer.Valid() || vertexCount == 0)
