@@ -1,6 +1,5 @@
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "myrenderer/buffer.hpp"
 #include "myrenderer/commandBuffer.hpp"
@@ -57,7 +56,8 @@ int main()
     assert(commandBuffer->Clear(commandClearColor));
     assert(!commandBuffer->IsEmpty());
 
-    assert(renderer.Submit(*commandBuffer));
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commandBuffer));
 
     assert(renderer.GetPixel(0, 0, color));
     assert(color == commandClearColor);
@@ -68,7 +68,8 @@ int main()
     assert(commandBuffer->Clear(0x11223344u));
     assert(!commandBuffer->IsEmpty());
 
-    assert(renderer.Submit(*commandBuffer));
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commandBuffer));
 
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0x11223344u);
@@ -83,7 +84,8 @@ int main()
 
     assert(!commandBuffer->IsEmpty());
 
-    assert(renderer.Submit(*commandBuffer));
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commandBuffer));
 
     assert(renderer.GetPixel(10, 10, color));
     assert(color == rectColor);
@@ -113,7 +115,8 @@ int main()
 
     assert(!commandBuffer->IsEmpty());
 
-    assert(renderer.Submit(*commandBuffer));
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commandBuffer));
 
     assert(renderer.GetPixel(5, 5, color));
     assert(color == firstRectColor);
@@ -146,7 +149,8 @@ int main()
 
     assert(triangleCommands->DrawTriangles(*vertexBuffer, 6));
 
-    assert(renderer.Submit(*triangleCommands));
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*triangleCommands));
 
     color = 0;
 
@@ -173,7 +177,8 @@ int main()
 
     lifetimeVertexBuffer.reset();
 
-    assert(renderer.Submit(*lifetimeCommands));
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*lifetimeCommands));
 
     // Test triangle-only command buffer.
     auto triangleCommandBuffer = renderer.CreateCommandBuffer(1024);
@@ -189,7 +194,8 @@ int main()
 
     assert(!triangleCommandBuffer->IsEmpty());
 
-    assert(renderer.Submit(*triangleCommandBuffer));
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*triangleCommandBuffer));
 
     assert(renderer.GetPixel(20, 15, color));
     assert(color == 0xFFFFFFFFu);
@@ -202,6 +208,23 @@ int main()
     assert(tooSmallVertexBuffer != nullptr);
 
     assert(!triangleCommandBuffer->DrawTriangles(*tooSmallVertexBuffer, 3));
+
+    // Test BeginFrame / EndFrame.
+    auto frameCommands = renderer.CreateCommandBuffer(256);
+
+    assert(frameCommands != nullptr);
+    assert(frameCommands->Valid());
+    assert(frameCommands->IsEmpty());
+
+    assert(renderer.BeginFrame());
+
+    assert(frameCommands->Clear(0xCAFEBABEu));
+    assert(!frameCommands->IsEmpty());
+
+    assert(renderer.EndFrame(*frameCommands));
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0xCAFEBABEu);
 
     return 0;
 }

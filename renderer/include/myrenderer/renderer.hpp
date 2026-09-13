@@ -32,6 +32,10 @@ namespace myrenderer
 
         bool Clear(uint32_t color);
 
+        bool BeginFrame();
+
+        bool EndFrame(const CommandBuffer &commandBuffer);
+
         bool GetPixel(uint32_t x, uint32_t y, uint32_t &color) const;
 
         std::unique_ptr<Buffer> CreateBuffer(size_t size);
@@ -40,9 +44,9 @@ namespace myrenderer
 
         std::unique_ptr<CommandBuffer> CreateCommandBuffer(size_t size);
 
+    private:
         bool Submit(const CommandBuffer &commandBuffer);
 
-    private:
         struct mygpu *m_gpu;
         struct mygpu_queue *m_queue;
         struct mygpu_fence *m_fence;

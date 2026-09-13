@@ -164,6 +164,21 @@ namespace myrenderer
         return success;
     }
 
+    bool Renderer::BeginFrame()
+    {
+        return Valid();
+    }
+
+    bool Renderer::EndFrame(const CommandBuffer &commandBuffer)
+    {
+        if (!Valid() || !commandBuffer.Valid())
+        {
+            return false;
+        }
+
+        return Submit(commandBuffer);
+    }
+
     bool Renderer::GetPixel(uint32_t x, uint32_t y, uint32_t &color) const
     {
         if (m_gpu == nullptr)
