@@ -11,6 +11,7 @@ namespace myrenderer
 {
     class Buffer;
     class CommandBuffer;
+    struct Vertex;
 
     class Renderer
     {
@@ -34,6 +35,9 @@ namespace myrenderer
         bool GetPixel(uint32_t x, uint32_t y, uint32_t &color) const;
 
         std::unique_ptr<Buffer> CreateBuffer(size_t size);
+
+        std::unique_ptr<Buffer> CreateVertexBuffer(const Vertex *vertices, size_t vertexCount);
+
         std::unique_ptr<CommandBuffer> CreateCommandBuffer(size_t size);
 
         bool Submit(const CommandBuffer &commandBuffer);

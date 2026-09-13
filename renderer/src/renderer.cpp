@@ -1,6 +1,7 @@
 #include "myrenderer/buffer.hpp"
 #include "myrenderer/commandBuffer.hpp"
 #include "myrenderer/renderer.hpp"
+#include "myrenderer/vertex.hpp"
 
 extern "C"
 {
@@ -195,6 +196,30 @@ namespace myrenderer
         }
 
         return std::unique_ptr<Buffer>(new Buffer(buffer));
+    }
+
+    std::unique_ptr<Buffer> Renderer::CreateVertexBuffer(const Vertex *vertices, size_t vertexCount)
+    {
+        if (!Valid() || vertices == nullptr || vertexCount == 0)
+        {
+            return nullptr;
+        }
+
+        if (vertexCount > SIZE_MAX / sizeof(Vertex))
+        {
+            return nullptr;
+        }
+
+        const size_t size = vertexCount * sizeof(Vertex);
+
+        auto buffer = CreateBuffer(size);
+
+        if (buffer == nullptr || !buffer->WriteVertices(vertices, vertexCount))
+        {
+            return nullptr;
+        }
+
+        return buffer;
     }
 
     std::unique_ptr<CommandBuffer> Renderer::CreateCommandBuffer(size_t size)
