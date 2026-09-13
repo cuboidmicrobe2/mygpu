@@ -73,21 +73,13 @@ int main()
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0x11223344u);
 
-    assert(renderer.GetPixel(0, 0, color));
-    assert(color == 0x11223344u);
-
     // Test DrawRect.
     constexpr uint32_t rectColor = 0x55667788u;
 
     assert(commandBuffer->Reset());
     assert(commandBuffer->IsEmpty());
 
-    assert(commandBuffer->DrawRect(
-        10,
-        10,
-        20,
-        20,
-        rectColor));
+    assert(commandBuffer->DrawRect(10, 10, 20, 20, rectColor));
 
     assert(!commandBuffer->IsEmpty());
 
@@ -148,6 +140,32 @@ int main()
 
     assert(vertexBuffer->WriteVertices(vertices, 6));
 
+    // Test mixed commands in one command buffer.
+    constexpr uint32_t mixedRectColor = 0xABCDEF01u;
+
+    assert(commandBuffer->Reset());
+    assert(commandBuffer->IsEmpty());
+
+    assert(commandBuffer->Clear(0x00000000u));
+
+    assert(commandBuffer->DrawRect(5, 5, 10, 10, mixedRectColor));
+
+    assert(commandBuffer->DrawTriangles(*vertexBuffer, 6));
+
+    assert(!commandBuffer->IsEmpty());
+
+    assert(renderer.Submit(*commandBuffer));
+
+    assert(renderer.GetPixel(5, 5, color));
+    assert(color == mixedRectColor);
+
+    assert(renderer.GetPixel(20, 15, color));
+    assert(color == 0xFFFFFFFFu);
+
+    assert(renderer.GetPixel(60, 15, color));
+    assert(color == 0xFFFFFFFFu);
+
+    // Test triangle-only command buffer.
     auto triangleCommandBuffer = renderer.CreateCommandBuffer(1024);
 
     assert(triangleCommandBuffer != nullptr);
@@ -158,6 +176,7 @@ int main()
     assert(!triangleCommandBuffer->IsEmpty());
 
     assert(triangleCommandBuffer->DrawTriangles(*vertexBuffer, 6));
+
     assert(!triangleCommandBuffer->IsEmpty());
 
     assert(renderer.Submit(*triangleCommandBuffer));
