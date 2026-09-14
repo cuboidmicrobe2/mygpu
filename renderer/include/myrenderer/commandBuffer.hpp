@@ -34,6 +34,10 @@ namespace myrenderer
 
         bool DrawTriangles(uint32_t vertexCount);
 
+        bool BindIndexBuffer(const Buffer &indexBuffer);
+
+        bool DrawIndexed(uint32_t indexCount);
+
     private:
         friend class Renderer;
 
@@ -41,5 +45,6 @@ namespace myrenderer
 
         struct mygpu_command_buffer *m_commandBuffer;
         const Buffer *m_vertexBuffer;
+        const Buffer *m_indexBuffer;
     };
 } // namespace myrenderer

@@ -9,7 +9,10 @@ extern "C"
 
 namespace myrenderer
 {
-    CommandBuffer::CommandBuffer(struct mygpu_command_buffer *CommandBuffer) : m_commandBuffer(CommandBuffer), m_vertexBuffer(nullptr) {}
+    CommandBuffer::CommandBuffer(struct mygpu_command_buffer *CommandBuffer)
+        : m_commandBuffer(CommandBuffer),
+          m_vertexBuffer(nullptr),
+          m_indexBuffer(nullptr) {}
 
     CommandBuffer::~CommandBuffer()
     {
@@ -48,6 +51,7 @@ namespace myrenderer
         }
 
         m_vertexBuffer = nullptr;
+        m_indexBuffer = nullptr;
 
         return true;
     }
@@ -127,6 +131,55 @@ namespace myrenderer
         command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
         command.vertex_address = m_vertexBuffer->Address();
         command.vertex_count = vertexCount;
+
+        return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
+    }
+
+    bool CommandBuffer::BindIndexBuffer(const Buffer &indexBuffer)
+    {
+        if (m_commandBuffer == nullptr || !indexBuffer.Valid())
+        {
+            return false;
+        }
+
+        m_indexBuffer = &indexBuffer;
+
+        return true;
+    }
+
+    bool CommandBuffer::DrawIndexed(uint32_t indexCount)
+    {
+        if (m_commandBuffer == nullptr ||
+            m_vertexBuffer == nullptr ||
+            m_indexBuffer == nullptr ||
+            indexCount == 0)
+        {
+            return false;
+        }
+
+        if (indexCount % 3 != 0)
+        {
+            return false;
+        }
+
+        if (indexCount > SIZE_MAX / sizeof(uint32_t))
+        {
+            return false;
+        }
+
+        const size_t requiredSize = static_cast<size_t>(indexCount) * sizeof(uint32_t);
+
+        if (m_indexBuffer->Size() < requiredSize)
+        {
+            return false;
+        }
+
+        struct mygpu_cmd_draw_indexed command;
+
+        command.opcode = MYGPU_CMD_DRAW_INDEXED;
+        command.vertex_address = m_vertexBuffer->Address();
+        command.index_address = m_indexBuffer->Address();
+        command.index_count = indexCount;
 
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }

@@ -177,8 +177,6 @@ int main()
     assert(lifetimeCommands->BindVertexBuffer(*lifetimeVertexBuffer));
     assert(lifetimeCommands->DrawTriangles(3));
 
-    lifetimeVertexBuffer.reset();
-
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*lifetimeCommands));
 
@@ -266,6 +264,65 @@ int main()
     assert(commandBuffer->IsEmpty());
 
     assert(!commandBuffer->DrawTriangles(3));
+
+    // Test indexed triangle.
+    const uint32_t indices[3] = {0, 1, 2};
+
+    auto indexBuffer = renderer.CreateBuffer(sizeof(indices));
+
+    assert(indexBuffer != nullptr);
+    assert(indexBuffer->Valid());
+    assert(indexBuffer->Size() == sizeof(indices));
+
+    assert(indexBuffer->Write(0, indices, sizeof(indices)));
+
+    auto indexedCommands = renderer.CreateCommandBuffer(256);
+
+    assert(indexedCommands != nullptr);
+    assert(indexedCommands->Valid());
+
+    assert(indexedCommands->BindVertexBuffer(*vertexBuffer));
+    assert(indexedCommands->BindIndexBuffer(*indexBuffer));
+    assert(indexedCommands->DrawIndexed(3));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*indexedCommands));
+
+    assert(renderer.GetPixel(20, 15, color));
+    assert(color == 0xFFFFFFFFu);
+
+    // Test indexed draw validation.
+    assert(indexedCommands->Reset());
+    assert(indexedCommands->BindVertexBuffer(*vertexBuffer));
+    assert(indexedCommands->BindIndexBuffer(*indexBuffer));
+
+    assert(!indexedCommands->DrawIndexed(0));
+    assert(!indexedCommands->DrawIndexed(4));
+    assert(indexedCommands->DrawIndexed(3));
+
+    auto tooSmallIndexBuffer = renderer.CreateBuffer(sizeof(uint32_t) * 2);
+
+    assert(tooSmallIndexBuffer != nullptr);
+
+    assert(indexedCommands->BindIndexBuffer(*tooSmallIndexBuffer));
+    assert(!indexedCommands->DrawIndexed(3));
+
+    assert(indexedCommands->Reset());
+
+    assert(!indexedCommands->DrawIndexed(3));
+
+    assert(indexedCommands->BindVertexBuffer(*vertexBuffer));
+
+    assert(!indexedCommands->DrawIndexed(3));
+
+    assert(indexedCommands->BindIndexBuffer(*indexBuffer));
+
+    assert(indexedCommands->DrawIndexed(3));
+
+    assert(indexedCommands->Reset());
+    assert(indexedCommands->IsEmpty());
+
+    assert(!indexedCommands->DrawIndexed(3));
 
     return 0;
 }
