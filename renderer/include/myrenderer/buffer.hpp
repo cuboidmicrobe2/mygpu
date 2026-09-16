@@ -30,6 +30,8 @@ namespace myrenderer
 
         bool WriteVertices(const Vertex *vertices, size_t vertexCount);
 
+        bool WriteIndices(const uint32_t *indices, size_t indexCount);
+
         uint32_t Address() const;
 
     private:

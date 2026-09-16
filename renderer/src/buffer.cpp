@@ -70,6 +70,21 @@ namespace myrenderer
         return Write(0, vertices, vertexCount * sizeof(Vertex));
     }
 
+    bool Buffer::WriteIndices(const uint32_t *indices, size_t indexCount)
+    {
+        if (m_buffer == nullptr || indices == nullptr || indexCount == 0)
+        {
+            return false;
+        }
+
+        if (indexCount > SIZE_MAX / sizeof(uint32_t))
+        {
+            return false;
+        }
+
+        return Write(0, indices, indexCount * sizeof(uint32_t));
+    }
+
     uint32_t Buffer::Address() const
     {
         if (m_buffer == nullptr)
