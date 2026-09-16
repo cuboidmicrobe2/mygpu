@@ -391,7 +391,7 @@ static void TestIndexedTriangle()
 
     const uint32_t indices[3] = {0, 1, 2};
 
-    auto indexBuffer = renderer.CreateBuffer(sizeof(indices));
+    auto indexBuffer = renderer.CreateIndexBuffer(indices, 3);
 
     assert(indexBuffer != nullptr);
     assert(indexBuffer->Valid());
@@ -438,11 +438,9 @@ static void TestIndexedDrawValidation()
 
     const uint32_t indices[3] = {0, 1, 2};
 
-    auto indexBuffer = renderer.CreateBuffer(sizeof(indices));
+    auto indexBuffer = renderer.CreateIndexBuffer(indices, 3);
 
     assert(indexBuffer != nullptr);
-
-    assert(indexBuffer->Write(0, indices, sizeof(indices)));
 
     auto commands = renderer.CreateCommandBuffer(256);
 
