@@ -620,6 +620,48 @@ static void TestCopyBufferDifferentSizes()
     assert(destinationValues[1] == sourceValues[2]);
 }
 
+static void TestPresented()
+{
+    myrenderer::Renderer renderer;
+    myrenderer::CommandBuffer *invalidCommands = nullptr;
+
+    assert(!invalidCommands);
+
+    assert(renderer.Valid());
+    assert(!renderer.Presented());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+    assert(commands->Clear(0x12345678u));
+    assert(commands->Present());
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(renderer.Presented());
+}
+
+static void TestNotPresented()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+    assert(!renderer.Presented());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+    assert(commands->Clear(0x12345678u));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(!renderer.Presented());
+}
+
 int main()
 {
     TestRendererBasics();
@@ -645,6 +687,9 @@ int main()
     TestCopyBufferWithOffsets();
     TestCopyBufferValidation();
     TestCopyBufferDifferentSizes();
+
+    TestPresented();
+    TestNotPresented();
 
     return 0;
 }

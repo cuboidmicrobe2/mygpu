@@ -33,4 +33,6 @@ struct mygpu_framebuffer *mygpu_get_framebuffer(struct mygpu *gpu);
 
 struct mygpu_memory *mygpu_get_memory(struct mygpu *gpu);
 
+int mygpu_presented(const struct mygpu *gpu);
+
 #endif

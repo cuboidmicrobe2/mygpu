@@ -180,3 +180,12 @@ struct mygpu_memory *mygpu_get_memory(struct mygpu *gpu)
 
     return gpu->memory;
 }
+
+int mygpu_presented(const struct mygpu *gpu)
+{
+    if (gpu == NULL) {
+        return 0;
+    }
+    
+    return gpu->presented;
+}

@@ -30,6 +30,8 @@ namespace myrenderer
         uint32_t Width() const;
         uint32_t Height() const;
 
+        bool Presented() const;
+
         bool Clear(uint32_t color);
 
         bool BeginFrame();

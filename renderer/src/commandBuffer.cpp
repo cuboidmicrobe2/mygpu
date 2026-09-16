@@ -71,6 +71,18 @@ namespace myrenderer
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }
 
+    bool CommandBuffer::Present()
+    {
+        if (m_commandBuffer == nullptr)
+        {
+            return false;
+        }
+
+        const uint32_t opcode = MYGPU_CMD_PRESENT;
+
+        return mygpu_command_buffer_write(m_commandBuffer, &opcode, sizeof(opcode)) == 0;
+    }
+
     bool CommandBuffer::DrawRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color)
     {
         if (m_commandBuffer == nullptr || width == 0 || height == 0)

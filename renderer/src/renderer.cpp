@@ -93,6 +93,16 @@ namespace myrenderer
         return mygpu_framebuffer_height(framebuffer);
     }
 
+    bool Renderer::Presented() const
+    {
+        if (!Valid())
+        {
+            return false;
+        }
+
+        return mygpu_presented(m_gpu) != 0;
+    }
+
     bool Renderer::Clear(uint32_t color)
     {
         if (m_gpu == nullptr)
