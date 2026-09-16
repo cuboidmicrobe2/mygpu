@@ -185,6 +185,7 @@ namespace myrenderer
             return false;
         }
 
+        mygpu_begin_frame(m_gpu);
         m_frameActive = true;
 
         return true;

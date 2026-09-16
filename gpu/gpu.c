@@ -186,6 +186,15 @@ int mygpu_presented(const struct mygpu *gpu)
     if (gpu == NULL) {
         return 0;
     }
-    
+
     return gpu->presented;
+}
+
+void mygpu_begin_frame(struct mygpu *gpu)
+{
+    if (gpu == NULL) {
+        return;
+    }
+
+    gpu->presented = 0;
 }

@@ -35,4 +35,6 @@ struct mygpu_memory *mygpu_get_memory(struct mygpu *gpu);
 
 int mygpu_presented(const struct mygpu *gpu);
 
+void mygpu_begin_frame(struct mygpu *gpu);
+
 #endif

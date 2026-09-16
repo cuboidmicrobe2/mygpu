@@ -746,6 +746,78 @@ static void TestCopyOverlap()
     assert(color == 0xFF0000FFu);
 }
 
+static void TestCommandBufferReuse()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+    assert(commands->Clear(0x12345678u));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+}
+
+static void TestPresentedAcrossFrames()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+    assert(commands->Present());
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+    assert(renderer.Presented());
+
+    assert(commands->Reset());
+    assert(commands->Clear(0x12345678u));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(!renderer.Presented());
+}
+
+static void TestBeginFramePreservesFramebuffer()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+    assert(commands->Clear(0x12345678u));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    uint32_t color = 0;
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0x12345678u);
+
+    assert(renderer.BeginFrame());
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0x12345678u);
+
+    assert(!renderer.Presented());
+}
+
 int main()
 {
     TestRendererBasics();
@@ -778,6 +850,11 @@ int main()
     TestCopyValidation();
     TestCopy();
     TestCopyOverlap();
+
+    TestCommandBufferReuse();
+    TestPresentedAcrossFrames();
+
+    TestBeginFramePreservesFramebuffer();
 
     return 0;
 }
