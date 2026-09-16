@@ -982,63 +982,6 @@ static void TestCommandBufferResetCapacity()
     assert(commands->Present());
 }
 
-static void TestResetClearsBindings()
-{
-    myrenderer::Renderer renderer;
-
-    assert(renderer.Valid());
-
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
-
-    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
-
-    assert(vertexBuffer != nullptr);
-
-    auto commands = renderer.CreateCommandBuffer(256);
-
-    assert(commands != nullptr);
-    assert(commands->BindVertexBuffer(*vertexBuffer));
-    assert(commands->DrawTriangles(3));
-
-    assert(commands->Reset());
-
-    assert(!commands->DrawTriangles(3));
-}
-
-static void TestResetClearsIndexBinding()
-{
-    myrenderer::Renderer renderer;
-
-    assert(renderer.Valid());
-
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
-
-    const uint32_t indices[3] = {0, 1, 2};
-
-    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
-    auto indexBuffer = renderer.CreateIndexBuffer(indices, 3);
-
-    assert(vertexBuffer != nullptr);
-    assert(indexBuffer != nullptr);
-
-    auto commands = renderer.CreateCommandBuffer(256);
-
-    assert(commands != nullptr);
-    assert(commands->BindVertexBuffer(*vertexBuffer));
-    assert(commands->BindIndexBuffer(*indexBuffer));
-    assert(commands->DrawIndexed(3));
-
-    assert(commands->Reset());
-
-    assert(!commands->DrawIndexed(3));
-}
-
 static void TestResetClearsAllBindings()
 {
     myrenderer::Renderer renderer;
@@ -1156,8 +1099,6 @@ int main()
 
     TestCommandBufferResetCapacity();
 
-    TestResetClearsBindings();
-    TestResetClearsIndexBinding();
     TestResetClearsAllBindings();
 
     TestCommandBufferReuseAfterReset();
