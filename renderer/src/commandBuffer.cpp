@@ -134,7 +134,7 @@ namespace myrenderer
         return true;
     }
 
-    bool CommandBuffer::DrawTriangles(uint32_t vertexCount)
+    bool CommandBuffer::DrawTriangles(uint32_t vertexCount, uint32_t firstVertex)
     {
         if (m_commandBuffer == nullptr || m_vertexBuffer == nullptr || vertexCount == 0)
         {
@@ -163,6 +163,7 @@ namespace myrenderer
         command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
         command.vertex_address = m_vertexBuffer->Address();
         command.vertex_count = vertexCount;
+        command.first_vertex = firstVertex;
 
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }
@@ -179,7 +180,7 @@ namespace myrenderer
         return true;
     }
 
-    bool CommandBuffer::DrawIndexed(uint32_t indexCount)
+    bool CommandBuffer::DrawIndexed(uint32_t indexCount, uint32_t firstIndex)
     {
         if (m_commandBuffer == nullptr ||
             m_vertexBuffer == nullptr ||
@@ -212,6 +213,7 @@ namespace myrenderer
         command.vertex_address = m_vertexBuffer->Address();
         command.index_address = m_indexBuffer->Address();
         command.index_count = indexCount;
+        command.first_index = firstIndex;
 
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }

@@ -57,6 +57,7 @@ struct mygpu_cmd_draw_triangles
     uint32_t opcode;
     uint32_t vertex_address;
     uint32_t vertex_count;
+    uint32_t first_vertex;
 };
 
 struct mygpu_cmd_draw_indexed
@@ -65,6 +66,7 @@ struct mygpu_cmd_draw_indexed
     uint32_t vertex_address;
     uint32_t index_address;
     uint32_t index_count;
+    uint32_t first_index;
 };
 
 struct mygpu_command_buffer *mygpu_command_buffer_create(uint32_t size);

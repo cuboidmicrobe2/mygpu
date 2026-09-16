@@ -36,11 +36,11 @@ namespace myrenderer
 
         bool BindVertexBuffer(const Buffer &vertexBuffer);
 
-        bool DrawTriangles(uint32_t vertexCount);
+        bool DrawTriangles(uint32_t vertexCount, uint32_t firstVertex);
 
         bool BindIndexBuffer(const Buffer &indexBuffer);
 
-        bool DrawIndexed(uint32_t indexCount);
+        bool DrawIndexed(uint32_t indexCount, uint32_t firstIndex);
 
         bool CopyBuffer(const Buffer &source, size_t sourceOffset, const Buffer &destination, size_t destinationOffset, size_t size);
 

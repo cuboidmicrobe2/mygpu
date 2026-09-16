@@ -189,7 +189,7 @@ static void TestMultipleTriangles()
     assert(commands->Valid());
 
     assert(commands->BindVertexBuffer(*vertexBuffer));
-    assert(commands->DrawTriangles(6));
+    assert(commands->DrawTriangles(6, 0));
 
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commands));
@@ -201,6 +201,43 @@ static void TestMultipleTriangles()
 
     assert(renderer.GetPixel(60, 15, color));
     assert(color == 0xFFFFFFFFu);
+}
+
+static void TestFirstVertex()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[6] = {
+        {10.0f, 10.0f, 0xFF0000FFu},
+        {30.0f, 10.0f, 0xFF0000FFu},
+        {20.0f, 30.0f, 0xFF0000FFu},
+
+        {50.0f, 10.0f, 0x00FF00FFu},
+        {70.0f, 10.0f, 0x00FF00FFu},
+        {60.0f, 30.0f, 0x00FF00FFu}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
+
+    assert(vertexBuffer != nullptr);
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->DrawTriangles(3, 3));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    uint32_t color = 0;
+
+    assert(renderer.GetPixel(60, 15, color));
+    assert(color == 0x00FF00FFu);
+
+    assert(renderer.GetPixel(20, 15, color));
+    assert(color != 0xFF0000FFu);
 }
 
 static void TestBufferLifetime()
@@ -223,7 +260,7 @@ static void TestBufferLifetime()
     assert(commands != nullptr);
 
     assert(commands->BindVertexBuffer(*vertexBuffer));
-    assert(commands->DrawTriangles(3));
+    assert(commands->DrawTriangles(3, 0));
 
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commands));
@@ -258,7 +295,7 @@ static void TestTriangleCommandBuffer()
     assert(!commandBuffer->IsEmpty());
 
     assert(commandBuffer->BindVertexBuffer(*vertexBuffer));
-    assert(commandBuffer->DrawTriangles(6));
+    assert(commandBuffer->DrawTriangles(6, 0));
 
     assert(!commandBuffer->IsEmpty());
 
@@ -278,7 +315,7 @@ static void TestTriangleCommandBuffer()
     assert(tooSmallVertexBuffer != nullptr);
 
     assert(commandBuffer->BindVertexBuffer(*tooSmallVertexBuffer));
-    assert(!commandBuffer->DrawTriangles(3));
+    assert(!commandBuffer->DrawTriangles(3, 0));
 }
 
 static void TestFrameLifecycle()
@@ -362,12 +399,12 @@ static void TestCommandBufferResetState()
     assert(commandBuffer != nullptr);
 
     assert(commandBuffer->BindVertexBuffer(*vertexBuffer));
-    assert(commandBuffer->DrawTriangles(3));
+    assert(commandBuffer->DrawTriangles(3, 0));
 
     assert(commandBuffer->Reset());
     assert(commandBuffer->IsEmpty());
 
-    assert(!commandBuffer->DrawTriangles(3));
+    assert(!commandBuffer->DrawTriangles(3, 0));
 }
 
 static void TestIndexedTriangle()
@@ -404,7 +441,7 @@ static void TestIndexedTriangle()
 
     assert(commands->BindVertexBuffer(*vertexBuffer));
     assert(commands->BindIndexBuffer(*indexBuffer));
-    assert(commands->DrawIndexed(3));
+    assert(commands->DrawIndexed(3, 0));
 
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commands));
@@ -447,33 +484,75 @@ static void TestIndexedDrawValidation()
     assert(commands->BindVertexBuffer(*vertexBuffer));
     assert(commands->BindIndexBuffer(*indexBuffer));
 
-    assert(!commands->DrawIndexed(0));
-    assert(!commands->DrawIndexed(4));
-    assert(commands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(0, 0));
+    assert(!commands->DrawIndexed(4, 0));
+    assert(commands->DrawIndexed(3, 0));
 
     auto tooSmallIndexBuffer = renderer.CreateBuffer(sizeof(uint32_t) * 2);
 
     assert(tooSmallIndexBuffer != nullptr);
 
     assert(commands->BindIndexBuffer(*tooSmallIndexBuffer));
-    assert(!commands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(3, 0));
 
     assert(commands->Reset());
 
-    assert(!commands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(3, 0));
 
     assert(commands->BindVertexBuffer(*vertexBuffer));
 
-    assert(!commands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(3, 0));
 
     assert(commands->BindIndexBuffer(*indexBuffer));
 
-    assert(commands->DrawIndexed(3));
+    assert(commands->DrawIndexed(3, 0));
 
     assert(commands->Reset());
     assert(commands->IsEmpty());
 
-    assert(!commands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(3, 0));
+}
+
+void TestIndexedFirstIndex()
+{
+    myrenderer::Renderer renderer;
+    assert(renderer.Valid());
+
+    myrenderer::Vertex vertices[] = {
+        {10.0f, 10.0f, 0xFF0000FF},
+        {30.0f, 10.0f, 0xFF0000FF},
+        {20.0f, 30.0f, 0xFF0000FF},
+
+        {50.0f, 10.0f, 0x00FF00FF},
+        {70.0f, 10.0f, 0x00FF00FF},
+        {60.0f, 30.0f, 0x00FF00FF}};
+
+    uint32_t indices[] = {
+        0, 1, 2,
+        3, 4, 5};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
+    auto indexBuffer = renderer.CreateIndexBuffer(indices, 6);
+    auto commandBuffer = renderer.CreateCommandBuffer(1024);
+
+    assert(vertexBuffer != nullptr);
+    assert(indexBuffer != nullptr);
+    assert(commandBuffer != nullptr);
+
+    assert(commandBuffer->BindVertexBuffer(*vertexBuffer));
+    assert(commandBuffer->BindIndexBuffer(*indexBuffer));
+    assert(commandBuffer->DrawIndexed(3, 3));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commandBuffer));
+
+    uint32_t color = 0;
+
+    assert(renderer.GetPixel(60, 15, color));
+    assert(color == 0x00FF00FF);
+
+    assert(renderer.GetPixel(20, 15, color));
+    assert(color != 0xFF0000FF);
 }
 
 static void TestCopyBuffer()
@@ -1006,12 +1085,12 @@ static void TestResetClearsAllBindings()
     assert(commands != nullptr);
     assert(commands->BindVertexBuffer(*vertexBuffer));
     assert(commands->BindIndexBuffer(*indexBuffer));
-    assert(commands->DrawIndexed(3));
+    assert(commands->DrawIndexed(3, 0));
 
     assert(commands->Reset());
 
-    assert(!commands->DrawTriangles(3));
-    assert(!commands->DrawIndexed(3));
+    assert(!commands->DrawTriangles(3, 0));
+    assert(!commands->DrawIndexed(3, 0));
 }
 
 static void TestCommandBufferReuseAfterReset()
@@ -1033,14 +1112,14 @@ static void TestCommandBufferReuseAfterReset()
 
     assert(commands != nullptr);
     assert(commands->BindVertexBuffer(*vertexBuffer));
-    assert(commands->DrawTriangles(3));
+    assert(commands->DrawTriangles(3, 0));
 
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commands));
 
     assert(commands->Reset());
     assert(commands->BindVertexBuffer(*vertexBuffer));
-    assert(commands->DrawTriangles(3));
+    assert(commands->DrawTriangles(3, 0));
 
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commands));
@@ -1056,6 +1135,7 @@ int main()
     TestMultipleCommands();
 
     TestMultipleTriangles();
+    TestFirstVertex();
     TestBufferLifetime();
     TestTriangleCommandBuffer();
 
@@ -1066,6 +1146,7 @@ int main()
 
     TestIndexedTriangle();
     TestIndexedDrawValidation();
+    TestIndexedFirstIndex();
 
     TestCopyBuffer();
     TestCopyBufferWithOffsets();

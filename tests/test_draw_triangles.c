@@ -645,6 +645,7 @@ static void test_indexed_triangle(void)
     command.index_address =
         mygpu_buffer_address(index_buffer);
     command.index_count = 3;
+    command.first_index = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -665,6 +666,116 @@ static void test_indexed_triangle(void)
         &color) == 0);
 
     assert(color == 0xff0000ffu);
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(index_buffer);
+    mygpu_buffer_destroy(vertex_buffer);
+    mygpu_destroy(gpu);
+}
+
+static void test_indexed_first_index(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *vertex_buffer;
+    struct mygpu_buffer *index_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_vertex vertices[6];
+    uint32_t indices[6];
+
+    struct mygpu_cmd_draw_indexed command;
+
+    uint32_t color;
+
+    gpu = mygpu_create();
+    assert(gpu != NULL);
+
+    vertices[0] = (struct mygpu_vertex){
+        10.0f, 10.0f, 0xff0000ffu
+    };
+
+    vertices[1] = (struct mygpu_vertex){
+        30.0f, 10.0f, 0xff0000ffu
+    };
+
+    vertices[2] = (struct mygpu_vertex){
+        20.0f, 30.0f, 0xff0000ffu
+    };
+
+    vertices[3] = (struct mygpu_vertex){
+        50.0f, 10.0f, 0xff00ff00u
+    };
+
+    vertices[4] = (struct mygpu_vertex){
+        70.0f, 10.0f, 0xff00ff00u
+    };
+
+    vertices[5] = (struct mygpu_vertex){
+        60.0f, 30.0f, 0xff00ff00u
+    };
+
+    vertex_buffer = create_vertex_buffer(
+        gpu,
+        vertices,
+        6);
+
+    index_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(indices));
+
+    assert(index_buffer != NULL);
+
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 3;
+    indices[4] = 4;
+    indices[5] = 5;
+
+    assert(mygpu_buffer_write(
+        index_buffer,
+        0,
+        indices,
+        sizeof(indices)) == 0);
+
+    command_buffer = mygpu_command_buffer_create(64);
+    assert(command_buffer != NULL);
+
+    command.opcode = MYGPU_CMD_DRAW_INDEXED;
+    command.vertex_address =
+        mygpu_buffer_address(vertex_buffer);
+    command.index_address =
+        mygpu_buffer_address(index_buffer);
+    command.index_count = 3;
+    command.first_index = 3;
+
+    assert(mygpu_command_buffer_write(
+        command_buffer,
+        &command,
+        sizeof(command)) == 0);
+
+    assert(mygpu_command_buffer_validate(
+        command_buffer) == 0);
+
+    assert(mygpu_command_buffer_execute(
+        gpu,
+        command_buffer) == 0);
+
+    assert(mygpu_framebuffer_get_pixel(
+        mygpu_get_framebuffer(gpu),
+        60,
+        15,
+        &color) == 0);
+
+    assert(color == 0xff00ff00u);
+
+    assert(mygpu_framebuffer_get_pixel(
+        mygpu_get_framebuffer(gpu),
+        20,
+        15,
+        &color) == 0);
+
+    assert(color != 0xff0000ffu);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -709,6 +820,7 @@ static void test_indexed_unknown_vertex_buffer(void)
     command.index_address =
         mygpu_buffer_address(index_buffer);
     command.index_count = 3;
+    command.first_index = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -765,6 +877,7 @@ static void test_indexed_unknown_index_buffer(void)
         mygpu_buffer_address(vertex_buffer);
     command.index_address = 0;
     command.index_count = 3;
+    command.first_index = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -839,6 +952,7 @@ static void test_indexed_index_buffer_too_small(void)
     command.index_address =
         mygpu_buffer_address(index_buffer);
     command.index_count = 3;
+    command.first_index = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -915,6 +1029,7 @@ static void test_indexed_vertex_index_out_of_bounds(void)
     command.index_address =
         mygpu_buffer_address(index_buffer);
     command.index_count = 3;
+    command.first_index = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -948,6 +1063,7 @@ int main(void)
     test_vertex_buffer_offset_too_small();
 
     test_indexed_triangle();
+    test_indexed_first_index();
     test_indexed_unknown_vertex_buffer();
     test_indexed_unknown_index_buffer();
     test_indexed_index_buffer_too_small();
