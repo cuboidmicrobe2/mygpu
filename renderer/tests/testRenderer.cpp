@@ -890,6 +890,48 @@ static void TestCreateIndexBufferValidation()
     assert(renderer.CreateIndexBuffer(indices, 0) == nullptr);
 }
 
+static void TestCreateVertexBuffer()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[3] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto buffer = renderer.CreateVertexBuffer(vertices, 3);
+
+    assert(buffer != nullptr);
+    assert(buffer->Valid());
+    assert(buffer->Size() == sizeof(vertices));
+
+    myrenderer::Vertex readBack[3] = {};
+
+    assert(buffer->Read(0, readBack, sizeof(readBack)));
+
+    assert(readBack[0].x == 10.0f);
+    assert(readBack[0].y == 10.0f);
+    assert(readBack[1].x == 30.0f);
+    assert(readBack[2].y == 30.0f);
+}
+
+static void TestCreateVertexBufferValidation()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[3] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu}};
+
+    assert(renderer.CreateVertexBuffer(nullptr, 3) == nullptr);
+    assert(renderer.CreateVertexBuffer(vertices, 0) == nullptr);
+}
+
 int main()
 {
     TestRendererBasics();
@@ -933,6 +975,9 @@ int main()
 
     TestCreateIndexBuffer();
     TestCreateIndexBufferValidation();
+
+    TestCreateVertexBuffer();
+    TestCreateVertexBufferValidation();
 
     return 0;
 }
