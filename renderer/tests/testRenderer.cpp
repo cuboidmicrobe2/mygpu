@@ -964,6 +964,26 @@ static void TestCommandBufferCapacity()
     assert(!commands->Present());
 }
 
+static void TestCommandBufferResetCapacity()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(sizeof(uint32_t));
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->Present());
+    assert(!commands->Present());
+
+    assert(commands->Reset());
+    assert(commands->IsEmpty());
+
+    assert(commands->Present());
+}
+
 int main()
 {
     TestRendererBasics();
@@ -1014,6 +1034,8 @@ int main()
     TestClearValidation();
 
     TestCommandBufferCapacity();
+
+    TestCommandBufferResetCapacity();
 
     return 0;
 }
