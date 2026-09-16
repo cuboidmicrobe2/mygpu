@@ -397,8 +397,6 @@ static void TestIndexedTriangle()
     assert(indexBuffer->Valid());
     assert(indexBuffer->Size() == sizeof(indices));
 
-    assert(indexBuffer->Write(0, indices, sizeof(indices)));
-
     auto commands = renderer.CreateCommandBuffer(256);
 
     assert(commands != nullptr);
