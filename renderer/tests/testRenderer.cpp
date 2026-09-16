@@ -1073,6 +1073,38 @@ static void TestResetClearsAllBindings()
     assert(!commands->DrawIndexed(3));
 }
 
+static void TestCommandBufferReuseAfterReset()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[3] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
+
+    assert(vertexBuffer != nullptr);
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->DrawTriangles(3));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(commands->Reset());
+    assert(commands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->DrawTriangles(3));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+}
+
 int main()
 {
     TestRendererBasics();
@@ -1129,6 +1161,8 @@ int main()
     TestResetClearsBindings();
     TestResetClearsIndexBinding();
     TestResetClearsAllBindings();
+
+    TestCommandBufferReuseAfterReset();
 
     return 0;
 }
