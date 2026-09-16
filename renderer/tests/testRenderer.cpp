@@ -662,6 +662,90 @@ static void TestNotPresented()
     assert(!renderer.Presented());
 }
 
+static void TestCopyValidation()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(!commands->Copy(0, 0, 0, 0, 0, 10));
+    assert(!commands->Copy(0, 0, 0, 0, 10, 0));
+}
+
+static void TestCopy()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->Clear(0x00000000u));
+    assert(commands->DrawRect(1, 1, 2, 2, 0xFF0000FFu));
+    assert(commands->Copy(1, 1, 5, 5, 2, 2));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    uint32_t color = 0;
+
+    assert(renderer.GetPixel(5, 5, color));
+    assert(color == 0xFF0000FFu);
+
+    assert(renderer.GetPixel(6, 5, color));
+    assert(color == 0xFF0000FFu);
+
+    assert(renderer.GetPixel(5, 6, color));
+    assert(color == 0xFF0000FFu);
+
+    assert(renderer.GetPixel(6, 6, color));
+    assert(color == 0xFF0000FFu);
+
+    assert(renderer.GetPixel(0, 0, color));
+    assert(color == 0x00000000u);
+}
+
+static void TestCopyOverlap()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->Clear(0x00000000u));
+    assert(commands->DrawRect(1, 1, 3, 1, 0xFF0000FFu));
+    assert(commands->Copy(1, 1, 2, 1, 3, 1));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    uint32_t color = 0;
+
+    assert(renderer.GetPixel(1, 1, color));
+    assert(color == 0xFF0000FFu);
+
+    assert(renderer.GetPixel(2, 1, color));
+    assert(color == 0xFF0000FFu);
+
+    assert(renderer.GetPixel(3, 1, color));
+    assert(color == 0xFF0000FFu);
+
+    assert(renderer.GetPixel(4, 1, color));
+    assert(color == 0xFF0000FFu);
+}
+
 int main()
 {
     TestRendererBasics();
@@ -690,6 +774,10 @@ int main()
 
     TestPresented();
     TestNotPresented();
+
+    TestCopyValidation();
+    TestCopy();
+    TestCopyOverlap();
 
     return 0;
 }

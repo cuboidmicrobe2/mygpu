@@ -71,6 +71,26 @@ namespace myrenderer
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }
 
+    bool CommandBuffer::Copy(uint32_t srcX, uint32_t srcY, uint32_t dstX, uint32_t dstY, uint32_t width, uint32_t height)
+    {
+        if (m_commandBuffer == nullptr || width == 0 || height == 0)
+        {
+            return false;
+        }
+
+        struct mygpu_cmd_copy command;
+
+        command.opcode = MYGPU_CMD_COPY;
+        command.src_x = srcX;
+        command.src_y = srcY;
+        command.dst_x = dstX;
+        command.dst_y = dstY;
+        command.width = width;
+        command.height = height;
+
+        return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
+    }
+
     bool CommandBuffer::Present()
     {
         if (m_commandBuffer == nullptr)
