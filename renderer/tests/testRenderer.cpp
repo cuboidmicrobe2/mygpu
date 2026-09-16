@@ -6,7 +6,7 @@
 #include "myrenderer/renderer.hpp"
 #include "myrenderer/vertex.hpp"
 
-int main()
+static void TestRendererBasics()
 {
     myrenderer::Renderer renderer;
 
@@ -23,6 +23,13 @@ int main()
 
     assert(renderer.GetPixel(0, 0, color));
     assert(color == clearColor);
+}
+
+static void TestBuffer()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
 
     auto buffer = renderer.CreateBuffer(3 * sizeof(uint32_t));
 
@@ -44,6 +51,13 @@ int main()
     assert(result[0] == values[0]);
     assert(result[1] == values[1]);
     assert(result[2] == values[2]);
+}
+
+static void TestCommandBufferClearAndReset()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
 
     auto commandBuffer = renderer.CreateCommandBuffer(1024);
 
@@ -59,6 +73,8 @@ int main()
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commandBuffer));
 
+    uint32_t color = 0;
+
     assert(renderer.GetPixel(0, 0, color));
     assert(color == commandClearColor);
 
@@ -73,12 +89,19 @@ int main()
 
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0x11223344u);
+}
 
-    // Test DrawRect.
+static void TestDrawRect()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commandBuffer = renderer.CreateCommandBuffer(1024);
+
+    assert(commandBuffer != nullptr);
+
     constexpr uint32_t rectColor = 0x55667788u;
-
-    assert(commandBuffer->Reset());
-    assert(commandBuffer->IsEmpty());
 
     assert(commandBuffer->DrawRect(10, 10, 20, 20, rectColor));
 
@@ -86,6 +109,8 @@ int main()
 
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commandBuffer));
+
+    uint32_t color = 0;
 
     assert(renderer.GetPixel(10, 10, color));
     assert(color == rectColor);
@@ -99,13 +124,20 @@ int main()
     assert(!commandBuffer->DrawRect(10, 10, 0, 20, rectColor));
 
     assert(!commandBuffer->DrawRect(10, 10, 20, 0, rectColor));
+}
 
-    // Test multiple commands in one command buffer.
+static void TestMultipleCommands()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commandBuffer = renderer.CreateCommandBuffer(1024);
+
+    assert(commandBuffer != nullptr);
+
     constexpr uint32_t firstRectColor = 0x11112222u;
     constexpr uint32_t secondRectColor = 0x33334444u;
-
-    assert(commandBuffer->Reset());
-    assert(commandBuffer->IsEmpty());
 
     assert(commandBuffer->Clear(0x00000000u));
 
@@ -118,6 +150,8 @@ int main()
     assert(renderer.BeginFrame());
     assert(renderer.EndFrame(*commandBuffer));
 
+    uint32_t color = 0;
+
     assert(renderer.GetPixel(5, 5, color));
     assert(color == firstRectColor);
 
@@ -126,6 +160,13 @@ int main()
 
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0x00000000u);
+}
+
+static void TestMultipleTriangles()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
 
     const myrenderer::Vertex vertices[6] = {
         {10.0f, 10.0f, 0xFFFFFFFFu},
@@ -142,61 +183,89 @@ int main()
     assert(vertexBuffer->Valid());
     assert(vertexBuffer->Size() == sizeof(vertices));
 
-    auto triangleCommands = renderer.CreateCommandBuffer(256);
+    auto commands = renderer.CreateCommandBuffer(256);
 
-    assert(triangleCommands != nullptr);
-    assert(triangleCommands->Valid());
+    assert(commands != nullptr);
+    assert(commands->Valid());
 
-    assert(triangleCommands->BindVertexBuffer(*vertexBuffer));
-    assert(triangleCommands->DrawTriangles(6));
+    assert(commands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->DrawTriangles(6));
 
     assert(renderer.BeginFrame());
-    assert(renderer.EndFrame(*triangleCommands));
+    assert(renderer.EndFrame(*commands));
 
-    color = 0;
+    uint32_t color = 0;
 
     assert(renderer.GetPixel(20, 15, color));
     assert(color == 0xFFFFFFFFu);
 
     assert(renderer.GetPixel(60, 15, color));
     assert(color == 0xFFFFFFFFu);
+}
 
-    const myrenderer::Vertex lifetimeVertices[3] = {
+static void TestBufferLifetime()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[3] = {
         {10.0f, 10.0f, 0xFFFFFFFFu},
         {30.0f, 10.0f, 0xFFFFFFFFu},
         {20.0f, 30.0f, 0xFFFFFFFFu}};
 
-    auto lifetimeVertexBuffer = renderer.CreateVertexBuffer(lifetimeVertices, 3);
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
 
-    assert(lifetimeVertexBuffer != nullptr);
+    assert(vertexBuffer != nullptr);
 
-    auto lifetimeCommands = renderer.CreateCommandBuffer(256);
+    auto commands = renderer.CreateCommandBuffer(256);
 
-    assert(lifetimeCommands != nullptr);
+    assert(commands != nullptr);
 
-    assert(lifetimeCommands->BindVertexBuffer(*lifetimeVertexBuffer));
-    assert(lifetimeCommands->DrawTriangles(3));
-
-    assert(renderer.BeginFrame());
-    assert(renderer.EndFrame(*lifetimeCommands));
-
-    // Test triangle-only command buffer.
-    auto triangleCommandBuffer = renderer.CreateCommandBuffer(1024);
-
-    assert(triangleCommandBuffer != nullptr);
-    assert(triangleCommandBuffer->Valid());
-    assert(triangleCommandBuffer->IsEmpty());
-
-    assert(triangleCommandBuffer->Clear(0x00000000u));
-    assert(!triangleCommandBuffer->IsEmpty());
-
-    assert(triangleCommandBuffer->BindVertexBuffer(*vertexBuffer));
-    assert(triangleCommandBuffer->DrawTriangles(6));
-
-    assert(!triangleCommandBuffer->IsEmpty());
+    assert(commands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->DrawTriangles(3));
 
     assert(renderer.BeginFrame());
-    assert(renderer.EndFrame(*triangleCommandBuffer));
+    assert(renderer.EndFrame(*commands));
+}
+
+static void TestTriangleCommandBuffer()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[6] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu},
+
+        {50.0f, 10.0f, 0xFFFFFFFFu},
+        {70.0f, 10.0f, 0xFFFFFFFFu},
+        {60.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
+
+    assert(vertexBuffer != nullptr);
+
+    auto commandBuffer = renderer.CreateCommandBuffer(1024);
+
+    assert(commandBuffer != nullptr);
+    assert(commandBuffer->Valid());
+    assert(commandBuffer->IsEmpty());
+
+    assert(commandBuffer->Clear(0x00000000u));
+    assert(!commandBuffer->IsEmpty());
+
+    assert(commandBuffer->BindVertexBuffer(*vertexBuffer));
+    assert(commandBuffer->DrawTriangles(6));
+
+    assert(!commandBuffer->IsEmpty());
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commandBuffer));
+
+    uint32_t color = 0;
 
     assert(renderer.GetPixel(20, 15, color));
     assert(color == 0xFFFFFFFFu);
@@ -208,10 +277,16 @@ int main()
 
     assert(tooSmallVertexBuffer != nullptr);
 
-    assert(triangleCommandBuffer->BindVertexBuffer(*tooSmallVertexBuffer));
-    assert(!triangleCommandBuffer->DrawTriangles(3));
+    assert(commandBuffer->BindVertexBuffer(*tooSmallVertexBuffer));
+    assert(!commandBuffer->DrawTriangles(3));
+}
 
-    // Test BeginFrame / EndFrame.
+static void TestFrameLifecycle()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
     auto frameCommands = renderer.CreateCommandBuffer(256);
 
     assert(frameCommands != nullptr);
@@ -225,10 +300,11 @@ int main()
 
     assert(renderer.EndFrame(*frameCommands));
 
+    uint32_t color = 0;
+
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0xCAFEBABEu);
 
-    // Test frame lifecycle.
     assert(!renderer.EndFrame(*frameCommands));
 
     assert(renderer.BeginFrame());
@@ -239,23 +315,51 @@ int main()
 
     assert(renderer.EndFrame(*frameCommands));
     assert(!renderer.EndFrame(*frameCommands));
+}
 
-    // Test frame command buffer validation.
-    auto stateCommands = renderer.CreateCommandBuffer(256);
+static void TestFrameCommandValidation()
+{
+    myrenderer::Renderer renderer;
 
-    assert(stateCommands != nullptr);
-    assert(stateCommands->Valid());
+    assert(renderer.Valid());
 
-    assert(stateCommands->Clear(0x01020304u));
+    auto commands = renderer.CreateCommandBuffer(256);
 
-    assert(!renderer.EndFrame(*stateCommands));
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->Clear(0x01020304u));
+
+    assert(!renderer.EndFrame(*commands));
 
     assert(renderer.BeginFrame());
 
-    assert(renderer.EndFrame(*stateCommands));
+    assert(renderer.EndFrame(*commands));
+
+    uint32_t color = 0;
 
     assert(renderer.GetPixel(0, 0, color));
     assert(color == 0x01020304u);
+}
+
+static void TestCommandBufferResetState()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[3] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
+
+    assert(vertexBuffer != nullptr);
+
+    auto commandBuffer = renderer.CreateCommandBuffer(256);
+
+    assert(commandBuffer != nullptr);
 
     assert(commandBuffer->BindVertexBuffer(*vertexBuffer));
     assert(commandBuffer->DrawTriangles(3));
@@ -264,8 +368,27 @@ int main()
     assert(commandBuffer->IsEmpty());
 
     assert(!commandBuffer->DrawTriangles(3));
+}
 
-    // Test indexed triangle.
+static void TestIndexedTriangle()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[6] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu},
+
+        {50.0f, 10.0f, 0xFFFFFFFFu},
+        {70.0f, 10.0f, 0xFFFFFFFFu},
+        {60.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
+
+    assert(vertexBuffer != nullptr);
+
     const uint32_t indices[3] = {0, 1, 2};
 
     auto indexBuffer = renderer.CreateBuffer(sizeof(indices));
@@ -276,53 +399,252 @@ int main()
 
     assert(indexBuffer->Write(0, indices, sizeof(indices)));
 
-    auto indexedCommands = renderer.CreateCommandBuffer(256);
+    auto commands = renderer.CreateCommandBuffer(256);
 
-    assert(indexedCommands != nullptr);
-    assert(indexedCommands->Valid());
+    assert(commands != nullptr);
+    assert(commands->Valid());
 
-    assert(indexedCommands->BindVertexBuffer(*vertexBuffer));
-    assert(indexedCommands->BindIndexBuffer(*indexBuffer));
-    assert(indexedCommands->DrawIndexed(3));
+    assert(commands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->BindIndexBuffer(*indexBuffer));
+    assert(commands->DrawIndexed(3));
 
     assert(renderer.BeginFrame());
-    assert(renderer.EndFrame(*indexedCommands));
+    assert(renderer.EndFrame(*commands));
+
+    uint32_t color = 0;
 
     assert(renderer.GetPixel(20, 15, color));
     assert(color == 0xFFFFFFFFu);
+}
 
-    // Test indexed draw validation.
-    assert(indexedCommands->Reset());
-    assert(indexedCommands->BindVertexBuffer(*vertexBuffer));
-    assert(indexedCommands->BindIndexBuffer(*indexBuffer));
+static void TestIndexedDrawValidation()
+{
+    myrenderer::Renderer renderer;
 
-    assert(!indexedCommands->DrawIndexed(0));
-    assert(!indexedCommands->DrawIndexed(4));
-    assert(indexedCommands->DrawIndexed(3));
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[6] = {
+        {10.0f, 10.0f, 0xFFFFFFFFu},
+        {30.0f, 10.0f, 0xFFFFFFFFu},
+        {20.0f, 30.0f, 0xFFFFFFFFu},
+
+        {50.0f, 10.0f, 0xFFFFFFFFu},
+        {70.0f, 10.0f, 0xFFFFFFFFu},
+        {60.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
+
+    assert(vertexBuffer != nullptr);
+
+    const uint32_t indices[3] = {0, 1, 2};
+
+    auto indexBuffer = renderer.CreateBuffer(sizeof(indices));
+
+    assert(indexBuffer != nullptr);
+
+    assert(indexBuffer->Write(0, indices, sizeof(indices)));
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+
+    assert(commands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->BindIndexBuffer(*indexBuffer));
+
+    assert(!commands->DrawIndexed(0));
+    assert(!commands->DrawIndexed(4));
+    assert(commands->DrawIndexed(3));
 
     auto tooSmallIndexBuffer = renderer.CreateBuffer(sizeof(uint32_t) * 2);
 
     assert(tooSmallIndexBuffer != nullptr);
 
-    assert(indexedCommands->BindIndexBuffer(*tooSmallIndexBuffer));
-    assert(!indexedCommands->DrawIndexed(3));
+    assert(commands->BindIndexBuffer(*tooSmallIndexBuffer));
+    assert(!commands->DrawIndexed(3));
 
-    assert(indexedCommands->Reset());
+    assert(commands->Reset());
 
-    assert(!indexedCommands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(3));
 
-    assert(indexedCommands->BindVertexBuffer(*vertexBuffer));
+    assert(commands->BindVertexBuffer(*vertexBuffer));
 
-    assert(!indexedCommands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(3));
 
-    assert(indexedCommands->BindIndexBuffer(*indexBuffer));
+    assert(commands->BindIndexBuffer(*indexBuffer));
 
-    assert(indexedCommands->DrawIndexed(3));
+    assert(commands->DrawIndexed(3));
 
-    assert(indexedCommands->Reset());
-    assert(indexedCommands->IsEmpty());
+    assert(commands->Reset());
+    assert(commands->IsEmpty());
 
-    assert(!indexedCommands->DrawIndexed(3));
+    assert(!commands->DrawIndexed(3));
+}
+
+static void TestCopyBuffer()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto source = renderer.CreateBuffer(sizeof(uint32_t) * 3);
+
+    auto destination = renderer.CreateBuffer(sizeof(uint32_t) * 3);
+
+    assert(source != nullptr);
+    assert(destination != nullptr);
+
+    const uint32_t sourceValues[3] = {
+        0x11111111u,
+        0x22222222u,
+        0x33333333u};
+
+    uint32_t destinationValues[3] = {};
+
+    assert(source->Write(0, sourceValues, sizeof(sourceValues)));
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->CopyBuffer(*source, 0, *destination, 0, sizeof(sourceValues)));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(destination->Read(0, destinationValues, sizeof(destinationValues)));
+
+    assert(destinationValues[0] == sourceValues[0]);
+    assert(destinationValues[1] == sourceValues[1]);
+    assert(destinationValues[2] == sourceValues[2]);
+}
+
+static void TestCopyBufferWithOffsets()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto source = renderer.CreateBuffer(sizeof(uint32_t) * 4);
+    auto destination = renderer.CreateBuffer(sizeof(uint32_t) * 4);
+
+    assert(source != nullptr);
+    assert(destination != nullptr);
+
+    const uint32_t sourceValues[4] = {
+        0x11111111u,
+        0x22222222u,
+        0x33333333u,
+        0x44444444u};
+
+    uint32_t destinationValues[4] = {};
+
+    assert(source->Write(0, sourceValues, sizeof(sourceValues)));
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->CopyBuffer(*source, sizeof(uint32_t), *destination, sizeof(uint32_t), sizeof(uint32_t) * 2));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(destination->Read(0, destinationValues, sizeof(destinationValues)));
+
+    assert(destinationValues[0] == 0);
+    assert(destinationValues[1] == sourceValues[1]);
+    assert(destinationValues[2] == sourceValues[2]);
+    assert(destinationValues[3] == 0);
+}
+
+static void TestCopyBufferValidation()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto source = renderer.CreateBuffer(sizeof(uint32_t));
+    auto destination = renderer.CreateBuffer(sizeof(uint32_t));
+
+    assert(source != nullptr);
+    assert(destination != nullptr);
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(!commands->CopyBuffer(*source, 0, *destination, 0, 0));
+    assert(!commands->CopyBuffer(*source, sizeof(uint32_t), *destination, 0, sizeof(uint32_t)));
+    assert(!commands->CopyBuffer(*source, 0, *destination, sizeof(uint32_t), sizeof(uint32_t)));
+    assert(!commands->CopyBuffer(*source, 0, *destination, 0, sizeof(uint32_t) * 2));
+}
+
+static void TestCopyBufferDifferentSizes()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto source = renderer.CreateBuffer(sizeof(uint32_t) * 4);
+    auto destination = renderer.CreateBuffer(sizeof(uint32_t) * 2);
+
+    assert(source != nullptr);
+    assert(destination != nullptr);
+
+    const uint32_t sourceValues[4] = {
+        0x11111111u,
+        0x22222222u,
+        0x33333333u,
+        0x44444444u};
+
+    uint32_t destinationValues[2] = {};
+
+    assert(source->Write(0, sourceValues, sizeof(sourceValues)));
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->CopyBuffer(*source, sizeof(uint32_t), *destination, 0, sizeof(uint32_t) * 2));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commands));
+
+    assert(destination->Read(0, destinationValues, sizeof(destinationValues)));
+
+    assert(destinationValues[0] == sourceValues[1]);
+    assert(destinationValues[1] == sourceValues[2]);
+}
+
+int main()
+{
+    TestRendererBasics();
+    TestBuffer();
+    TestCommandBufferClearAndReset();
+
+    TestDrawRect();
+    TestMultipleCommands();
+
+    TestMultipleTriangles();
+    TestBufferLifetime();
+    TestTriangleCommandBuffer();
+
+    TestFrameLifecycle();
+    TestFrameCommandValidation();
+
+    TestCommandBufferResetState();
+
+    TestIndexedTriangle();
+    TestIndexedDrawValidation();
+
+    TestCopyBuffer();
+    TestCopyBufferWithOffsets();
+    TestCopyBufferValidation();
+    TestCopyBufferDifferentSizes();
 
     return 0;
 }

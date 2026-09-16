@@ -464,6 +464,10 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
         case MYGPU_CMD_BUFFER_COPY: {
             struct mygpu_cmd_buffer_copy command;
+            struct mygpu_buffer *source_buffer;
+            struct mygpu_buffer *destination_buffer;
+            size_t source_offset;
+            size_t destination_offset;
             uint8_t *data;
 
             memcpy(
@@ -475,6 +479,34 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             if (command.size == 0) {
                 offset += sizeof(command);
                 break;
+            }
+
+            source_buffer = mygpu_buffer_lookup(gpu, command.src_address);
+            if (source_buffer == NULL) {
+                return -1;
+            }
+
+            destination_buffer = mygpu_buffer_lookup(gpu, command.dst_address);
+            if (destination_buffer == NULL) {
+                return -1;
+            }
+
+            source_offset = mygpu_buffer_offset(source_buffer, command.src_address);
+
+            destination_offset = mygpu_buffer_offset(destination_buffer, command.dst_address);
+
+            if (source_offset == SIZE_MAX ||
+                destination_offset == SIZE_MAX) {
+                    
+                return -1;
+            }
+
+            if ((size_t)command.size >
+                    mygpu_buffer_size(source_buffer) - source_offset ||
+                (size_t)command.size >
+                    mygpu_buffer_size(destination_buffer) - destination_offset) {
+
+                return -1;
             }
 
             data = malloc(command.size);

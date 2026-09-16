@@ -38,6 +38,8 @@ namespace myrenderer
 
         bool DrawIndexed(uint32_t indexCount);
 
+        bool CopyBuffer(const Buffer &source, size_t sourceOffset, const Buffer &destination, size_t destinationOffset, size_t size);
+
     private:
         friend class Renderer;
 

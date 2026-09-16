@@ -1,8 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "mygpu/buffer.h"
 #include "mygpu/gpu.h"
 #include "mygpu/commands.h"
+#include "mygpu/memory.h"
 
 #define TEST_CLEAR_COLOR 0x000000FFu
 
@@ -1673,6 +1675,728 @@ static void test_draw_indexed_validation_truncated(void)
     mygpu_command_buffer_destroy(command_buffer);
 }
 
+static void test_buffer_copy_validation(void)
+{
+    struct mygpu_command_buffer *command_buffer;
+    struct mygpu_cmd_buffer_copy command;
+
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create BUFFER_COPY validation buffer"
+    );
+
+    if (command_buffer == NULL) {
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address = 0;
+    command.dst_address = 100;
+    command.size = 16;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)
+        ) == 0,
+        "write BUFFER_COPY"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate BUFFER_COPY"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+}
+
+static void test_buffer_copy_validation_zero_size(void)
+{
+    struct mygpu_command_buffer *command_buffer;
+    struct mygpu_cmd_buffer_copy command;
+
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create zero-size BUFFER_COPY buffer"
+    );
+
+    if (command_buffer == NULL) {
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address = 0;
+    command.dst_address = 100;
+    command.size = 0;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)
+        ) == 0,
+        "write zero-size BUFFER_COPY"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate zero-size BUFFER_COPY"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+}
+
+static void test_buffer_copy_validation_truncated(void)
+{
+    struct mygpu_command_buffer *command_buffer;
+    struct mygpu_cmd_buffer_copy command;
+
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create truncated BUFFER_COPY buffer"
+    );
+
+    if (command_buffer == NULL) {
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address = 0;
+    command.dst_address = 100;
+    command.size = 16;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command) - 1
+        ) == 0,
+        "write truncated BUFFER_COPY"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) != 0,
+        "reject truncated BUFFER_COPY"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+}
+
+static void test_buffer_copy_execution(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *source_buffer;
+    struct mygpu_buffer *destination_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    uint32_t source_values[3] = {
+        0x11111111u,
+        0x22222222u,
+        0x33333333u};
+
+    uint32_t destination_values[3] = {0};
+
+    struct mygpu_cmd_buffer_copy command;
+
+    gpu = mygpu_create();
+
+    check(
+        gpu != NULL,
+        "create GPU for BUFFER_COPY"
+    );
+
+    if (gpu == NULL) {
+        return;
+    }
+
+    source_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(source_values));
+
+    destination_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(destination_values));
+
+    check(
+        source_buffer != NULL,
+        "create BUFFER_COPY source buffer"
+    );
+
+    check(
+        destination_buffer != NULL,
+        "create BUFFER_COPY destination buffer"
+    );
+
+    if (source_buffer == NULL || destination_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    check(
+        mygpu_buffer_write(
+            source_buffer,
+            0,
+            source_values,
+            sizeof(source_values)) == 0,
+        "write BUFFER_COPY source"
+    );
+
+    command_buffer = mygpu_command_buffer_create(
+        sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create BUFFER_COPY command buffer"
+    );
+
+    if (command_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address =
+        mygpu_buffer_address(source_buffer);
+    command.dst_address =
+        mygpu_buffer_address(destination_buffer);
+    command.size = sizeof(source_values);
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)) == 0,
+        "write BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_execute(
+            gpu,
+            command_buffer) == 0,
+        "execute BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_buffer_read(
+            destination_buffer,
+            0,
+            destination_values,
+            sizeof(destination_values)) == 0,
+        "read BUFFER_COPY destination"
+    );
+
+    check(
+        destination_values[0] == source_values[0] &&
+        destination_values[1] == source_values[1] &&
+        destination_values[2] == source_values[2],
+        "BUFFER_COPY copied data"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(destination_buffer);
+    mygpu_buffer_destroy(source_buffer);
+    mygpu_destroy(gpu);
+}
+
+static void test_buffer_copy_execution_with_offsets(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *source_buffer;
+    struct mygpu_buffer *destination_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    uint32_t source_values[4] = {
+        0x11111111u,
+        0x22222222u,
+        0x33333333u,
+        0x44444444u};
+
+    uint32_t destination_values[4] = {0};
+
+    struct mygpu_cmd_buffer_copy command;
+
+    gpu = mygpu_create();
+
+    check(
+        gpu != NULL,
+        "create GPU for offset BUFFER_COPY"
+    );
+
+    if (gpu == NULL) {
+        return;
+    }
+
+    source_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(source_values));
+
+    destination_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(destination_values));
+
+    check(
+        source_buffer != NULL,
+        "create offset BUFFER_COPY source buffer"
+    );
+
+    check(
+        destination_buffer != NULL,
+        "create offset BUFFER_COPY destination buffer"
+    );
+
+    if (source_buffer == NULL || destination_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    check(
+        mygpu_buffer_write(
+            source_buffer,
+            0,
+            source_values,
+            sizeof(source_values)) == 0,
+        "write offset BUFFER_COPY source"
+    );
+
+    command_buffer = mygpu_command_buffer_create(
+        sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create offset BUFFER_COPY command buffer"
+    );
+
+    if (command_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address =
+        mygpu_buffer_address(source_buffer) + sizeof(uint32_t);
+    command.dst_address =
+        mygpu_buffer_address(destination_buffer) + sizeof(uint32_t);
+    command.size = sizeof(uint32_t) * 2;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)) == 0,
+        "write offset BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate offset BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_execute(
+            gpu,
+            command_buffer) == 0,
+        "execute offset BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_buffer_read(
+            destination_buffer,
+            0,
+            destination_values,
+            sizeof(destination_values)) == 0,
+        "read offset BUFFER_COPY destination"
+    );
+
+    check(
+        destination_values[0] == 0 &&
+        destination_values[1] == source_values[1] &&
+        destination_values[2] == source_values[2] &&
+        destination_values[3] == 0,
+        "BUFFER_COPY copied offset data"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(destination_buffer);
+    mygpu_buffer_destroy(source_buffer);
+    mygpu_destroy(gpu);
+}
+
+static void test_buffer_copy_unknown_source(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *destination_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_cmd_buffer_copy command;
+
+    gpu = mygpu_create();
+
+    check(
+        gpu != NULL,
+        "create GPU for unknown BUFFER_COPY source"
+    );
+
+    if (gpu == NULL) {
+        return;
+    }
+
+    destination_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(uint32_t));
+
+    check(
+        destination_buffer != NULL,
+        "create unknown BUFFER_COPY destination buffer"
+    );
+
+    if (destination_buffer == NULL) {
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command_buffer = mygpu_command_buffer_create(
+        sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create unknown BUFFER_COPY source command buffer"
+    );
+
+    if (command_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address = MYGPU_MEMORY_SIZE - sizeof(uint32_t);
+    command.dst_address = mygpu_buffer_address(destination_buffer);
+    command.size = sizeof(uint32_t);
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)) == 0,
+        "write unknown BUFFER_COPY source command"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate unknown BUFFER_COPY source command"
+    );
+
+    check(
+        mygpu_command_buffer_execute(
+            gpu,
+            command_buffer) != 0,
+        "reject unknown BUFFER_COPY source"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(destination_buffer);
+    mygpu_destroy(gpu);
+}
+
+static void test_buffer_copy_unknown_destination(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *source_buffer;
+    struct mygpu_buffer *destination_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_cmd_buffer_copy command;
+
+    gpu = mygpu_create();
+
+    check(
+        gpu != NULL,
+        "create GPU for unknown BUFFER_COPY destination"
+    );
+
+    if (gpu == NULL) {
+        return;
+    }
+
+    source_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(uint32_t));
+
+    destination_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(uint32_t));
+
+    check(
+        source_buffer != NULL,
+        "create unknown destination source buffer"
+    );
+
+    check(
+        destination_buffer != NULL,
+        "create unknown destination buffer"
+    );
+
+    if (source_buffer == NULL || destination_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command_buffer = mygpu_command_buffer_create(
+        sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create unknown destination command buffer"
+    );
+
+    if (command_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address =
+        mygpu_buffer_address(source_buffer);
+    command.dst_address =
+        MYGPU_MEMORY_SIZE - sizeof(uint32_t);
+    command.size = sizeof(uint32_t);
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)) == 0,
+        "write unknown destination BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate unknown destination BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_execute(
+            gpu,
+            command_buffer) != 0,
+        "reject unknown BUFFER_COPY destination"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(destination_buffer);
+    mygpu_buffer_destroy(source_buffer);
+    mygpu_destroy(gpu);
+}
+
+static void test_buffer_copy_source_too_small(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *source_buffer;
+    struct mygpu_buffer *destination_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_cmd_buffer_copy command;
+
+    gpu = mygpu_create();
+
+    check(
+        gpu != NULL,
+        "create GPU for small BUFFER_COPY source"
+    );
+
+    if (gpu == NULL) {
+        return;
+    }
+
+    source_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(uint32_t));
+
+    destination_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(uint32_t) * 2);
+
+    check(
+        source_buffer != NULL,
+        "create small BUFFER_COPY source buffer"
+    );
+
+    check(
+        destination_buffer != NULL,
+        "create small BUFFER_COPY destination buffer"
+    );
+
+    if (source_buffer == NULL || destination_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command_buffer = mygpu_command_buffer_create(
+        sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create small BUFFER_COPY command buffer"
+    );
+
+    if (command_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address =
+        mygpu_buffer_address(source_buffer);
+    command.dst_address =
+        mygpu_buffer_address(destination_buffer);
+    command.size = sizeof(uint32_t) * 2;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)) == 0,
+        "write small-source BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate small-source BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_execute(
+            gpu,
+            command_buffer) != 0,
+        "reject BUFFER_COPY with small source buffer"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(destination_buffer);
+    mygpu_buffer_destroy(source_buffer);
+    mygpu_destroy(gpu);
+}
+
+static void test_buffer_copy_destination_too_small(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *source_buffer;
+    struct mygpu_buffer *destination_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_cmd_buffer_copy command;
+
+    gpu = mygpu_create();
+
+    check(
+        gpu != NULL,
+        "create GPU for small BUFFER_COPY destination"
+    );
+
+    if (gpu == NULL) {
+        return;
+    }
+
+    source_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(uint32_t) * 2);
+
+    destination_buffer = mygpu_buffer_create(
+        gpu,
+        sizeof(uint32_t));
+
+    check(
+        source_buffer != NULL,
+        "create small destination BUFFER_COPY source buffer"
+    );
+
+    check(
+        destination_buffer != NULL,
+        "create small BUFFER_COPY destination buffer"
+    );
+
+    if (source_buffer == NULL || destination_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command_buffer = mygpu_command_buffer_create(
+        sizeof(command));
+
+    check(
+        command_buffer != NULL,
+        "create small destination BUFFER_COPY command buffer"
+    );
+
+    if (command_buffer == NULL) {
+        mygpu_buffer_destroy(destination_buffer);
+        mygpu_buffer_destroy(source_buffer);
+        mygpu_destroy(gpu);
+        return;
+    }
+
+    command.opcode = MYGPU_CMD_BUFFER_COPY;
+    command.src_address =
+        mygpu_buffer_address(source_buffer);
+    command.dst_address =
+        mygpu_buffer_address(destination_buffer);
+    command.size = sizeof(uint32_t) * 2;
+
+    check(
+        mygpu_command_buffer_write(
+            command_buffer,
+            &command,
+            sizeof(command)) == 0,
+        "write small-destination BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_validate(command_buffer) == 0,
+        "validate small-destination BUFFER_COPY command"
+    );
+
+    check(
+        mygpu_command_buffer_execute(
+            gpu,
+            command_buffer) != 0,
+        "reject BUFFER_COPY with small destination buffer"
+    );
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(destination_buffer);
+    mygpu_buffer_destroy(source_buffer);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     printf("=== MyGPU Command Tests ===\n\n");
@@ -1711,6 +2435,16 @@ int main(void)
     test_draw_indexed_validation_zero_count();
     test_draw_indexed_validation_invalid_count();
     test_draw_indexed_validation_truncated();
+
+    test_buffer_copy_validation();
+    test_buffer_copy_validation_zero_size();
+    test_buffer_copy_validation_truncated();
+    test_buffer_copy_execution();
+    test_buffer_copy_execution_with_offsets();
+    test_buffer_copy_unknown_source();
+    test_buffer_copy_unknown_destination();
+    test_buffer_copy_source_too_small();
+    test_buffer_copy_destination_too_small();
 
     printf("\n=== Results ===\n");
 

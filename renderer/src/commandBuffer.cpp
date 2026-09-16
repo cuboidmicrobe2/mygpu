@@ -184,4 +184,57 @@ namespace myrenderer
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }
 
+    bool CommandBuffer::CopyBuffer(const Buffer &source, size_t sourceOffset, const Buffer &destination, size_t destinationOffset, size_t size)
+    {
+        if (m_commandBuffer == nullptr ||
+            !source.Valid() ||
+            !destination.Valid() ||
+            size == 0)
+        {
+            return false;
+        }
+
+        if (sourceOffset > source.Size() ||
+            size > source.Size() - sourceOffset)
+        {
+            return false;
+        }
+
+        if (destinationOffset > destination.Size() ||
+            size > destination.Size() - destinationOffset)
+        {
+            return false;
+        }
+
+        if (sourceOffset > UINT32_MAX ||
+            destinationOffset > UINT32_MAX)
+        {
+            return false;
+        }
+
+        const uint64_t sourceAddress = static_cast<uint64_t>(source.Address()) + sourceOffset;
+
+        const uint64_t destinationAddress = static_cast<uint64_t>(destination.Address()) + destinationOffset;
+
+        if (sourceAddress > UINT32_MAX ||
+            destinationAddress > UINT32_MAX)
+        {
+            return false;
+        }
+
+        if (size > UINT32_MAX)
+        {
+            return false;
+        }
+
+        struct mygpu_cmd_buffer_copy command;
+
+        command.opcode = MYGPU_CMD_BUFFER_COPY;
+        command.src_address = static_cast<uint32_t>(sourceAddress);
+        command.dst_address = static_cast<uint32_t>(destinationAddress);
+        command.size = static_cast<uint32_t>(size);
+
+        return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
+    }
+
 } // namespace myrenderer
