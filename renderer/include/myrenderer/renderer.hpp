@@ -44,6 +44,8 @@ namespace myrenderer
 
         std::unique_ptr<Buffer> CreateVertexBuffer(const Vertex *vertices, size_t vertexCount);
 
+        std::unique_ptr<Buffer> CreateIndexBuffer(const uint32_t *indices, size_t indexCount);
+
         std::unique_ptr<CommandBuffer> CreateCommandBuffer(size_t size);
 
     private:

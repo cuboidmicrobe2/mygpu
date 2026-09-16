@@ -857,6 +857,41 @@ static void TestWriteIndicesValidation()
     assert(!buffer->WriteIndices(indices, 0));
 }
 
+static void TestCreateIndexBuffer()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const uint32_t indices[3] = {0, 1, 2};
+
+    auto buffer = renderer.CreateIndexBuffer(indices, 3);
+
+    assert(buffer != nullptr);
+    assert(buffer->Valid());
+    assert(buffer->Size() == sizeof(indices));
+
+    uint32_t readBack[3] = {};
+
+    assert(buffer->Read(0, readBack, sizeof(readBack)));
+
+    assert(readBack[0] == 0);
+    assert(readBack[1] == 1);
+    assert(readBack[2] == 2);
+}
+
+static void TestCreateIndexBufferValidation()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const uint32_t indices[3] = {0, 1, 2};
+
+    assert(renderer.CreateIndexBuffer(nullptr, 3) == nullptr);
+    assert(renderer.CreateIndexBuffer(indices, 0) == nullptr);
+}
+
 int main()
 {
     TestRendererBasics();
@@ -897,6 +932,9 @@ int main()
 
     TestWriteIndices();
     TestWriteIndicesValidation();
+
+    TestCreateIndexBuffer();
+    TestCreateIndexBufferValidation();
 
     return 0;
 }

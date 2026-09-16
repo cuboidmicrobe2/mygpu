@@ -263,6 +263,28 @@ namespace myrenderer
         return buffer;
     }
 
+    std::unique_ptr<Buffer> Renderer::CreateIndexBuffer(const uint32_t *indices, size_t indexCount)
+    {
+        if (!Valid() || indices == nullptr || indexCount == 0)
+        {
+            return nullptr;
+        }
+
+        if (indexCount > SIZE_MAX / sizeof(uint32_t))
+        {
+            return nullptr;
+        }
+
+        auto buffer = CreateBuffer(indexCount * sizeof(uint32_t));
+
+        if (buffer == nullptr || !buffer->WriteIndices(indices, indexCount))
+        {
+            return nullptr;
+        }
+
+        return buffer;
+    }
+
     std::unique_ptr<CommandBuffer> Renderer::CreateCommandBuffer(size_t size)
     {
         if (m_gpu == nullptr)
