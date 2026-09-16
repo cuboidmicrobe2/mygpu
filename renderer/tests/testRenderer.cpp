@@ -932,6 +932,23 @@ static void TestCreateVertexBufferValidation()
     assert(renderer.CreateVertexBuffer(vertices, 0) == nullptr);
 }
 
+static void TestClearValidation()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(256);
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->Clear(0x12345678u));
+
+    assert(commands->Reset());
+    assert(commands->IsEmpty());
+}
+
 int main()
 {
     TestRendererBasics();
@@ -978,6 +995,8 @@ int main()
 
     TestCreateVertexBuffer();
     TestCreateVertexBufferValidation();
+
+    TestClearValidation();
 
     return 0;
 }
