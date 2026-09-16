@@ -949,6 +949,21 @@ static void TestClearValidation()
     assert(commands->IsEmpty());
 }
 
+static void TestCommandBufferCapacity()
+{
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    auto commands = renderer.CreateCommandBuffer(sizeof(uint32_t));
+
+    assert(commands != nullptr);
+    assert(commands->Valid());
+
+    assert(commands->Present());
+    assert(!commands->Present());
+}
+
 int main()
 {
     TestRendererBasics();
@@ -997,6 +1012,8 @@ int main()
     TestCreateVertexBufferValidation();
 
     TestClearValidation();
+
+    TestCommandBufferCapacity();
 
     return 0;
 }
