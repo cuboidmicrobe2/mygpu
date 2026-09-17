@@ -41,7 +41,9 @@ static struct mygpu_command_buffer *create_draw_command(
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
+    command.vertex_offset = 0;
     command.vertex_count = 3;
+    command.first_vertex = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -257,7 +259,9 @@ static void test_triangle_outside_framebuffer(void)
         draw_command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
         draw_command.vertex_address =
             mygpu_buffer_address(vertex_buffer);
+        draw_command.vertex_offset = 0;
         draw_command.vertex_count = 3;
+        draw_command.first_vertex = 0;
 
         assert(mygpu_command_buffer_write(
             command_buffer,
@@ -331,7 +335,9 @@ static void test_degenerate_triangle(void)
     draw_command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     draw_command.vertex_address =
         mygpu_buffer_address(vertex_buffer);
+    draw_command.vertex_offset = 0;
     draw_command.vertex_count = 3;
+    draw_command.first_vertex = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -406,7 +412,9 @@ static void test_multiple_triangles(void)
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
+    command.vertex_offset = 0;
     command.vertex_count = 3;
+    command.first_vertex = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -449,6 +457,92 @@ static void test_multiple_triangles(void)
     mygpu_destroy(gpu);
 }
 
+static void test_vertex_buffer_offset(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *vertex_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_vertex vertices[6];
+
+    struct mygpu_cmd_draw_triangles command;
+
+    uint32_t color;
+
+    gpu = mygpu_create();
+    assert(gpu != NULL);
+
+    vertices[0] = (struct mygpu_vertex){
+        2.0f, 2.0f, 0xff0000ffu
+    };
+
+    vertices[1] = (struct mygpu_vertex){
+        8.0f, 2.0f, 0xff0000ffu
+    };
+
+    vertices[2] = (struct mygpu_vertex){
+        2.0f, 8.0f, 0xff0000ffu
+    };
+
+    vertices[3] = (struct mygpu_vertex){
+        20.0f, 20.0f, 0xff00ff00u
+    };
+
+    vertices[4] = (struct mygpu_vertex){
+        26.0f, 20.0f, 0xff00ff00u
+    };
+
+    vertices[5] = (struct mygpu_vertex){
+        20.0f, 26.0f, 0xff00ff00u
+    };
+
+    vertex_buffer = create_vertex_buffer(
+        gpu,
+        vertices,
+        6);
+
+    command_buffer = mygpu_command_buffer_create(64);
+    assert(command_buffer != NULL);
+
+    command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
+    command.vertex_address = mygpu_buffer_address(vertex_buffer);
+    command.vertex_offset =
+        3u * (uint32_t)sizeof(struct mygpu_vertex);
+    command.vertex_count = 3;
+    command.first_vertex = 0;
+
+    assert(mygpu_command_buffer_write(
+        command_buffer,
+        &command,
+        sizeof(command)) == 0);
+
+    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+
+    assert(mygpu_command_buffer_execute(
+        gpu,
+        command_buffer) == 0);
+
+    assert(mygpu_framebuffer_get_pixel(
+        mygpu_get_framebuffer(gpu),
+        21,
+        21,
+        &color) == 0);
+
+    assert(color == 0xff00ff00u);
+
+    assert(mygpu_framebuffer_get_pixel(
+        mygpu_get_framebuffer(gpu),
+        3,
+        3,
+        &color) == 0);
+
+    assert(color != 0xff0000ffu);
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(vertex_buffer);
+    mygpu_destroy(gpu);
+}
+
 static void test_unknown_vertex_buffer(void)
 {
     struct mygpu *gpu;
@@ -463,7 +557,9 @@ static void test_unknown_vertex_buffer(void)
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = 0xFFFFFFFFu;
+    command.vertex_offset = 0;
     command.vertex_count = 3;
+    command.first_vertex = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -510,7 +606,9 @@ static void test_vertex_buffer_too_small(void)
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
+    command.vertex_offset = 0;
     command.vertex_count = 3;
+    command.first_vertex = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -568,7 +666,9 @@ static void test_vertex_buffer_offset_too_small(void)
     command.vertex_address =
         mygpu_buffer_address(vertex_buffer) +
         (3u * (uint32_t)sizeof(struct mygpu_vertex));
+    command.vertex_offset = 0;
     command.vertex_count = 3;
+    command.first_vertex = 0;
 
     assert(mygpu_command_buffer_write(
         command_buffer,
@@ -1057,6 +1157,8 @@ int main(void)
     test_triangle_outside_framebuffer();
     test_degenerate_triangle();
     test_multiple_triangles();
+    
+    test_vertex_buffer_offset();
 
     test_unknown_vertex_buffer();
     test_vertex_buffer_too_small();

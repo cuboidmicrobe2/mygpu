@@ -56,6 +56,7 @@ struct mygpu_cmd_draw_triangles
 {
     uint32_t opcode;
     uint32_t vertex_address;
+    uint32_t vertex_offset;
     uint32_t vertex_count;
     uint32_t first_vertex;
 };

@@ -12,6 +12,7 @@ namespace myrenderer
     CommandBuffer::CommandBuffer(struct mygpu_command_buffer *CommandBuffer)
         : m_commandBuffer(CommandBuffer),
           m_vertexBuffer(nullptr),
+          m_vertexBufferOffset(0),
           m_indexBuffer(nullptr) {}
 
     CommandBuffer::~CommandBuffer()
@@ -51,6 +52,8 @@ namespace myrenderer
         }
 
         m_vertexBuffer = nullptr;
+        m_vertexBufferOffset = 0;
+
         m_indexBuffer = nullptr;
 
         return true;
@@ -122,14 +125,15 @@ namespace myrenderer
         return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
     }
 
-    bool CommandBuffer::BindVertexBuffer(const Buffer &vertexBuffer)
+    bool CommandBuffer::BindVertexBuffer(const Buffer &vertexBuffer, size_t offset)
     {
-        if (m_commandBuffer == nullptr || !vertexBuffer.Valid())
+        if (m_commandBuffer == nullptr || !vertexBuffer.Valid() || offset > vertexBuffer.Size())
         {
             return false;
         }
 
         m_vertexBuffer = &vertexBuffer;
+        m_vertexBufferOffset = offset;
 
         return true;
     }
@@ -162,6 +166,7 @@ namespace myrenderer
 
         command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
         command.vertex_address = m_vertexBuffer->Address();
+        command.vertex_offset = static_cast<uint32_t>(m_vertexBufferOffset);
         command.vertex_count = vertexCount;
         command.first_vertex = firstVertex;
 
