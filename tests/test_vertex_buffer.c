@@ -16,9 +16,7 @@ static void test_vertex_fetch(void)
     gpu = mygpu_create();
     assert(gpu != NULL);
 
-    buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(vertices));
+    buffer = mygpu_buffer_create(gpu, sizeof(vertices));
 
     assert(buffer != NULL);
 
@@ -34,11 +32,7 @@ static void test_vertex_fetch(void)
     vertices[2].y = 60.0f;
     vertices[2].color = 0x0000ffffu;
 
-    assert(mygpu_buffer_write(
-        buffer,
-        0,
-        vertices,
-        sizeof(vertices)) == 0);
+    assert(mygpu_buffer_write(buffer, 0, vertices, sizeof(vertices)) == 0);
 
     assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 0, &vertex) == 0);
     assert(vertex.x == 10.0f);

@@ -23,28 +23,14 @@ static void check(int condition, const char *name)
     }
 }
 
-static void check_pixel(
-    struct mygpu *gpu,
-    uint32_t x,
-    uint32_t y,
-    uint32_t expected,
-    const char *name
-)
+static void check_pixel(struct mygpu *gpu, uint32_t x, uint32_t y, uint32_t expected, const char *name)
 {
     uint32_t color;
     int result;
 
-    result = mygpu_get_pixel(
-        gpu,
-        x,
-        y,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, x, y, &color);
 
-    check(
-        result == 0 && color == expected,
-        name
-    );
+    check(result == 0 && color == expected, name);
 }
 
 static void test_create_destroy(void)
@@ -53,17 +39,11 @@ static void test_create_destroy(void)
 
     queue = mygpu_queue_create();
 
-    check(
-        queue != NULL,
-        "create queue"
-    );
+    check(queue != NULL, "create queue");
 
     mygpu_queue_destroy(queue);
 
-    check(
-        1,
-        "destroy queue"
-    );
+    check(1, "destroy queue");
 }
 
 static void test_invalid_arguments(void)
@@ -78,10 +58,7 @@ static void test_invalid_arguments(void)
     fence = mygpu_fence_create(1);
     gpu = mygpu_create();
 
-    if (queue == NULL ||
-        buffer == NULL ||
-        fence == NULL ||
-        gpu == NULL) {
+    if (queue == NULL || buffer == NULL || fence == NULL || gpu == NULL) {
 
         check(0, "invalid argument queue setup");
 
@@ -93,30 +70,15 @@ static void test_invalid_arguments(void)
         return;
     }
 
-    check(
-        mygpu_queue_submit(NULL, buffer, fence) != 0,
-        "reject NULL queue"
-    );
+    check(mygpu_queue_submit(NULL, buffer, fence) != 0, "reject NULL queue");
 
-    check(
-        mygpu_queue_submit(queue, NULL, fence) != 0,
-        "reject NULL command buffer"
-    );
+    check(mygpu_queue_submit(queue, NULL, fence) != 0, "reject NULL command buffer");
 
-    check(
-        mygpu_queue_submit(queue, buffer, NULL) != 0,
-        "reject NULL fence"
-    );
+    check(mygpu_queue_submit(queue, buffer, NULL) != 0, "reject NULL fence");
 
-    check(
-        mygpu_queue_process(NULL, queue) != 0,
-        "reject NULL GPU"
-    );
+    check(mygpu_queue_process(NULL, queue) != 0, "reject NULL GPU");
 
-    check(
-        mygpu_queue_process(gpu, NULL) != 0,
-        "reject NULL queue"
-    );
+    check(mygpu_queue_process(gpu, NULL) != 0, "reject NULL queue");
 
     mygpu_queue_destroy(queue);
     mygpu_command_buffer_destroy(buffer);
@@ -139,10 +101,7 @@ static void test_submit_and_process_clear(void)
     buffer = mygpu_command_buffer_create(64);
     fence = mygpu_fence_create(10);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        buffer == NULL ||
-        fence == NULL) {
+    if (gpu == NULL || queue == NULL || buffer == NULL || fence == NULL) {
 
         check(0, "CLEAR queue setup");
 
@@ -157,60 +116,25 @@ static void test_submit_and_process_clear(void)
     command.opcode = MYGPU_CMD_CLEAR;
     command.color = 0xFF0000FF;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &command,
-        sizeof(command)
-    );
+    result = mygpu_command_buffer_write(buffer, &command, sizeof(command));
 
-    check(
-        result == 0,
-        "write CLEAR command for queue"
-    );
+    check(result == 0, "write CLEAR command for queue");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer,
-        fence
-    );
+    result = mygpu_queue_submit(queue, buffer, fence);
 
-    check(
-        result == 0,
-        "submit command buffer"
-    );
+    check(result == 0, "submit command buffer");
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "fence initially unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "fence initially unsignaled");
 
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result == 0,
-        "process queue"
-    );
+    check(result == 0, "process queue");
 
-    check_pixel(
-        gpu,
-        10,
-        10,
-        0xFF0000FF,
-        "queued CLEAR changes framebuffer"
-    );
+    check_pixel(gpu, 10, 10, 0xFF0000FF, "queued CLEAR changes framebuffer");
 
-    check(
-        mygpu_fence_is_signaled(fence) == 1,
-        "fence signals after CLEAR"
-    );
+    check(mygpu_fence_is_signaled(fence) == 1, "fence signals after CLEAR");
 
-    check(
-        mygpu_fence_id(fence) == 10,
-        "queued fence retains ID"
-    );
+    check(mygpu_fence_id(fence) == 10, "queued fence retains ID");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_fence_destroy(fence);
@@ -243,12 +167,7 @@ static void test_fifo_order(void)
     fence1 = mygpu_fence_create(1);
     fence2 = mygpu_fence_create(2);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        buffer1 == NULL ||
-        buffer2 == NULL ||
-        fence1 == NULL ||
-        fence2 == NULL) {
+    if (gpu == NULL || queue == NULL || buffer1 == NULL || buffer2 == NULL || fence1 == NULL || fence2 == NULL) {
 
         check(0, "FIFO queue setup");
 
@@ -268,82 +187,36 @@ static void test_fifo_order(void)
     command2.opcode = MYGPU_CMD_CLEAR;
     command2.color = 0x00FF00FF;
 
-    result = mygpu_command_buffer_write(
-        buffer1,
-        &command1,
-        sizeof(command1)
-    );
+    result = mygpu_command_buffer_write(buffer1, &command1, sizeof(command1));
 
-    check(
-        result == 0,
-        "write first FIFO command"
-    );
+    check(result == 0, "write first FIFO command");
 
-    result = mygpu_command_buffer_write(
-        buffer2,
-        &command2,
-        sizeof(command2)
-    );
+    result = mygpu_command_buffer_write(buffer2, &command2, sizeof(command2));
 
-    check(
-        result == 0,
-        "write second FIFO command"
-    );
+    check(result == 0, "write second FIFO command");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer1,
-        fence1
-    );
+    result = mygpu_queue_submit(queue, buffer1, fence1);
 
-    check(
-        result == 0,
-        "submit first FIFO command"
-    );
+    check(result == 0, "submit first FIFO command");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer2,
-        fence2
-    );
+    result = mygpu_queue_submit(queue, buffer2, fence2);
 
-    check(
-        result == 0,
-        "submit second FIFO command"
-    );
+    check(result == 0, "submit second FIFO command");
 
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result == 0,
-        "process FIFO commands"
-    );
+    check(result == 0, "process FIFO commands");
 
     /*
      * The second CLEAR should execute after
      * the first CLEAR, so the final color
      * should be command2's color.
      */
-    check_pixel(
-        gpu,
-        50,
-        50,
-        0x00FF00FF,
-        "FIFO executes commands in submission order"
-    );
+    check_pixel(gpu, 50, 50, 0x00FF00FF, "FIFO executes commands in submission order");
 
-    check(
-        mygpu_fence_is_signaled(fence1) == 1,
-        "first FIFO fence signals"
-    );
+    check(mygpu_fence_is_signaled(fence1) == 1, "first FIFO fence signals");
 
-    check(
-        mygpu_fence_is_signaled(fence2) == 1,
-        "second FIFO fence signals"
-    );
+    check(mygpu_fence_is_signaled(fence2) == 1, "second FIFO fence signals");
 
     mygpu_command_buffer_destroy(buffer1);
     mygpu_command_buffer_destroy(buffer2);
@@ -372,10 +245,7 @@ static void test_empty_queue(void)
         return;
     }
 
-    check(
-        mygpu_queue_process(gpu, queue) == 0,
-        "process empty queue"
-    );
+    check(mygpu_queue_process(gpu, queue) == 0, "process empty queue");
 
     mygpu_queue_destroy(queue);
     mygpu_destroy(gpu);
@@ -396,10 +266,7 @@ static void test_present_fence(void)
     buffer = mygpu_command_buffer_create(64);
     fence = mygpu_fence_create(20);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        buffer == NULL ||
-        fence == NULL) {
+    if (gpu == NULL || queue == NULL || buffer == NULL || fence == NULL) {
 
         check(0, "PRESENT queue setup");
 
@@ -417,56 +284,27 @@ static void test_present_fence(void)
      */
     opcode = MYGPU_CMD_PRESENT;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &opcode,
-        sizeof(opcode)
-    );
+    result = mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode));
 
-    check(
-        result == 0,
-        "write queued PRESENT command"
-    );
+    check(result == 0, "write queued PRESENT command");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer,
-        fence
-    );
+    result = mygpu_queue_submit(queue, buffer, fence);
 
-    check(
-        result == 0,
-        "submit PRESENT command"
-    );
+    check(result == 0, "submit PRESENT command");
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "PRESENT fence initially unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "PRESENT fence initially unsignaled");
 
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result == 0,
-        "process queued PRESENT command"
-    );
+    check(result == 0, "process queued PRESENT command");
 
-    check(
-        mygpu_fence_is_signaled(fence) == 1,
-        "queued PRESENT signals fence"
-    );
+    check(mygpu_fence_is_signaled(fence) == 1, "queued PRESENT signals fence");
 
     /*
      * PRESENT should also update the GPU's
      * presentation state.
      */
-    check(
-        mygpu_is_presented(gpu) != 0,
-        "queued PRESENT marks framebuffer presented"
-    );
+    check(mygpu_is_presented(gpu) != 0, "queued PRESENT marks framebuffer presented");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_fence_destroy(fence);
@@ -489,10 +327,7 @@ static void test_invalid_command_fence(void)
     buffer = mygpu_command_buffer_create(64);
     fence = mygpu_fence_create(30);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        buffer == NULL ||
-        fence == NULL) {
+    if (gpu == NULL || queue == NULL || buffer == NULL || fence == NULL) {
 
         check(0, "invalid command fence setup");
 
@@ -506,47 +341,21 @@ static void test_invalid_command_fence(void)
 
     invalid_opcode = 0xFFFFFFFFu;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &invalid_opcode,
-        sizeof(invalid_opcode)
-    );
+    result = mygpu_command_buffer_write(buffer, &invalid_opcode, sizeof(invalid_opcode));
 
-    check(
-        result == 0,
-        "write invalid queued command"
-    );
+    check(result == 0, "write invalid queued command");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer,
-        fence
-    );
+    result = mygpu_queue_submit(queue, buffer, fence);
 
-    check(
-        result == 0,
-        "submit invalid command"
-    );
+    check(result == 0, "submit invalid command");
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "invalid command fence initially unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "invalid command fence initially unsignaled");
 
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result != 0,
-        "reject invalid queued command"
-    );
+    check(result != 0, "reject invalid queued command");
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "invalid command fence remains unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "invalid command fence remains unsignaled");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_fence_destroy(fence);
@@ -603,16 +412,9 @@ static void test_failed_command_stops_queue(void)
      */
     invalid_opcode = 0xFFFFFFFFu;
 
-    result = mygpu_command_buffer_write(
-        bad_buffer,
-        &invalid_opcode,
-        sizeof(invalid_opcode)
-    );
+    result = mygpu_command_buffer_write(bad_buffer, &invalid_opcode, sizeof(invalid_opcode));
 
-    check(
-        result == 0,
-        "write failed queue command"
-    );
+    check(result == 0, "write failed queue command");
 
     /*
      * Create a valid CLEAR command.
@@ -620,79 +422,40 @@ static void test_failed_command_stops_queue(void)
     clear_command.opcode = MYGPU_CMD_CLEAR;
     clear_command.color = 0xFF0000FFu;
 
-    result = mygpu_command_buffer_write(
-        good_buffer,
-        &clear_command,
-        sizeof(clear_command)
-    );
+    result = mygpu_command_buffer_write(good_buffer, &clear_command, sizeof(clear_command));
 
-    check(
-        result == 0,
-        "write command after failed command"
-    );
+    check(result == 0, "write command after failed command");
 
     /*
      * Submit the invalid command first.
      */
-    result = mygpu_queue_submit(
-        queue,
-        bad_buffer,
-        bad_fence
-    );
+    result = mygpu_queue_submit(queue, bad_buffer, bad_fence);
 
-    check(
-        result == 0,
-        "submit failed command first"
-    );
+    check(result == 0, "submit failed command first");
 
     /*
      * Submit the valid command second.
      */
-    result = mygpu_queue_submit(
-        queue,
-        good_buffer,
-        good_fence
-    );
+    result = mygpu_queue_submit(queue, good_buffer, good_fence);
 
-    check(
-        result == 0,
-        "submit valid command second"
-    );
+    check(result == 0, "submit valid command second");
 
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result != 0,
-        "failed command stops queue"
-    );
+    check(result != 0, "failed command stops queue");
 
     /*
      * Neither command should have completed.
      */
-    check(
-        mygpu_fence_is_signaled(bad_fence) == 0,
-        "failed command fence remains unsignaled"
-    );
+    check(mygpu_fence_is_signaled(bad_fence) == 0, "failed command fence remains unsignaled");
 
-    check(
-        mygpu_fence_is_signaled(good_fence) == 0,
-        "following command fence remains unsignaled"
-    );
+    check(mygpu_fence_is_signaled(good_fence) == 0, "following command fence remains unsignaled");
 
     /*
      * The CLEAR command should not have executed.
      * A newly created GPU contains TEST_CLEAR_COLOR.
      */
-    check_pixel(
-        gpu,
-        50,
-        50,
-        TEST_CLEAR_COLOR,
-        "command after failure does not execute"
-    );
+    check_pixel(gpu, 50, 50, TEST_CLEAR_COLOR, "command after failure does not execute");
 
     mygpu_command_buffer_destroy(bad_buffer);
     mygpu_command_buffer_destroy(good_buffer);
@@ -753,16 +516,9 @@ static void test_queue_recovery_after_failure(void)
      */
     invalid_opcode = 0xFFFFFFFFu;
 
-    result = mygpu_command_buffer_write(
-        bad_buffer,
-        &invalid_opcode,
-        sizeof(invalid_opcode)
-    );
+    result = mygpu_command_buffer_write(bad_buffer, &invalid_opcode, sizeof(invalid_opcode));
 
-    check(
-        result == 0,
-        "write recovery invalid command"
-    );
+    check(result == 0, "write recovery invalid command");
 
     /*
      * Create a valid CLEAR command.
@@ -770,88 +526,43 @@ static void test_queue_recovery_after_failure(void)
     clear_command.opcode = MYGPU_CMD_CLEAR;
     clear_command.color = 0xFF0000FFu;
 
-    result = mygpu_command_buffer_write(
-        good_buffer,
-        &clear_command,
-        sizeof(clear_command)
-    );
+    result = mygpu_command_buffer_write(good_buffer, &clear_command, sizeof(clear_command));
 
-    check(
-        result == 0,
-        "write recovery valid command"
-    );
+    check(result == 0, "write recovery valid command");
 
     /*
      * Submit the invalid command first.
      */
-    check(
-        mygpu_queue_submit(
-            queue,
-            bad_buffer,
-            bad_fence
-        ) == 0,
-        "submit recovery invalid command"
-    );
+    check(mygpu_queue_submit(queue, bad_buffer, bad_fence) == 0, "submit recovery invalid command");
 
     /*
      * Submit the valid command second.
      */
-    check(
-        mygpu_queue_submit(
-            queue,
-            good_buffer,
-            good_fence
-        ) == 0,
-        "submit recovery valid command"
-    );
+    check(mygpu_queue_submit(queue, good_buffer, good_fence) == 0, "submit recovery valid command");
 
     /*
      * The first command should fail.
      */
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result != 0,
-        "recovery process reports failure"
-    );
+    check(result != 0, "recovery process reports failure");
 
     /*
      * The failed command must not signal its fence.
      */
-    check(
-        mygpu_fence_is_signaled(bad_fence) == 0,
-        "failed recovery fence remains unsignaled"
-    );
+    check(mygpu_fence_is_signaled(bad_fence) == 0, "failed recovery fence remains unsignaled");
 
     /*
      * The failed command was removed from the queue,
      * so the valid command can now be processed.
      */
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result == 0,
-        "queue recovers after failed command"
-    );
+    check(result == 0, "queue recovers after failed command");
 
-    check(
-        mygpu_fence_is_signaled(good_fence) == 1,
-        "recovery command fence signals"
-    );
+    check(mygpu_fence_is_signaled(good_fence) == 1, "recovery command fence signals");
 
-    check_pixel(
-        gpu,
-        50,
-        50,
-        0xFF0000FFu,
-        "recovery command executes"
-    );
+    check_pixel(gpu, 50, 50, 0xFF0000FFu, "recovery command executes");
 
     mygpu_command_buffer_destroy(bad_buffer);
     mygpu_command_buffer_destroy(good_buffer);
@@ -878,10 +589,7 @@ static void test_queue_retains_resources(void)
     buffer = mygpu_command_buffer_create(64);
     fence = mygpu_fence_create(60);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        buffer == NULL ||
-        fence == NULL) {
+    if (gpu == NULL || queue == NULL || buffer == NULL || fence == NULL) {
 
         check(0, "queue ownership setup");
 
@@ -896,54 +604,25 @@ static void test_queue_retains_resources(void)
     command.opcode = MYGPU_CMD_CLEAR;
     command.color = 0x12345678u;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &command,
-        sizeof(command)
-    );
+    result = mygpu_command_buffer_write(buffer, &command, sizeof(command));
 
-    check(
-        result == 0,
-        "write ownership test command"
-    );
+    check(result == 0, "write ownership test command");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer,
-        fence
-    );
+    result = mygpu_queue_submit(queue, buffer, fence);
 
-    check(
-        result == 0,
-        "submit ownership test command"
-    );
+    check(result == 0, "submit ownership test command");
 
     /*
      * Process the queue while the caller still owns
      * the command buffer and fence.
      */
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result == 0,
-        "process ownership test command"
-    );
+    check(result == 0, "process ownership test command");
 
-    check(
-        mygpu_fence_is_signaled(fence) == 1,
-        "ownership test fence signals"
-    );
+    check(mygpu_fence_is_signaled(fence) == 1, "ownership test fence signals");
 
-    check_pixel(
-        gpu,
-        10,
-        10,
-        0x12345678u,
-        "ownership test command executes"
-    );
+    check_pixel(gpu, 10, 10, 0x12345678u, "ownership test command executes");
 
     /*
      * The queue must not destroy either resource.
@@ -952,10 +631,7 @@ static void test_queue_retains_resources(void)
     mygpu_command_buffer_destroy(buffer);
     mygpu_fence_destroy(fence);
 
-    check(
-        1,
-        "caller destroys submitted resources"
-    );
+    check(1, "caller destroys submitted resources");
 
     mygpu_queue_destroy(queue);
     mygpu_destroy(gpu);
@@ -975,10 +651,7 @@ static void test_queue_owns_resources(void)
     buffer = mygpu_command_buffer_create(64);
     fence = mygpu_fence_create(100);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        buffer == NULL ||
-        fence == NULL) {
+    if (gpu == NULL || queue == NULL || buffer == NULL || fence == NULL) {
 
         check(0, "queue ownership setup");
 
@@ -993,27 +666,13 @@ static void test_queue_owns_resources(void)
     command.opcode = MYGPU_CMD_CLEAR;
     command.color = 0x12345678;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &command,
-        sizeof(command)
-    );
+    result = mygpu_command_buffer_write(buffer, &command, sizeof(command));
 
-    check(
-        result == 0,
-        "write ownership command"
-    );
+    check(result == 0, "write ownership command");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer,
-        fence
-    );
+    result = mygpu_queue_submit(queue, buffer, fence);
 
-    check(
-        result == 0,
-        "submit ownership command"
-    );
+    check(result == 0, "submit ownership command");
 
     /*
      * The queue now owns references to both objects.
@@ -1021,23 +680,11 @@ static void test_queue_owns_resources(void)
     mygpu_command_buffer_destroy(buffer);
     mygpu_fence_destroy(fence);
 
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result == 0,
-        "process after caller releases resources"
-    );
+    check(result == 0, "process after caller releases resources");
 
-    check_pixel(
-        gpu,
-        10,
-        10,
-        0x12345678,
-        "queue-owned command still executes"
-    );
+    check_pixel(gpu, 10, 10, 0x12345678, "queue-owned command still executes");
 
     /*
      * We can't safely inspect fence here because the caller
@@ -1063,10 +710,7 @@ static void test_duplicate_submission(void)
     buffer = mygpu_command_buffer_create(64);
     fence = mygpu_fence_create(70);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        buffer == NULL ||
-        fence == NULL) {
+    if (gpu == NULL || queue == NULL || buffer == NULL || fence == NULL) {
 
         check(0, "duplicate submission setup");
 
@@ -1081,42 +725,21 @@ static void test_duplicate_submission(void)
     command.opcode = MYGPU_CMD_CLEAR;
     command.color = 0x11223344u;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &command,
-        sizeof(command)
-    );
+    result = mygpu_command_buffer_write(buffer, &command, sizeof(command));
 
-    check(
-        result == 0,
-        "write duplicate submission command"
-    );
+    check(result == 0, "write duplicate submission command");
 
-    result = mygpu_queue_submit(
-        queue,
-        buffer,
-        fence
-    );
+    result = mygpu_queue_submit(queue, buffer, fence);
 
-    check(
-        result == 0,
-        "submit command first time"
-    );
+    check(result == 0, "submit command first time");
 
     /*
      * Submit the same buffer and fence again.
      * The queue must retain another reference.
      */
-    result = mygpu_queue_submit(
-        queue,
-        buffer,
-        fence
-    );
+    result = mygpu_queue_submit(queue, buffer, fence);
 
-    check(
-        result == 0,
-        "submit command second time"
-    );
+    check(result == 0, "submit command second time");
 
     /*
      * Release the caller's references.
@@ -1125,28 +748,16 @@ static void test_duplicate_submission(void)
     mygpu_command_buffer_destroy(buffer);
     mygpu_fence_destroy(fence);
 
-    result = mygpu_queue_process(
-        gpu,
-        queue
-    );
+    result = mygpu_queue_process(gpu, queue);
 
-    check(
-        result == 0,
-        "process duplicate submissions"
-    );
+    check(result == 0, "process duplicate submissions");
 
     /*
      * Both entries used the same CLEAR command.
      * The final framebuffer value confirms both entries
      * were processed without invalidating the shared buffer.
      */
-    check_pixel(
-        gpu,
-        10,
-        10,
-        0x11223344u,
-        "duplicate submissions execute correctly"
-    );
+    check_pixel(gpu, 10, 10, 0x11223344u, "duplicate submissions execute correctly");
 
     mygpu_queue_destroy(queue);
     mygpu_destroy(gpu);
@@ -1171,11 +782,7 @@ int main(void)
 
     printf("\n=== Results ===\n");
 
-    printf(
-        "%d/%d tests passed\n",
-        tests_passed,
-        tests_run
-    );
+    printf("%d/%d tests passed\n", tests_passed, tests_run);
 
     if (tests_passed == tests_run) {
         printf("All tests passed!\n");

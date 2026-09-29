@@ -31,17 +31,9 @@ static void test_triangle(void)
     v2.y = 12.0f;
     v2.color = 0xff0000ffu;
 
-    assert(mygpu_rasterize_triangle(
-        framebuffer,
-        &v0,
-        &v1,
-        &v2) == 0);
+    assert(mygpu_rasterize_triangle(framebuffer, &v0, &v1, &v2) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(
-        framebuffer,
-        3,
-        3,
-        &color) == 0);
+    assert(mygpu_framebuffer_get_pixel(framebuffer, 3, 3, &color) == 0);
 
     assert(color == 0xff0000ffu);
 

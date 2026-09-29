@@ -26,10 +26,7 @@ static void test_create_destroy(void)
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "create GPU for buffer"
-    );
+    check(gpu != NULL, "create GPU for buffer");
 
     if (gpu == NULL) {
         return;
@@ -37,17 +34,11 @@ static void test_create_destroy(void)
 
     buffer = mygpu_buffer_create(gpu, 64);
 
-    check(
-        buffer != NULL,
-        "create buffer"
-    );
+    check(buffer != NULL, "create buffer");
 
     mygpu_buffer_destroy(buffer);
 
-    check(
-        1,
-        "destroy buffer"
-    );
+    check(1, "destroy buffer");
 
     mygpu_destroy(gpu);
 }
@@ -66,10 +57,7 @@ static void test_create_zero_size(void)
 
     buffer = mygpu_buffer_create(gpu, 0);
 
-    check(
-        buffer == NULL,
-        "reject zero-size buffer"
-    );
+    check(buffer == NULL, "reject zero-size buffer");
 
     mygpu_destroy(gpu);
 }
@@ -80,10 +68,7 @@ static void test_create_null_gpu(void)
 
     buffer = mygpu_buffer_create(NULL, 64);
 
-    check(
-        buffer == NULL,
-        "reject buffer with NULL GPU"
-    );
+    check(buffer == NULL, "reject buffer with NULL GPU");
 }
 
 static void test_size(void)
@@ -106,10 +91,7 @@ static void test_size(void)
         return;
     }
 
-    check(
-        mygpu_buffer_size(buffer) == 128,
-        "buffer reports correct size"
-    );
+    check(mygpu_buffer_size(buffer) == 128, "buffer reports correct size");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -138,30 +120,11 @@ static void test_write_read(void)
         return;
     }
 
-    check(
-        mygpu_buffer_write(
-            buffer,
-            0,
-            &write_value,
-            sizeof(write_value)
-        ) == 0,
-        "write buffer"
-    );
+    check(mygpu_buffer_write(buffer, 0, &write_value, sizeof(write_value)) == 0, "write buffer");
 
-    check(
-        mygpu_buffer_read(
-            buffer,
-            0,
-            &read_value,
-            sizeof(read_value)
-        ) == 0,
-        "read buffer"
-    );
+    check(mygpu_buffer_read(buffer, 0, &read_value, sizeof(read_value)) == 0, "read buffer");
 
-    check(
-        read_value == write_value,
-        "buffer data matches"
-    );
+    check(read_value == write_value, "buffer data matches");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -189,20 +152,9 @@ static void test_new_buffer_is_zeroed(void)
         return;
     }
 
-    check(
-        mygpu_buffer_read(
-            buffer,
-            0,
-            &value,
-            sizeof(value)
-        ) == 0,
-        "read newly-created buffer"
-    );
+    check(mygpu_buffer_read(buffer, 0, &value, sizeof(value)) == 0, "read newly-created buffer");
 
-    check(
-        value == 0,
-        "new buffer is zeroed"
-    );
+    check(value == 0, "new buffer is zeroed");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -237,25 +189,9 @@ static void test_partial_write_read(void)
         return;
     }
 
-    check(
-        mygpu_buffer_write(
-            buffer,
-            4,
-            write_data,
-            sizeof(write_data)
-        ) == 0,
-        "write buffer at offset"
-    );
+    check(mygpu_buffer_write(buffer, 4, write_data, sizeof(write_data)) == 0, "write buffer at offset");
 
-    check(
-        mygpu_buffer_read(
-            buffer,
-            4,
-            read_data,
-            sizeof(read_data)
-        ) == 0,
-        "read buffer at offset"
-    );
+    check(mygpu_buffer_read(buffer, 4, read_data, sizeof(read_data)) == 0, "read buffer at offset");
 
     check(
         read_data[0] == 0x10 &&
@@ -293,15 +229,7 @@ static void test_write_past_end(void)
         return;
     }
 
-    check(
-        mygpu_buffer_write(
-            buffer,
-            6,
-            data,
-            sizeof(data)
-        ) != 0,
-        "reject write past buffer end"
-    );
+    check(mygpu_buffer_write(buffer, 6, data, sizeof(data)) != 0, "reject write past buffer end");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -329,15 +257,7 @@ static void test_read_past_end(void)
         return;
     }
 
-    check(
-        mygpu_buffer_read(
-            buffer,
-            6,
-            data,
-            sizeof(data)
-        ) != 0,
-        "reject read past buffer end"
-    );
+    check(mygpu_buffer_read(buffer, 6, data, sizeof(data)) != 0, "reject read past buffer end");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -365,25 +285,9 @@ static void test_offset_past_end(void)
         return;
     }
 
-    check(
-        mygpu_buffer_write(
-            buffer,
-            9,
-            &data,
-            1
-        ) != 0,
-        "reject write with offset past end"
-    );
+    check(mygpu_buffer_write(buffer, 9, &data, 1) != 0, "reject write with offset past end");
 
-    check(
-        mygpu_buffer_read(
-            buffer,
-            9,
-            &data,
-            1
-        ) != 0,
-        "reject read with offset past end"
-    );
+    check(mygpu_buffer_read(buffer, 9, &data, 1) != 0, "reject read with offset past end");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -411,50 +315,15 @@ static void test_null_arguments(void)
         return;
     }
 
-    check(
-        mygpu_buffer_write(
-            NULL,
-            0,
-            &value,
-            sizeof(value)
-        ) != 0,
-        "reject NULL buffer on write"
-    );
+    check(mygpu_buffer_write(NULL, 0, &value, sizeof(value)) != 0, "reject NULL buffer on write");
 
-    check(
-        mygpu_buffer_read(
-            NULL,
-            0,
-            &value,
-            sizeof(value)
-        ) != 0,
-        "reject NULL buffer on read"
-    );
+    check(mygpu_buffer_read(NULL, 0, &value, sizeof(value)) != 0, "reject NULL buffer on read");
 
-    check(
-        mygpu_buffer_write(
-            buffer,
-            0,
-            NULL,
-            sizeof(value)
-        ) != 0,
-        "reject NULL write data"
-    );
+    check(mygpu_buffer_write(buffer, 0, NULL, sizeof(value)) != 0, "reject NULL write data");
 
-    check(
-        mygpu_buffer_read(
-            buffer,
-            0,
-            NULL,
-            sizeof(value)
-        ) != 0,
-        "reject NULL read data"
-    );
+    check(mygpu_buffer_read(buffer, 0, NULL, sizeof(value)) != 0, "reject NULL read data");
 
-    check(
-        mygpu_buffer_size(NULL) == 0,
-        "NULL buffer size is zero"
-    );
+    check(mygpu_buffer_size(NULL) == 0, "NULL buffer size is zero");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -482,15 +351,9 @@ static void test_multiple_buffers(void)
     buffer_a = mygpu_buffer_create(gpu, 16);
     buffer_b = mygpu_buffer_create(gpu, 16);
 
-    check(
-        buffer_a != NULL,
-        "create first buffer"
-    );
+    check(buffer_a != NULL, "create first buffer");
 
-    check(
-        buffer_b != NULL,
-        "create second buffer"
-    );
+    check(buffer_b != NULL, "create second buffer");
 
     if (buffer_a == NULL || buffer_b == NULL) {
         mygpu_buffer_destroy(buffer_a);
@@ -499,43 +362,17 @@ static void test_multiple_buffers(void)
         return;
     }
 
-    mygpu_buffer_write(
-        buffer_a,
-        0,
-        &value_a,
-        sizeof(value_a)
-    );
+    mygpu_buffer_write(buffer_a, 0, &value_a, sizeof(value_a));
 
-    mygpu_buffer_write(
-        buffer_b,
-        0,
-        &value_b,
-        sizeof(value_b)
-    );
+    mygpu_buffer_write(buffer_b, 0, &value_b, sizeof(value_b));
 
-    mygpu_buffer_read(
-        buffer_a,
-        0,
-        &read_a,
-        sizeof(read_a)
-    );
+    mygpu_buffer_read(buffer_a, 0, &read_a, sizeof(read_a));
 
-    mygpu_buffer_read(
-        buffer_b,
-        0,
-        &read_b,
-        sizeof(read_b)
-    );
+    mygpu_buffer_read(buffer_b, 0, &read_b, sizeof(read_b));
 
-    check(
-        read_a == value_a,
-        "first buffer keeps its own data"
-    );
+    check(read_a == value_a, "first buffer keeps its own data");
 
-    check(
-        read_b == value_b,
-        "second buffer keeps its own data"
-    );
+    check(read_b == value_b, "second buffer keeps its own data");
 
     mygpu_buffer_destroy(buffer_a);
     mygpu_buffer_destroy(buffer_b);
@@ -547,17 +384,11 @@ static void test_address(void)
     struct mygpu *gpu;
     struct mygpu_buffer *buffer;
 
-    check(
-        mygpu_buffer_address(NULL) == 0,
-        "NULL buffer address is zero"
-    );
+    check(mygpu_buffer_address(NULL) == 0, "NULL buffer address is zero");
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "buffer address GPU setup"
-    );
+    check(gpu != NULL, "buffer address GPU setup");
 
     if (gpu == NULL) {
         return;
@@ -565,20 +396,14 @@ static void test_address(void)
 
     buffer = mygpu_buffer_create(gpu, 64);
 
-    check(
-        buffer != NULL,
-        "create buffer for address"
-    );
+    check(buffer != NULL, "create buffer for address");
 
     if (buffer == NULL) {
         mygpu_destroy(gpu);
         return;
     }
 
-    check(
-        mygpu_buffer_address(buffer) == 0,
-        "buffer has initial GPU address"
-    );
+    check(mygpu_buffer_address(buffer) == 0, "buffer has initial GPU address");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -609,15 +434,9 @@ static void test_buffer_addresses_and_isolation(void)
     buffer_a = mygpu_buffer_create(gpu, 64);
     buffer_b = mygpu_buffer_create(gpu, 64);
 
-    check(
-        buffer_a != NULL,
-        "create first buffer for isolation"
-    );
+    check(buffer_a != NULL, "create first buffer for isolation");
 
-    check(
-        buffer_b != NULL,
-        "create second buffer for isolation"
-    );
+    check(buffer_b != NULL, "create second buffer for isolation");
 
     if (buffer_a == NULL || buffer_b == NULL) {
         mygpu_buffer_destroy(buffer_a);
@@ -629,65 +448,21 @@ static void test_buffer_addresses_and_isolation(void)
     address_a = mygpu_buffer_address(buffer_a);
     address_b = mygpu_buffer_address(buffer_b);
 
-    check(
-        address_a != address_b,
-        "buffers have different GPU addresses"
-    );
+    check(address_a != address_b, "buffers have different GPU addresses");
 
-    check(
-        address_b >= address_a + mygpu_buffer_size(buffer_a),
-        "buffer addresses do not overlap"
-    );
+    check(address_b >= address_a + mygpu_buffer_size(buffer_a), "buffer addresses do not overlap");
 
-    check(
-        mygpu_buffer_write(
-            buffer_a,
-            0,
-            &value_a,
-            sizeof(value_a)
-        ) == 0,
-        "write first buffer"
-    );
+    check(mygpu_buffer_write(buffer_a, 0, &value_a, sizeof(value_a)) == 0, "write first buffer");
 
-    check(
-        mygpu_buffer_write(
-            buffer_b,
-            0,
-            &value_b,
-            sizeof(value_b)
-        ) == 0,
-        "write second buffer"
-    );
+    check(mygpu_buffer_write(buffer_b, 0, &value_b, sizeof(value_b)) == 0, "write second buffer");
 
-    check(
-        mygpu_buffer_read(
-            buffer_a,
-            0,
-            &read_a,
-            sizeof(read_a)
-        ) == 0,
-        "read first buffer"
-    );
+    check(mygpu_buffer_read(buffer_a, 0, &read_a, sizeof(read_a)) == 0, "read first buffer");
 
-    check(
-        mygpu_buffer_read(
-            buffer_b,
-            0,
-            &read_b,
-            sizeof(read_b)
-        ) == 0,
-        "read second buffer"
-    );
+    check(mygpu_buffer_read(buffer_b, 0, &read_b, sizeof(read_b)) == 0, "read second buffer");
 
-    check(
-        read_a == value_a,
-        "first buffer data is isolated"
-    );
+    check(read_a == value_a, "first buffer data is isolated");
 
-    check(
-        read_b == value_b,
-        "second buffer data is isolated"
-    );
+    check(read_b == value_b, "second buffer data is isolated");
 
     mygpu_buffer_destroy(buffer_a);
     mygpu_buffer_destroy(buffer_b);
@@ -713,15 +488,9 @@ static void test_buffer_lookup(void)
     buffer_a = mygpu_buffer_create(gpu, 64);
     buffer_b = mygpu_buffer_create(gpu, 128);
 
-    check(
-        buffer_a != NULL,
-        "create first buffer for lookup"
-    );
+    check(buffer_a != NULL, "create first buffer for lookup");
 
-    check(
-        buffer_b != NULL,
-        "create second buffer for lookup"
-    );
+    check(buffer_b != NULL, "create second buffer for lookup");
 
     if (buffer_a == NULL || buffer_b == NULL) {
         mygpu_buffer_destroy(buffer_a);
@@ -733,15 +502,9 @@ static void test_buffer_lookup(void)
     address_a = mygpu_buffer_address(buffer_a);
     address_b = mygpu_buffer_address(buffer_b);
 
-    check(
-        mygpu_buffer_lookup(gpu, address_a) == buffer_a,
-        "lookup finds first buffer"
-    );
+    check(mygpu_buffer_lookup(gpu, address_a) == buffer_a, "lookup finds first buffer");
 
-    check(
-        mygpu_buffer_lookup(gpu, address_b) == buffer_b,
-        "lookup finds second buffer"
-    );
+    check(mygpu_buffer_lookup(gpu, address_b) == buffer_b, "lookup finds second buffer");
 
     mygpu_buffer_destroy(buffer_a);
     mygpu_buffer_destroy(buffer_b);
@@ -759,10 +522,7 @@ static void test_buffer_lookup_unknown(void)
         return;
     }
 
-    check(
-        mygpu_buffer_lookup(gpu, 0xFFFFFFFFu) == NULL,
-        "lookup rejects unknown address"
-    );
+    check(mygpu_buffer_lookup(gpu, 0xFFFFFFFFu) == NULL, "lookup rejects unknown address");
 
     mygpu_destroy(gpu);
 }
@@ -791,17 +551,11 @@ static void test_buffer_lookup_after_destroy(void)
 
     address = mygpu_buffer_address(buffer);
 
-    check(
-        mygpu_buffer_lookup(gpu, address) == buffer,
-        "lookup finds buffer before destroy"
-    );
+    check(mygpu_buffer_lookup(gpu, address) == buffer, "lookup finds buffer before destroy");
 
     mygpu_buffer_destroy(buffer);
 
-    check(
-        mygpu_buffer_lookup(gpu, address) == NULL,
-        "lookup rejects destroyed buffer"
-    );
+    check(mygpu_buffer_lookup(gpu, address) == NULL, "lookup rejects destroyed buffer");
 
     mygpu_destroy(gpu);
 }
@@ -830,11 +584,7 @@ int main(void)
 
     printf("\n=== Results ===\n");
 
-    printf(
-        "%d/%d tests passed\n",
-        tests_passed,
-        tests_run
-    );
+    printf("%d/%d tests passed\n", tests_passed, tests_run);
 
     if (tests_passed == tests_run) {
         printf("All tests passed!\n");

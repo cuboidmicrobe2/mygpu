@@ -740,20 +740,17 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                     return -1;
                 }
 
-                if (index0 >=
-                    vertex_size_remaining / sizeof(struct mygpu_vertex)) {
+                if (index0 >= vertex_size_remaining / sizeof(struct mygpu_vertex)) {
                     
                     return -1;
                 }
 
-                if (index1 >=
-                    vertex_size_remaining / sizeof(struct mygpu_vertex)) {
+                if (index1 >= vertex_size_remaining / sizeof(struct mygpu_vertex)) {
                     
                     return -1;
                 }
 
-                if (index2 >=
-                    vertex_size_remaining / sizeof(struct mygpu_vertex)) {
+                if (index2 >= vertex_size_remaining / sizeof(struct mygpu_vertex)) {
                     
                     return -1;
                 }

@@ -23,28 +23,14 @@ static void check(int condition, const char *name)
     }
 }
 
-static void check_pixel(
-    struct mygpu *gpu,
-    uint32_t x,
-    uint32_t y,
-    uint32_t expected,
-    const char *name
-)
+static void check_pixel(struct mygpu *gpu, uint32_t x, uint32_t y, uint32_t expected, const char *name)
 {
     uint32_t color;
     int result;
 
-    result = mygpu_get_pixel(
-        gpu,
-        x,
-        y,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, x, y, &color);
 
-    check(
-        result == 0 && color == expected,
-        name
-    );
+    check(result == 0 && color == expected, name);
 }
 
 static void test_create_destroy(void)
@@ -53,17 +39,11 @@ static void test_create_destroy(void)
 
     buffer = mygpu_command_buffer_create(64);
 
-    check(
-        buffer != NULL,
-        "create command buffer"
-    );
+    check(buffer != NULL, "create command buffer");
 
     mygpu_command_buffer_destroy(buffer);
 
-    check(
-        1,
-        "destroy command buffer"
-    );
+    check(1, "destroy command buffer");
 }
 
 static void test_create_zero_size(void)
@@ -72,10 +52,7 @@ static void test_create_zero_size(void)
 
     buffer = mygpu_command_buffer_create(0);
 
-    check(
-        buffer == NULL,
-        "reject zero-size command buffer"
-    );
+    check(buffer == NULL, "reject zero-size command buffer");
 }
 
 static void test_write_command(void)
@@ -94,16 +71,9 @@ static void test_write_command(void)
     command.opcode = MYGPU_CMD_CLEAR;
     command.color = 0xFF0000FF;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &command,
-        sizeof(command)
-    );
+    result = mygpu_command_buffer_write(buffer, &command, sizeof(command));
 
-    check(
-        result == 0,
-        "write CLEAR command"
-    );
+    check(result == 0, "write CLEAR command");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -121,16 +91,9 @@ static void test_write_too_large(void)
         return;
     }
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        data,
-        sizeof(data)
-    );
+    result = mygpu_command_buffer_write(buffer, data, sizeof(data));
 
-    check(
-        result != 0,
-        "reject oversized command"
-    );
+    check(result != 0, "reject oversized command");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -162,43 +125,19 @@ static void test_execute_clear(void)
     command.opcode = MYGPU_CMD_CLEAR;
     command.color = 0xFF0000FF;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &command,
-        sizeof(command)
-    );
+    result = mygpu_command_buffer_write(buffer, &command, sizeof(command));
 
-    check(
-        result == 0,
-        "write CLEAR command for execution"
-    );
+    check(result == 0, "write CLEAR command for execution");
 
-    result = mygpu_command_buffer_execute(
-        gpu,
-        buffer
-    );
+    result = mygpu_command_buffer_execute(gpu, buffer);
 
-    check(
-        result == 0,
-        "execute CLEAR command"
-    );
+    check(result == 0, "execute CLEAR command");
 
-    result = mygpu_get_pixel(
-        gpu,
-        10,
-        10,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 10, 10, &color);
 
-    check(
-        result == 0,
-        "read pixel after CLEAR"
-    );
+    check(result == 0, "read pixel after CLEAR");
 
-    check(
-        color == 0xFF0000FF,
-        "CLEAR command changes framebuffer"
-    );
+    check(color == 0xFF0000FF, "CLEAR command changes framebuffer");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -228,26 +167,13 @@ static void test_invalid_opcode(void)
 
     opcode = 0xFFFFFFFF;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &opcode,
-        sizeof(opcode)
-    );
+    result = mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode));
 
-    check(
-        result == 0,
-        "write invalid opcode"
-    );
+    check(result == 0, "write invalid opcode");
 
-    result = mygpu_command_buffer_execute(
-        gpu,
-        buffer
-    );
+    result = mygpu_command_buffer_execute(gpu, buffer);
 
-    check(
-        result != 0,
-        "reject invalid opcode"
-    );
+    check(result != 0, "reject invalid opcode");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -284,26 +210,13 @@ static void test_truncated_command(void)
      */
     opcode = MYGPU_CMD_CLEAR;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &opcode,
-        sizeof(opcode)
-    );
+    result = mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode));
 
-    check(
-        result == 0,
-        "write truncated CLEAR command"
-    );
+    check(result == 0, "write truncated CLEAR command");
 
-    result = mygpu_command_buffer_execute(
-        gpu,
-        buffer
-    );
+    result = mygpu_command_buffer_execute(gpu, buffer);
 
-    check(
-        result != 0,
-        "reject truncated CLEAR command"
-    );
+    check(result != 0, "reject truncated CLEAR command");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -348,101 +261,40 @@ static void test_draw_rect(void)
     command.height = 2;
     command.color = 0xFF0000FF;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &command,
-        sizeof(command)
-    );
+    result = mygpu_command_buffer_write(buffer, &command, sizeof(command));
 
-    check(
-        result == 0,
-        "write DRAW_RECT command"
-    );
+    check(result == 0, "write DRAW_RECT command");
 
-    result = mygpu_command_buffer_execute(
-        gpu,
-        buffer
-    );
+    result = mygpu_command_buffer_execute(gpu, buffer);
 
-    check(
-        result == 0,
-        "execute DRAW_RECT command"
-    );
+    check(result == 0, "execute DRAW_RECT command");
 
     /*
      * Check pixels inside the rectangle.
      */
-    result = mygpu_get_pixel(
-        gpu,
-        10,
-        20,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 10, 20, &color);
 
-    check(
-        result == 0 && color == 0xFF0000FF,
-        "DRAW_RECT top-left pixel"
-    );
+    check(result == 0 && color == 0xFF0000FF, "DRAW_RECT top-left pixel");
 
-    result = mygpu_get_pixel(
-        gpu,
-        11,
-        20,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 11, 20, &color);
 
-    check(
-        result == 0 && color == 0xFF0000FF,
-        "DRAW_RECT middle-top pixel"
-    );
+    check(result == 0 && color == 0xFF0000FF, "DRAW_RECT middle-top pixel");
 
-    result = mygpu_get_pixel(
-        gpu,
-        12,
-        20,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 12, 20, &color);
 
-    check(
-        result == 0 && color == 0xFF0000FF,
-        "DRAW_RECT top-right pixel"
-    );
+    check(result == 0 && color == 0xFF0000FF, "DRAW_RECT top-right pixel");
 
-    result = mygpu_get_pixel(
-        gpu,
-        10,
-        21,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 10, 21, &color);
 
-    check(
-        result == 0 && color == 0xFF0000FF,
-        "DRAW_RECT bottom-left pixel"
-    );
+    check(result == 0 && color == 0xFF0000FF, "DRAW_RECT bottom-left pixel");
 
-    result = mygpu_get_pixel(
-        gpu,
-        11,
-        21,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 11, 21, &color);
 
-    check(
-        result == 0 && color == 0xFF0000FF,
-        "DRAW_RECT bottom-middle pixel"
-    );
+    check(result == 0 && color == 0xFF0000FF, "DRAW_RECT bottom-middle pixel");
 
-    result = mygpu_get_pixel(
-        gpu,
-        12,
-        21,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 12, 21, &color);
 
-    check(
-        result == 0 && color == 0xFF0000FF,
-        "DRAW_RECT bottom-right pixel"
-    );
+    check(result == 0 && color == 0xFF0000FF, "DRAW_RECT bottom-right pixel");
 
     /*
      * Check pixels outside the rectangle.
@@ -451,41 +303,17 @@ static void test_draw_rect(void)
      * so pixels outside the rectangle should remain
      * unchanged.
      */
-    result = mygpu_get_pixel(
-        gpu,
-        9,
-        20,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 9, 20, &color);
 
-    check(
-        result == 0 && color == TEST_CLEAR_COLOR,
-        "DRAW_RECT does not modify left pixel"
-    );
+    check(result == 0 && color == TEST_CLEAR_COLOR, "DRAW_RECT does not modify left pixel");
 
-    result = mygpu_get_pixel(
-        gpu,
-        13,
-        20,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 13, 20, &color);
 
-    check(
-        result == 0 && color == TEST_CLEAR_COLOR,
-        "DRAW_RECT does not modify right pixel"
-    );
+    check(result == 0 && color == TEST_CLEAR_COLOR, "DRAW_RECT does not modify right pixel");
 
-    result = mygpu_get_pixel(
-        gpu,
-        10,
-        22,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 10, 22, &color);
 
-    check(
-        result == 0 && color == TEST_CLEAR_COLOR,
-        "DRAW_RECT does not modify pixel below"
-    );
+    check(result == 0 && color == TEST_CLEAR_COLOR, "DRAW_RECT does not modify pixel below");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -535,41 +363,16 @@ static void test_draw_rect_right_edge(void)
     command.height = 1;
     command.color = color;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write right-edge DRAW_RECT"
-    );
+    check(mygpu_command_buffer_write(buffer, &command, sizeof(command)) == 0, "write right-edge DRAW_RECT");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            buffer
-        ) == 0,
-        "execute right-edge DRAW_RECT"
-    );
+    check(mygpu_command_buffer_execute(gpu, buffer) == 0, "execute right-edge DRAW_RECT");
 
     /*
      * Both visible pixels should have been drawn.
      */
-    check_pixel(
-        gpu,
-        318,
-        10,
-        color,
-        "right-edge pixel 318"
-    );
+    check_pixel(gpu, 318, 10, color, "right-edge pixel 318");
 
-    check_pixel(
-        gpu,
-        319,
-        10,
-        color,
-        "right-edge pixel 319"
-    );
+    check_pixel(gpu, 319, 10, color, "right-edge pixel 319");
 
     /*
      * Pixels 320 and above are outside the framebuffer,
@@ -627,41 +430,16 @@ static void test_draw_rect_bottom_edge(void)
     command.height = 5;
     command.color = color;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write bottom-edge DRAW_RECT"
-    );
+    check(mygpu_command_buffer_write(buffer, &command, sizeof(command)) == 0, "write bottom-edge DRAW_RECT");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            buffer
-        ) == 0,
-        "execute bottom-edge DRAW_RECT"
-    );
+    check(mygpu_command_buffer_execute(gpu, buffer) == 0, "execute bottom-edge DRAW_RECT");
 
     /*
      * Both visible pixels should have been drawn.
      */
-    check_pixel(
-        gpu,
-        10,
-        198,
-        color,
-        "bottom-edge pixel 198"
-    );
+    check_pixel(gpu, 10, 198, color, "bottom-edge pixel 198");
 
-    check_pixel(
-        gpu,
-        10,
-        199,
-        color,
-        "bottom-edge pixel 199"
-    );
+    check_pixel(gpu, 10, 199, color, "bottom-edge pixel 199");
 
     /*
      * Pixels at Y=200 and beyond are outside the framebuffer,
@@ -710,34 +488,15 @@ static void test_draw_rect_outside(void)
     command.height = 10;
     command.color = 0xFFFFFFFF;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write outside DRAW_RECT"
-    );
+    check(mygpu_command_buffer_write(buffer, &command, sizeof(command)) == 0, "write outside DRAW_RECT");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            buffer
-        ) == 0,
-        "ignore completely outside DRAW_RECT"
-    );
+    check(mygpu_command_buffer_execute(gpu, buffer) == 0, "ignore completely outside DRAW_RECT");
 
     /*
      * A pixel inside the framebuffer should remain
      * in the GPU's reset state.
      */
-    check_pixel(
-        gpu,
-        100,
-        100,
-        background,
-        "outside rectangle does not modify framebuffer"
-    );
+    check_pixel(gpu, 100, 100, background, "outside rectangle does not modify framebuffer");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -781,26 +540,13 @@ static void test_copy(void)
     draw.height = 2;
     draw.color = source_color;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &draw,
-        sizeof(draw)
-    );
+    result = mygpu_command_buffer_write(buffer, &draw, sizeof(draw));
 
-    check(
-        result == 0,
-        "write source DRAW_RECT for COPY"
-    );
+    check(result == 0, "write source DRAW_RECT for COPY");
 
-    result = mygpu_command_buffer_execute(
-        gpu,
-        buffer
-    );
+    result = mygpu_command_buffer_execute(gpu, buffer);
 
-    check(
-        result == 0,
-        "draw source rectangle for COPY"
-    );
+    check(result == 0, "draw source rectangle for COPY");
 
     /*
      * Create a COPY command that moves the 3x2 rectangle
@@ -828,105 +574,42 @@ static void test_copy(void)
         return;
     }
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &copy,
-        sizeof(copy)
-    );
+    result = mygpu_command_buffer_write(buffer, &copy, sizeof(copy));
 
-    check(
-        result == 0,
-        "write COPY command"
-    );
+    check(result == 0, "write COPY command");
 
-    result = mygpu_command_buffer_execute(
-        gpu,
-        buffer
-    );
+    result = mygpu_command_buffer_execute(gpu, buffer);
 
-    check(
-        result == 0,
-        "execute COPY command"
-    );
+    check(result == 0, "execute COPY command");
 
     /*
      * Verify every pixel in the destination rectangle.
      */
-    check_pixel(
-        gpu,
-        20,
-        30,
-        source_color,
-        "COPY destination top-left pixel"
-    );
+    check_pixel(gpu, 20, 30, source_color, "COPY destination top-left pixel");
 
-    check_pixel(
-        gpu,
-        21,
-        30,
-        source_color,
-        "COPY destination middle-top pixel"
-    );
+    check_pixel(gpu, 21, 30, source_color, "COPY destination middle-top pixel");
 
-    check_pixel(
-        gpu,
-        22,
-        30,
-        source_color,
-        "COPY destination top-right pixel"
-    );
+    check_pixel(gpu, 22, 30, source_color, "COPY destination top-right pixel");
 
-    check_pixel(
-        gpu,
-        20,
-        31,
-        source_color,
-        "COPY destination bottom-left pixel"
-    );
+    check_pixel(gpu, 20, 31, source_color, "COPY destination bottom-left pixel");
 
-    check_pixel(
-        gpu,
-        21,
-        31,
-        source_color,
-        "COPY destination bottom-middle pixel"
-    );
+    check_pixel(gpu, 21, 31, source_color, "COPY destination bottom-middle pixel");
 
-    check_pixel(
-        gpu,
-        22,
-        31,
-        source_color,
-        "COPY destination bottom-right pixel"
-    );
+    check_pixel(gpu, 22, 31, source_color, "COPY destination bottom-right pixel");
 
     /*
      * Verify that the original source rectangle was not
      * modified by the COPY operation.
      */
-    result = mygpu_get_pixel(
-        gpu,
-        10,
-        20,
-        &color
-    );
+    result = mygpu_get_pixel(gpu, 10, 20, &color);
 
-    check(
-        result == 0 && color == source_color,
-        "COPY does not modify source"
-    );
+    check(result == 0 && color == source_color, "COPY does not modify source");
 
     /*
      * Verify that a pixel immediately outside the destination
      * rectangle was not modified.
      */
-    check_pixel(
-        gpu,
-        23,
-        30,
-        TEST_CLEAR_COLOR,
-        "COPY does not modify pixel outside destination"
-    );
+    check_pixel(gpu, 23, 30, TEST_CLEAR_COLOR, "COPY does not modify pixel outside destination");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -974,22 +657,9 @@ static void test_copy_overlap(void)
     draw.height = 1;
     draw.color = color;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &draw,
-            sizeof(draw)
-        ) == 0,
-        "write overlap source DRAW_RECT"
-    );
+    check(mygpu_command_buffer_write(buffer, &draw, sizeof(draw)) == 0, "write overlap source DRAW_RECT");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            buffer
-        ) == 0,
-        "draw overlap source rectangle"
-    );
+    check(mygpu_command_buffer_execute(gpu, buffer) == 0, "draw overlap source rectangle");
 
     mygpu_command_buffer_destroy(buffer);
 
@@ -1019,58 +689,21 @@ static void test_copy_overlap(void)
     copy.width = 4;
     copy.height = 1;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &copy,
-            sizeof(copy)
-        ) == 0,
-        "write overlapping COPY command"
-    );
+    check(mygpu_command_buffer_write(buffer, &copy, sizeof(copy)) == 0, "write overlapping COPY command");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            buffer
-        ) == 0,
-        "execute overlapping COPY command"
-    );
+    check(mygpu_command_buffer_execute(gpu, buffer) == 0, "execute overlapping COPY command");
 
     /*
      * The destination pixels should all contain the
      * original source color.
      */
-    check_pixel(
-        gpu,
-        12,
-        20,
-        color,
-        "overlapping COPY destination pixel 12"
-    );
+    check_pixel(gpu, 12, 20, color, "overlapping COPY destination pixel 12");
 
-    check_pixel(
-        gpu,
-        13,
-        20,
-        color,
-        "overlapping COPY destination pixel 13"
-    );
+    check_pixel(gpu, 13, 20, color, "overlapping COPY destination pixel 13");
 
-    check_pixel(
-        gpu,
-        14,
-        20,
-        color,
-        "overlapping COPY destination pixel 14"
-    );
+    check_pixel(gpu, 14, 20, color, "overlapping COPY destination pixel 14");
 
-    check_pixel(
-        gpu,
-        15,
-        20,
-        color,
-        "overlapping COPY destination pixel 15"
-    );
+    check_pixel(gpu, 15, 20, color, "overlapping COPY destination pixel 15");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -1108,22 +741,9 @@ static void test_copy_zero_size(void)
     copy.width = 0;
     copy.height = 10;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &copy,
-            sizeof(copy)
-        ) == 0,
-        "write zero-width COPY"
-    );
+    check(mygpu_command_buffer_write(buffer, &copy, sizeof(copy)) == 0, "write zero-width COPY");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            buffer
-        ) == 0,
-        "ignore zero-width COPY"
-    );
+    check(mygpu_command_buffer_execute(gpu, buffer) == 0, "ignore zero-width COPY");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -1164,27 +784,14 @@ static void test_copy_outside(void)
     copy.width = 2;
     copy.height = 1;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &copy,
-            sizeof(copy)
-        ) == 0,
-        "write out-of-bounds COPY"
-    );
+    check(mygpu_command_buffer_write(buffer, &copy, sizeof(copy)) == 0, "write out-of-bounds COPY");
 
     /*
      * Our first COPY implementation rejects a rectangle
      * when its source or destination extends outside the
      * framebuffer.
      */
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            buffer
-        ) != 0,
-        "reject out-of-bounds COPY"
-    );
+    check(mygpu_command_buffer_execute(gpu, buffer) != 0, "reject out-of-bounds COPY");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -1216,49 +823,27 @@ static void test_present(void)
      * A newly created GPU should not have a presented
      * framebuffer yet.
      */
-    check(
-        mygpu_is_presented(gpu) == 0,
-        "framebuffer initially not presented"
-    );
+    check(mygpu_is_presented(gpu) == 0, "framebuffer initially not presented");
 
     opcode = MYGPU_CMD_PRESENT;
 
-    result = mygpu_command_buffer_write(
-        buffer,
-        &opcode,
-        sizeof(opcode)
-    );
+    result = mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode));
 
-    check(
-        result == 0,
-        "write PRESENT command"
-    );
+    check(result == 0, "write PRESENT command");
 
-    result = mygpu_command_buffer_execute(
-        gpu,
-        buffer
-    );
+    result = mygpu_command_buffer_execute(gpu, buffer);
 
-    check(
-        result == 0,
-        "execute PRESENT command"
-    );
+    check(result == 0, "execute PRESENT command");
 
     /*
      * PRESENT should mark the current framebuffer as
      * presented.
      */
-    check(
-        mygpu_is_presented(gpu) == 1,
-        "PRESENT marks framebuffer presented"
-    );
+    check(mygpu_is_presented(gpu) == 1, "PRESENT marks framebuffer presented");
 
     mygpu_reset(gpu);
 
-    check(
-        mygpu_is_presented(gpu) == 0,
-        "reset clears presented state"
-    );
+    check(mygpu_is_presented(gpu) == 0, "reset clears presented state");
 
     mygpu_command_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -1266,10 +851,7 @@ static void test_present(void)
 
 static void test_validate_null(void)
 {
-    check(
-        mygpu_command_buffer_validate(NULL) != 0,
-        "validate NULL command buffer"
-    );
+    check(mygpu_command_buffer_validate(NULL) != 0, "validate NULL command buffer");
 }
 
 static void test_validate_clear(void)
@@ -1287,19 +869,9 @@ static void test_validate_clear(void)
     command.opcode = MYGPU_CMD_CLEAR;
     command.color = 0xFF0000FFu;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write CLEAR for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &command, sizeof(command)) == 0, "write CLEAR for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) == 0,
-        "validate CLEAR command"
-    );
+    check(mygpu_command_buffer_validate(buffer) == 0, "validate CLEAR command");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1323,19 +895,9 @@ static void test_validate_draw_rect(void)
     command.height = 2;
     command.color = 0xFF0000FFu;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write DRAW_RECT for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &command, sizeof(command)) == 0, "write DRAW_RECT for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) == 0,
-        "validate DRAW_RECT command"
-    );
+    check(mygpu_command_buffer_validate(buffer) == 0, "validate DRAW_RECT command");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1360,19 +922,9 @@ static void test_validate_copy(void)
     command.width = 5;
     command.height = 5;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write COPY for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &command, sizeof(command)) == 0, "write COPY for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) == 0,
-        "validate COPY command"
-    );
+    check(mygpu_command_buffer_validate(buffer) == 0, "validate COPY command");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1391,19 +943,9 @@ static void test_validate_present(void)
 
     opcode = MYGPU_CMD_PRESENT;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &opcode,
-            sizeof(opcode)
-        ) == 0,
-        "write PRESENT for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode)) == 0, "write PRESENT for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) == 0,
-        "validate PRESENT command"
-    );
+    check(mygpu_command_buffer_validate(buffer) == 0, "validate PRESENT command");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1422,19 +964,9 @@ static void test_validate_invalid_opcode(void)
 
     opcode = 0xFFFFFFFFu;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &opcode,
-            sizeof(opcode)
-        ) == 0,
-        "write invalid opcode for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode)) == 0, "write invalid opcode for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) != 0,
-        "reject invalid opcode during validation"
-    );
+    check(mygpu_command_buffer_validate(buffer) != 0, "reject invalid opcode during validation");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1453,19 +985,9 @@ static void test_validate_truncated_clear(void)
 
     opcode = MYGPU_CMD_CLEAR;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &opcode,
-            sizeof(opcode)
-        ) == 0,
-        "write truncated CLEAR for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode)) == 0, "write truncated CLEAR for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) != 0,
-        "reject truncated CLEAR during validation"
-    );
+    check(mygpu_command_buffer_validate(buffer) != 0, "reject truncated CLEAR during validation");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1484,19 +1006,9 @@ static void test_validate_truncated_draw_rect(void)
 
     opcode = MYGPU_CMD_DRAW_RECT;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &opcode,
-            sizeof(opcode)
-        ) == 0,
-        "write truncated DRAW_RECT for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode)) == 0, "write truncated DRAW_RECT for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) != 0,
-        "reject truncated DRAW_RECT during validation"
-    );
+    check(mygpu_command_buffer_validate(buffer) != 0, "reject truncated DRAW_RECT during validation");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1515,19 +1027,9 @@ static void test_validate_truncated_copy(void)
 
     opcode = MYGPU_CMD_COPY;
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            &opcode,
-            sizeof(opcode)
-        ) == 0,
-        "write truncated COPY for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, &opcode, sizeof(opcode)) == 0, "write truncated COPY for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) != 0,
-        "reject truncated COPY during validation"
-    );
+    check(mygpu_command_buffer_validate(buffer) != 0, "reject truncated COPY during validation");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1544,19 +1046,9 @@ static void test_validate_truncated_present(void)
         return;
     }
 
-    check(
-        mygpu_command_buffer_write(
-            buffer,
-            data,
-            sizeof(data)
-        ) == 0,
-        "write truncated PRESENT for validation"
-    );
+    check(mygpu_command_buffer_write(buffer, data, sizeof(data)) == 0, "write truncated PRESENT for validation");
 
-    check(
-        mygpu_command_buffer_validate(buffer) != 0,
-        "reject truncated PRESENT during validation"
-    );
+    check(mygpu_command_buffer_validate(buffer) != 0, "reject truncated PRESENT during validation");
 
     mygpu_command_buffer_destroy(buffer);
 }
@@ -1568,10 +1060,7 @@ static void test_draw_indexed_validation_zero_count(void)
 
     command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create zero-count DRAW_INDEXED buffer"
-    );
+    check(command_buffer != NULL, "create zero-count DRAW_INDEXED buffer");
 
     if (command_buffer == NULL) {
         return;
@@ -1583,19 +1072,9 @@ static void test_draw_indexed_validation_zero_count(void)
     command.index_address = 0;
     command.index_count = 0;
 
-    check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write zero-count DRAW_INDEXED"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0, "write zero-count DRAW_INDEXED");
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) != 0,
-        "reject zero-count DRAW_INDEXED"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) != 0, "reject zero-count DRAW_INDEXED");
 
     mygpu_command_buffer_destroy(command_buffer);
 }
@@ -1607,10 +1086,7 @@ static void test_draw_indexed_validation_invalid_count(void)
 
     command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create invalid-count DRAW_INDEXED buffer"
-    );
+    check(command_buffer != NULL, "create invalid-count DRAW_INDEXED buffer");
 
     if (command_buffer == NULL) {
         return;
@@ -1623,18 +1099,11 @@ static void test_draw_indexed_validation_invalid_count(void)
     command.index_count = 4;
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
         "write invalid-count DRAW_INDEXED"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) != 0,
-        "reject invalid-count DRAW_INDEXED"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) != 0, "reject invalid-count DRAW_INDEXED");
 
     mygpu_command_buffer_destroy(command_buffer);
 }
@@ -1646,10 +1115,7 @@ static void test_draw_indexed_validation_truncated(void)
 
     command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create truncated DRAW_INDEXED buffer"
-    );
+    check(command_buffer != NULL, "create truncated DRAW_INDEXED buffer");
 
     if (command_buffer == NULL) {
         return;
@@ -1662,18 +1128,11 @@ static void test_draw_indexed_validation_truncated(void)
     command.index_count = 3;
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command) - 1
-        ) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command) - 1) == 0,
         "write truncated DRAW_INDEXED"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) != 0,
-        "reject truncated DRAW_INDEXED"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) != 0, "reject truncated DRAW_INDEXED");
 
     mygpu_command_buffer_destroy(command_buffer);
 }
@@ -1685,10 +1144,7 @@ static void test_buffer_copy_validation(void)
 
     command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create BUFFER_COPY validation buffer"
-    );
+    check(command_buffer != NULL, "create BUFFER_COPY validation buffer");
 
     if (command_buffer == NULL) {
         return;
@@ -1699,19 +1155,9 @@ static void test_buffer_copy_validation(void)
     command.dst_address = 100;
     command.size = 16;
 
-    check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write BUFFER_COPY"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0, "write BUFFER_COPY");
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate BUFFER_COPY"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate BUFFER_COPY");
 
     mygpu_command_buffer_destroy(command_buffer);
 }
@@ -1723,10 +1169,7 @@ static void test_buffer_copy_validation_zero_size(void)
 
     command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create zero-size BUFFER_COPY buffer"
-    );
+    check(command_buffer != NULL, "create zero-size BUFFER_COPY buffer");
 
     if (command_buffer == NULL) {
         return;
@@ -1737,19 +1180,9 @@ static void test_buffer_copy_validation_zero_size(void)
     command.dst_address = 100;
     command.size = 0;
 
-    check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)
-        ) == 0,
-        "write zero-size BUFFER_COPY"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0, "write zero-size BUFFER_COPY");
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate zero-size BUFFER_COPY"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate zero-size BUFFER_COPY");
 
     mygpu_command_buffer_destroy(command_buffer);
 }
@@ -1761,10 +1194,7 @@ static void test_buffer_copy_validation_truncated(void)
 
     command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create truncated BUFFER_COPY buffer"
-    );
+    check(command_buffer != NULL, "create truncated BUFFER_COPY buffer");
 
     if (command_buffer == NULL) {
         return;
@@ -1776,18 +1206,11 @@ static void test_buffer_copy_validation_truncated(void)
     command.size = 16;
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command) - 1
-        ) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command) - 1) == 0,
         "write truncated BUFFER_COPY"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) != 0,
-        "reject truncated BUFFER_COPY"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) != 0, "reject truncated BUFFER_COPY");
 
     mygpu_command_buffer_destroy(command_buffer);
 }
@@ -1810,32 +1233,19 @@ static void test_buffer_copy_execution(void)
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "create GPU for BUFFER_COPY"
-    );
+    check(gpu != NULL, "create GPU for BUFFER_COPY");
 
     if (gpu == NULL) {
         return;
     }
 
-    source_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(source_values));
+    source_buffer = mygpu_buffer_create(gpu, sizeof(source_values));
 
-    destination_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(destination_values));
+    destination_buffer = mygpu_buffer_create(gpu, sizeof(destination_values));
 
-    check(
-        source_buffer != NULL,
-        "create BUFFER_COPY source buffer"
-    );
+    check(source_buffer != NULL, "create BUFFER_COPY source buffer");
 
-    check(
-        destination_buffer != NULL,
-        "create BUFFER_COPY destination buffer"
-    );
+    check(destination_buffer != NULL, "create BUFFER_COPY destination buffer");
 
     if (source_buffer == NULL || destination_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -1844,22 +1254,11 @@ static void test_buffer_copy_execution(void)
         return;
     }
 
-    check(
-        mygpu_buffer_write(
-            source_buffer,
-            0,
-            source_values,
-            sizeof(source_values)) == 0,
-        "write BUFFER_COPY source"
-    );
+    check(mygpu_buffer_write(source_buffer, 0, source_values, sizeof(source_values)) == 0, "write BUFFER_COPY source");
 
-    command_buffer = mygpu_command_buffer_create(
-        sizeof(command));
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create BUFFER_COPY command buffer"
-    );
+    check(command_buffer != NULL, "create BUFFER_COPY command buffer");
 
     if (command_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -1869,38 +1268,18 @@ static void test_buffer_copy_execution(void)
     }
 
     command.opcode = MYGPU_CMD_BUFFER_COPY;
-    command.src_address =
-        mygpu_buffer_address(source_buffer);
-    command.dst_address =
-        mygpu_buffer_address(destination_buffer);
+    command.src_address = mygpu_buffer_address(source_buffer);
+    command.dst_address = mygpu_buffer_address(destination_buffer);
     command.size = sizeof(source_values);
 
-    check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)) == 0,
-        "write BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0, "write BUFFER_COPY command");
+
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate BUFFER_COPY command");
+
+    check(mygpu_command_buffer_execute(gpu, command_buffer) == 0, "execute BUFFER_COPY command");
 
     check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate BUFFER_COPY command"
-    );
-
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            command_buffer) == 0,
-        "execute BUFFER_COPY command"
-    );
-
-    check(
-        mygpu_buffer_read(
-            destination_buffer,
-            0,
-            destination_values,
-            sizeof(destination_values)) == 0,
+        mygpu_buffer_read(destination_buffer, 0, destination_values, sizeof(destination_values)) == 0,
         "read BUFFER_COPY destination"
     );
 
@@ -1936,32 +1315,19 @@ static void test_buffer_copy_execution_with_offsets(void)
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "create GPU for offset BUFFER_COPY"
-    );
+    check(gpu != NULL, "create GPU for offset BUFFER_COPY");
 
     if (gpu == NULL) {
         return;
     }
 
-    source_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(source_values));
+    source_buffer = mygpu_buffer_create(gpu, sizeof(source_values));
 
-    destination_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(destination_values));
+    destination_buffer = mygpu_buffer_create(gpu, sizeof(destination_values));
 
-    check(
-        source_buffer != NULL,
-        "create offset BUFFER_COPY source buffer"
-    );
+    check(source_buffer != NULL, "create offset BUFFER_COPY source buffer");
 
-    check(
-        destination_buffer != NULL,
-        "create offset BUFFER_COPY destination buffer"
-    );
+    check(destination_buffer != NULL, "create offset BUFFER_COPY destination buffer");
 
     if (source_buffer == NULL || destination_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -1971,21 +1337,13 @@ static void test_buffer_copy_execution_with_offsets(void)
     }
 
     check(
-        mygpu_buffer_write(
-            source_buffer,
-            0,
-            source_values,
-            sizeof(source_values)) == 0,
+        mygpu_buffer_write(source_buffer, 0, source_values, sizeof(source_values)) == 0,
         "write offset BUFFER_COPY source"
     );
 
-    command_buffer = mygpu_command_buffer_create(
-        sizeof(command));
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create offset BUFFER_COPY command buffer"
-    );
+    check(command_buffer != NULL, "create offset BUFFER_COPY command buffer");
 
     if (command_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -1995,38 +1353,21 @@ static void test_buffer_copy_execution_with_offsets(void)
     }
 
     command.opcode = MYGPU_CMD_BUFFER_COPY;
-    command.src_address =
-        mygpu_buffer_address(source_buffer) + sizeof(uint32_t);
-    command.dst_address =
-        mygpu_buffer_address(destination_buffer) + sizeof(uint32_t);
+    command.src_address = mygpu_buffer_address(source_buffer) + sizeof(uint32_t);
+    command.dst_address = mygpu_buffer_address(destination_buffer) + sizeof(uint32_t);
     command.size = sizeof(uint32_t) * 2;
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
         "write offset BUFFER_COPY command"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate offset BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate offset BUFFER_COPY command");
+
+    check(mygpu_command_buffer_execute(gpu, command_buffer) == 0, "execute offset BUFFER_COPY command");
 
     check(
-        mygpu_command_buffer_execute(
-            gpu,
-            command_buffer) == 0,
-        "execute offset BUFFER_COPY command"
-    );
-
-    check(
-        mygpu_buffer_read(
-            destination_buffer,
-            0,
-            destination_values,
-            sizeof(destination_values)) == 0,
+        mygpu_buffer_read(destination_buffer, 0, destination_values, sizeof(destination_values)) == 0,
         "read offset BUFFER_COPY destination"
     );
 
@@ -2054,36 +1395,24 @@ static void test_buffer_copy_unknown_source(void)
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "create GPU for unknown BUFFER_COPY source"
-    );
+    check(gpu != NULL, "create GPU for unknown BUFFER_COPY source");
 
     if (gpu == NULL) {
         return;
     }
 
-    destination_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(uint32_t));
+    destination_buffer = mygpu_buffer_create(gpu, sizeof(uint32_t));
 
-    check(
-        destination_buffer != NULL,
-        "create unknown BUFFER_COPY destination buffer"
-    );
+    check(destination_buffer != NULL, "create unknown BUFFER_COPY destination buffer");
 
     if (destination_buffer == NULL) {
         mygpu_destroy(gpu);
         return;
     }
 
-    command_buffer = mygpu_command_buffer_create(
-        sizeof(command));
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create unknown BUFFER_COPY source command buffer"
-    );
+    check(command_buffer != NULL, "create unknown BUFFER_COPY source command buffer");
 
     if (command_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -2097,24 +1426,13 @@ static void test_buffer_copy_unknown_source(void)
     command.size = sizeof(uint32_t);
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
         "write unknown BUFFER_COPY source command"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate unknown BUFFER_COPY source command"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate unknown BUFFER_COPY source command");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            command_buffer) != 0,
-        "reject unknown BUFFER_COPY source"
-    );
+    check(mygpu_command_buffer_execute(gpu, command_buffer) != 0, "reject unknown BUFFER_COPY source");
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(destination_buffer);
@@ -2132,32 +1450,19 @@ static void test_buffer_copy_unknown_destination(void)
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "create GPU for unknown BUFFER_COPY destination"
-    );
+    check(gpu != NULL, "create GPU for unknown BUFFER_COPY destination");
 
     if (gpu == NULL) {
         return;
     }
 
-    source_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(uint32_t));
+    source_buffer = mygpu_buffer_create(gpu, sizeof(uint32_t));
 
-    destination_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(uint32_t));
+    destination_buffer = mygpu_buffer_create(gpu, sizeof(uint32_t));
 
-    check(
-        source_buffer != NULL,
-        "create unknown destination source buffer"
-    );
+    check(source_buffer != NULL, "create unknown destination source buffer");
 
-    check(
-        destination_buffer != NULL,
-        "create unknown destination buffer"
-    );
+    check(destination_buffer != NULL, "create unknown destination buffer");
 
     if (source_buffer == NULL || destination_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -2166,13 +1471,9 @@ static void test_buffer_copy_unknown_destination(void)
         return;
     }
 
-    command_buffer = mygpu_command_buffer_create(
-        sizeof(command));
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create unknown destination command buffer"
-    );
+    check(command_buffer != NULL, "create unknown destination command buffer");
 
     if (command_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -2182,31 +1483,18 @@ static void test_buffer_copy_unknown_destination(void)
     }
 
     command.opcode = MYGPU_CMD_BUFFER_COPY;
-    command.src_address =
-        mygpu_buffer_address(source_buffer);
-    command.dst_address =
-        MYGPU_MEMORY_SIZE - sizeof(uint32_t);
+    command.src_address = mygpu_buffer_address(source_buffer);
+    command.dst_address = MYGPU_MEMORY_SIZE - sizeof(uint32_t);
     command.size = sizeof(uint32_t);
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
         "write unknown destination BUFFER_COPY command"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate unknown destination BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate unknown destination BUFFER_COPY command");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            command_buffer) != 0,
-        "reject unknown BUFFER_COPY destination"
-    );
+    check(mygpu_command_buffer_execute(gpu, command_buffer) != 0, "reject unknown BUFFER_COPY destination");
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(destination_buffer);
@@ -2225,32 +1513,19 @@ static void test_buffer_copy_source_too_small(void)
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "create GPU for small BUFFER_COPY source"
-    );
+    check(gpu != NULL, "create GPU for small BUFFER_COPY source");
 
     if (gpu == NULL) {
         return;
     }
 
-    source_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(uint32_t));
+    source_buffer = mygpu_buffer_create(gpu, sizeof(uint32_t));
 
-    destination_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(uint32_t) * 2);
+    destination_buffer = mygpu_buffer_create(gpu, sizeof(uint32_t) * 2);
 
-    check(
-        source_buffer != NULL,
-        "create small BUFFER_COPY source buffer"
-    );
+    check(source_buffer != NULL, "create small BUFFER_COPY source buffer");
 
-    check(
-        destination_buffer != NULL,
-        "create small BUFFER_COPY destination buffer"
-    );
+    check(destination_buffer != NULL, "create small BUFFER_COPY destination buffer");
 
     if (source_buffer == NULL || destination_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -2259,13 +1534,9 @@ static void test_buffer_copy_source_too_small(void)
         return;
     }
 
-    command_buffer = mygpu_command_buffer_create(
-        sizeof(command));
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create small BUFFER_COPY command buffer"
-    );
+    check(command_buffer != NULL, "create small BUFFER_COPY command buffer");
 
     if (command_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -2275,31 +1546,18 @@ static void test_buffer_copy_source_too_small(void)
     }
 
     command.opcode = MYGPU_CMD_BUFFER_COPY;
-    command.src_address =
-        mygpu_buffer_address(source_buffer);
-    command.dst_address =
-        mygpu_buffer_address(destination_buffer);
+    command.src_address = mygpu_buffer_address(source_buffer);
+    command.dst_address = mygpu_buffer_address(destination_buffer);
     command.size = sizeof(uint32_t) * 2;
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
         "write small-source BUFFER_COPY command"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate small-source BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate small-source BUFFER_COPY command");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            command_buffer) != 0,
-        "reject BUFFER_COPY with small source buffer"
-    );
+    check(mygpu_command_buffer_execute(gpu, command_buffer) != 0, "reject BUFFER_COPY with small source buffer");
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(destination_buffer);
@@ -2318,32 +1576,19 @@ static void test_buffer_copy_destination_too_small(void)
 
     gpu = mygpu_create();
 
-    check(
-        gpu != NULL,
-        "create GPU for small BUFFER_COPY destination"
-    );
+    check(gpu != NULL, "create GPU for small BUFFER_COPY destination");
 
     if (gpu == NULL) {
         return;
     }
 
-    source_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(uint32_t) * 2);
+    source_buffer = mygpu_buffer_create(gpu, sizeof(uint32_t) * 2);
 
-    destination_buffer = mygpu_buffer_create(
-        gpu,
-        sizeof(uint32_t));
+    destination_buffer = mygpu_buffer_create(gpu, sizeof(uint32_t));
 
-    check(
-        source_buffer != NULL,
-        "create small destination BUFFER_COPY source buffer"
-    );
+    check(source_buffer != NULL, "create small destination BUFFER_COPY source buffer");
 
-    check(
-        destination_buffer != NULL,
-        "create small BUFFER_COPY destination buffer"
-    );
+    check(destination_buffer != NULL, "create small BUFFER_COPY destination buffer");
 
     if (source_buffer == NULL || destination_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -2352,13 +1597,9 @@ static void test_buffer_copy_destination_too_small(void)
         return;
     }
 
-    command_buffer = mygpu_command_buffer_create(
-        sizeof(command));
+    command_buffer = mygpu_command_buffer_create(sizeof(command));
 
-    check(
-        command_buffer != NULL,
-        "create small destination BUFFER_COPY command buffer"
-    );
+    check(command_buffer != NULL, "create small destination BUFFER_COPY command buffer");
 
     if (command_buffer == NULL) {
         mygpu_buffer_destroy(destination_buffer);
@@ -2368,31 +1609,18 @@ static void test_buffer_copy_destination_too_small(void)
     }
 
     command.opcode = MYGPU_CMD_BUFFER_COPY;
-    command.src_address =
-        mygpu_buffer_address(source_buffer);
-    command.dst_address =
-        mygpu_buffer_address(destination_buffer);
+    command.src_address = mygpu_buffer_address(source_buffer);
+    command.dst_address = mygpu_buffer_address(destination_buffer);
     command.size = sizeof(uint32_t) * 2;
 
     check(
-        mygpu_command_buffer_write(
-            command_buffer,
-            &command,
-            sizeof(command)) == 0,
+        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
         "write small-destination BUFFER_COPY command"
     );
 
-    check(
-        mygpu_command_buffer_validate(command_buffer) == 0,
-        "validate small-destination BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_validate(command_buffer) == 0, "validate small-destination BUFFER_COPY command");
 
-    check(
-        mygpu_command_buffer_execute(
-            gpu,
-            command_buffer) != 0,
-        "reject BUFFER_COPY with small destination buffer"
-    );
+    check(mygpu_command_buffer_execute(gpu, command_buffer) != 0, "reject BUFFER_COPY with small destination buffer");
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(destination_buffer);
@@ -2451,11 +1679,7 @@ int main(void)
 
     printf("\n=== Results ===\n");
 
-    printf(
-        "%d/%d tests passed\n",
-        tests_passed,
-        tests_run
-    );
+    printf("%d/%d tests passed\n", tests_passed, tests_run);
 
     if (tests_passed == tests_run) {
         printf("All tests passed!\n");

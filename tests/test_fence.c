@@ -24,17 +24,11 @@ static void test_create_destroy(void)
 
     fence = mygpu_fence_create(42);
 
-    check(
-        fence != NULL,
-        "create fence"
-    );
+    check(fence != NULL, "create fence");
 
     mygpu_fence_destroy(fence);
 
-    check(
-        1,
-        "destroy fence"
-    );
+    check(1, "destroy fence");
 }
 
 static void test_initial_state(void)
@@ -48,10 +42,7 @@ static void test_initial_state(void)
         return;
     }
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "fence initially unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "fence initially unsignaled");
 
     mygpu_fence_destroy(fence);
 }
@@ -67,10 +58,7 @@ static void test_id(void)
         return;
     }
 
-    check(
-        mygpu_fence_id(fence) == 12345,
-        "fence returns correct ID"
-    );
+    check(mygpu_fence_id(fence) == 12345, "fence returns correct ID");
 
     mygpu_fence_destroy(fence);
 }
@@ -86,17 +74,11 @@ static void test_signal(void)
         return;
     }
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "fence starts unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "fence starts unsignaled");
 
     mygpu_fence_signal(fence);
 
-    check(
-        mygpu_fence_is_signaled(fence) == 1,
-        "signal changes fence state"
-    );
+    check(mygpu_fence_is_signaled(fence) == 1, "signal changes fence state");
 
     mygpu_fence_destroy(fence);
 }
@@ -114,22 +96,13 @@ static void test_reset(void)
 
     mygpu_fence_signal(fence);
 
-    check(
-        mygpu_fence_is_signaled(fence) == 1,
-        "fence signaled before reset"
-    );
+    check(mygpu_fence_is_signaled(fence) == 1, "fence signaled before reset");
 
     mygpu_fence_reset(fence);
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "reset returns fence to unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "reset returns fence to unsignaled");
 
-    check(
-        mygpu_fence_id(fence) == 300,
-        "reset preserves fence ID"
-    );
+    check(mygpu_fence_id(fence) == 300, "reset preserves fence ID");
 
     mygpu_fence_destroy(fence);
 }
@@ -153,25 +126,13 @@ static void test_multiple_fences(void)
 
     mygpu_fence_signal(fence1);
 
-    check(
-        mygpu_fence_is_signaled(fence1) == 1,
-        "first fence can be signaled"
-    );
+    check(mygpu_fence_is_signaled(fence1) == 1, "first fence can be signaled");
 
-    check(
-        mygpu_fence_is_signaled(fence2) == 0,
-        "second fence remains unsignaled"
-    );
+    check(mygpu_fence_is_signaled(fence2) == 0, "second fence remains unsignaled");
 
-    check(
-        mygpu_fence_id(fence1) == 1,
-        "first fence has correct ID"
-    );
+    check(mygpu_fence_id(fence1) == 1, "first fence has correct ID");
 
-    check(
-        mygpu_fence_id(fence2) == 2,
-        "second fence has correct ID"
-    );
+    check(mygpu_fence_id(fence2) == 2, "second fence has correct ID");
 
     mygpu_fence_destroy(fence1);
     mygpu_fence_destroy(fence2);
@@ -188,36 +149,21 @@ static void test_null_arguments(void)
         return;
     }
 
-    check(
-        mygpu_fence_is_signaled(NULL) == 0,
-        "NULL fence is not signaled"
-    );
+    check(mygpu_fence_is_signaled(NULL) == 0, "NULL fence is not signaled");
 
     mygpu_fence_signal(NULL);
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "signal NULL fence has no effect"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "signal NULL fence has no effect");
 
     mygpu_fence_reset(NULL);
 
-    check(
-        mygpu_fence_is_signaled(fence) == 0,
-        "reset NULL fence has no effect"
-    );
+    check(mygpu_fence_is_signaled(fence) == 0, "reset NULL fence has no effect");
 
-    check(
-        mygpu_fence_id(NULL) == 0,
-        "NULL fence ID returns zero"
-    );
+    check(mygpu_fence_id(NULL) == 0, "NULL fence ID returns zero");
 
     mygpu_fence_destroy(NULL);
 
-    check(
-        1,
-        "destroy NULL fence is safe"
-    );
+    check(1, "destroy NULL fence is safe");
 
     mygpu_fence_destroy(fence);
 }
@@ -236,11 +182,7 @@ int main(void)
 
     printf("\n=== Results ===\n");
 
-    printf(
-        "%d/%d tests passed\n",
-        tests_passed,
-        tests_run
-    );
+    printf("%d/%d tests passed\n", tests_passed, tests_run);
 
     if (tests_passed == tests_run) {
         printf("All tests passed!\n");

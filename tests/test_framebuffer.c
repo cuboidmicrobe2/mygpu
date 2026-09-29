@@ -24,10 +24,7 @@ static void test_create_destroy(void)
 
     framebuffer = mygpu_framebuffer_create(320, 200);
 
-    check(
-        framebuffer != NULL,
-        "create framebuffer"
-    );
+    check(framebuffer != NULL, "create framebuffer");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -43,15 +40,9 @@ static void test_dimensions(void)
         return;
     }
 
-    check(
-        mygpu_framebuffer_width(framebuffer) == 320,
-        "framebuffer width is 320"
-    );
+    check(mygpu_framebuffer_width(framebuffer) == 320, "framebuffer width is 320");
 
-    check(
-        mygpu_framebuffer_height(framebuffer) == 200,
-        "framebuffer height is 200"
-    );
+    check(mygpu_framebuffer_height(framebuffer) == 200, "framebuffer height is 200");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -69,39 +60,17 @@ static void test_initial_pixels_are_zero(void)
         return;
     }
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        0,
-        0,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 0, 0, &color);
 
-    check(
-        result == 0,
-        "read initial pixel"
-    );
+    check(result == 0, "read initial pixel");
 
-    check(
-        color == 0,
-        "initial pixel is zero"
-    );
+    check(color == 0, "initial pixel is zero");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        319,
-        199,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 319, 199, &color);
 
-    check(
-        result == 0,
-        "read initial last pixel"
-    );
+    check(result == 0, "read initial last pixel");
 
-    check(
-        color == 0,
-        "initial last pixel is zero"
-    );
+    check(color == 0, "initial last pixel is zero");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -119,34 +88,15 @@ static void test_set_and_get_pixel(void)
         return;
     }
 
-    result = mygpu_framebuffer_set_pixel(
-        framebuffer,
-        10,
-        20,
-        0xFF0000FF
-    );
+    result = mygpu_framebuffer_set_pixel(framebuffer, 10, 20, 0xFF0000FF);
 
-    check(
-        result == 0,
-        "set pixel"
-    );
+    check(result == 0, "set pixel");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        10,
-        20,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 10, 20, &color);
 
-    check(
-        result == 0,
-        "get pixel"
-    );
+    check(result == 0, "get pixel");
 
-    check(
-        color == 0xFF0000FF,
-        "pixel contains correct color"
-    );
+    check(color == 0xFF0000FF, "pixel contains correct color");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -164,62 +114,23 @@ static void test_multiple_pixels(void)
         return;
     }
 
-    mygpu_framebuffer_set_pixel(
-        framebuffer,
-        0,
-        0,
-        0xFF0000FF
-    );
+    mygpu_framebuffer_set_pixel(framebuffer, 0, 0, 0xFF0000FF);
 
-    mygpu_framebuffer_set_pixel(
-        framebuffer,
-        1,
-        0,
-        0x00FF00FF
-    );
+    mygpu_framebuffer_set_pixel(framebuffer, 1, 0, 0x00FF00FF);
 
-    mygpu_framebuffer_set_pixel(
-        framebuffer,
-        0,
-        1,
-        0x0000FFFF
-    );
+    mygpu_framebuffer_set_pixel(framebuffer, 0, 1, 0x0000FFFF);
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        0,
-        0,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 0, 0, &color);
 
-    check(
-        result == 0 && color == 0xFF0000FF,
-        "first pixel is correct"
-    );
+    check(result == 0 && color == 0xFF0000FF, "first pixel is correct");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        1,
-        0,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 1, 0, &color);
 
-    check(
-        result == 0 && color == 0x00FF00FF,
-        "second pixel is correct"
-    );
+    check(result == 0 && color == 0x00FF00FF, "second pixel is correct");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        0,
-        1,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 0, 1, &color);
 
-    check(
-        result == 0 && color == 0x0000FFFF,
-        "pixel on second row is correct"
-    );
+    check(result == 0 && color == 0x0000FFFF, "pixel on second row is correct");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -237,46 +148,19 @@ static void test_clear(void)
         return;
     }
 
-    mygpu_framebuffer_clear(
-        framebuffer,
-        0x12345678
-    );
+    mygpu_framebuffer_clear(framebuffer, 0x12345678);
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        0,
-        0,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 0, 0, &color);
 
-    check(
-        result == 0 && color == 0x12345678,
-        "clear first pixel"
-    );
+    check(result == 0 && color == 0x12345678, "clear first pixel");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        100,
-        100,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 100, 100, &color);
 
-    check(
-        result == 0 && color == 0x12345678,
-        "clear middle pixel"
-    );
+    check(result == 0 && color == 0x12345678, "clear middle pixel");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        319,
-        199,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 319, 199, &color);
 
-    check(
-        result == 0 && color == 0x12345678,
-        "clear last pixel"
-    );
+    check(result == 0 && color == 0x12345678, "clear last pixel");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -294,48 +178,19 @@ static void test_clear_overwrites_existing_pixels(void)
         return;
     }
 
-    mygpu_framebuffer_set_pixel(
-        framebuffer,
-        10,
-        10,
-        0xFFFFFFFF
-    );
+    mygpu_framebuffer_set_pixel(framebuffer, 10, 10, 0xFFFFFFFF);
 
-    mygpu_framebuffer_set_pixel(
-        framebuffer,
-        100,
-        100,
-        0xFFFFFFFF
-    );
+    mygpu_framebuffer_set_pixel(framebuffer, 100, 100, 0xFFFFFFFF);
 
-    mygpu_framebuffer_clear(
-        framebuffer,
-        0x000000FF
-    );
+    mygpu_framebuffer_clear(framebuffer, 0x000000FF);
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        10,
-        10,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 10, 10, &color);
 
-    check(
-        result == 0 && color == 0x000000FF,
-        "clear overwrites existing pixel"
-    );
+    check(result == 0 && color == 0x000000FF, "clear overwrites existing pixel");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        100,
-        100,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 100, 100, &color);
 
-    check(
-        result == 0 && color == 0x000000FF,
-        "clear overwrites another pixel"
-    );
+    check(result == 0 && color == 0x000000FF, "clear overwrites another pixel");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -353,29 +208,13 @@ static void test_first_pixel_boundary(void)
         return;
     }
 
-    result = mygpu_framebuffer_set_pixel(
-        framebuffer,
-        0,
-        0,
-        0xAABBCCDD
-    );
+    result = mygpu_framebuffer_set_pixel(framebuffer, 0, 0, 0xAABBCCDD);
 
-    check(
-        result == 0,
-        "set first pixel"
-    );
+    check(result == 0, "set first pixel");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        0,
-        0,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 0, 0, &color);
 
-    check(
-        result == 0 && color == 0xAABBCCDD,
-        "first pixel has correct color"
-    );
+    check(result == 0 && color == 0xAABBCCDD, "first pixel has correct color");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -393,29 +232,13 @@ static void test_last_pixel_boundary(void)
         return;
     }
 
-    result = mygpu_framebuffer_set_pixel(
-        framebuffer,
-        319,
-        199,
-        0x11223344
-    );
+    result = mygpu_framebuffer_set_pixel(framebuffer, 319, 199, 0x11223344);
 
-    check(
-        result == 0,
-        "set last pixel"
-    );
+    check(result == 0, "set last pixel");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        319,
-        199,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 319, 199, &color);
 
-    check(
-        result == 0 && color == 0x11223344,
-        "last pixel has correct color"
-    );
+    check(result == 0 && color == 0x11223344, "last pixel has correct color");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -433,41 +256,17 @@ static void test_x_out_of_bounds(void)
         return;
     }
 
-    result = mygpu_framebuffer_set_pixel(
-        framebuffer,
-        320,
-        0,
-        0xFFFFFFFF
-    );
+    result = mygpu_framebuffer_set_pixel(framebuffer, 320, 0, 0xFFFFFFFF);
 
-    check(
-        result != 0,
-        "reject x equal to width"
-    );
+    check(result != 0, "reject x equal to width");
 
-    result = mygpu_framebuffer_set_pixel(
-        framebuffer,
-        1000,
-        0,
-        0xFFFFFFFF
-    );
+    result = mygpu_framebuffer_set_pixel(framebuffer, 1000, 0, 0xFFFFFFFF);
 
-    check(
-        result != 0,
-        "reject x greater than width"
-    );
+    check(result != 0, "reject x greater than width");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        320,
-        0,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 320, 0, &color);
 
-    check(
-        result != 0,
-        "reject out-of-bounds x read"
-    );
+    check(result != 0, "reject out-of-bounds x read");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -485,41 +284,17 @@ static void test_y_out_of_bounds(void)
         return;
     }
 
-    result = mygpu_framebuffer_set_pixel(
-        framebuffer,
-        0,
-        200,
-        0xFFFFFFFF
-    );
+    result = mygpu_framebuffer_set_pixel(framebuffer, 0, 200, 0xFFFFFFFF);
 
-    check(
-        result != 0,
-        "reject y equal to height"
-    );
+    check(result != 0, "reject y equal to height");
 
-    result = mygpu_framebuffer_set_pixel(
-        framebuffer,
-        0,
-        1000,
-        0xFFFFFFFF
-    );
+    result = mygpu_framebuffer_set_pixel(framebuffer, 0, 1000, 0xFFFFFFFF);
 
-    check(
-        result != 0,
-        "reject y greater than height"
-    );
+    check(result != 0, "reject y greater than height");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        0,
-        200,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 0, 200, &color);
 
-    check(
-        result != 0,
-        "reject out-of-bounds y read"
-    );
+    check(result != 0, "reject out-of-bounds y read");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -530,24 +305,15 @@ static void test_zero_dimensions(void)
 
     framebuffer = mygpu_framebuffer_create(0, 200);
 
-    check(
-        framebuffer == NULL,
-        "reject zero width"
-    );
+    check(framebuffer == NULL, "reject zero width");
 
     framebuffer = mygpu_framebuffer_create(320, 0);
 
-    check(
-        framebuffer == NULL,
-        "reject zero height"
-    );
+    check(framebuffer == NULL, "reject zero height");
 
     framebuffer = mygpu_framebuffer_create(0, 0);
 
-    check(
-        framebuffer == NULL,
-        "reject zero width and height"
-    );
+    check(framebuffer == NULL, "reject zero width and height");
 }
 
 static void test_null_arguments(void)
@@ -563,68 +329,29 @@ static void test_null_arguments(void)
         return;
     }
 
-    result = mygpu_framebuffer_set_pixel(
-        NULL,
-        0,
-        0,
-        0xFFFFFFFF
-    );
+    result = mygpu_framebuffer_set_pixel(NULL, 0, 0, 0xFFFFFFFF);
 
-    check(
-        result != 0,
-        "reject NULL framebuffer on set"
-    );
+    check(result != 0, "reject NULL framebuffer on set");
 
-    result = mygpu_framebuffer_get_pixel(
-        NULL,
-        0,
-        0,
-        &color
-    );
+    result = mygpu_framebuffer_get_pixel(NULL, 0, 0, &color);
 
-    check(
-        result != 0,
-        "reject NULL framebuffer on get"
-    );
+    check(result != 0, "reject NULL framebuffer on get");
 
-    result = mygpu_framebuffer_get_pixel(
-        framebuffer,
-        0,
-        0,
-        NULL
-    );
+    result = mygpu_framebuffer_get_pixel(framebuffer, 0, 0, NULL);
 
-    check(
-        result != 0,
-        "reject NULL color pointer"
-    );
+    check(result != 0, "reject NULL color pointer");
 
-    mygpu_framebuffer_clear(
-        NULL,
-        0xFFFFFFFF
-    );
+    mygpu_framebuffer_clear(NULL, 0xFFFFFFFF);
 
-    check(
-        1,
-        "clear safely handles NULL framebuffer"
-    );
+    check(1, "clear safely handles NULL framebuffer");
 
-    check(
-        mygpu_framebuffer_width(NULL) == 0,
-        "NULL framebuffer width returns zero"
-    );
+    check(mygpu_framebuffer_width(NULL) == 0, "NULL framebuffer width returns zero");
 
-    check(
-        mygpu_framebuffer_height(NULL) == 0,
-        "NULL framebuffer height returns zero"
-    );
+    check(mygpu_framebuffer_height(NULL) == 0, "NULL framebuffer height returns zero");
 
     mygpu_framebuffer_destroy(NULL);
 
-    check(
-        1,
-        "destroy safely handles NULL framebuffer"
-    );
+    check(1, "destroy safely handles NULL framebuffer");
 
     mygpu_framebuffer_destroy(framebuffer);
 }
@@ -649,11 +376,7 @@ int main(void)
 
     printf("\n=== Results ===\n");
 
-    printf(
-        "%d/%d tests passed\n",
-        tests_passed,
-        tests_run
-    );
+    printf("%d/%d tests passed\n", tests_passed, tests_run);
 
     if (tests_passed == tests_run) {
         printf("All tests passed!\n");
