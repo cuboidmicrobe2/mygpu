@@ -613,6 +613,48 @@ void TestIndexedFirstIndex()
     assert(color != 0xFF0000FF);
 }
 
+static void TestIndexedVertexBufferOffset()
+{
+    myrenderer::Renderer renderer;
+    assert(renderer.Valid());
+
+    myrenderer::Vertex vertices[] = {
+        {10.0f, 10.0f, 0xFF0000FF},
+        {30.0f, 10.0f, 0xFF0000FF},
+        {20.0f, 30.0f, 0xFF0000FF},
+
+        {50.0f, 10.0f, 0x00FF00FF},
+        {70.0f, 10.0f, 0x00FF00FF},
+        {60.0f, 30.0f, 0x00FF00FF}};
+
+    uint32_t indices[] = {0, 1, 2};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
+    auto indexBuffer = renderer.CreateIndexBuffer(indices, 3);
+    auto commandBuffer = renderer.CreateCommandBuffer(1024);
+
+    assert(vertexBuffer != nullptr);
+    assert(indexBuffer != nullptr);
+    assert(commandBuffer != nullptr);
+
+    const size_t offset = 3 * sizeof(myrenderer::Vertex);
+
+    assert(commandBuffer->BindVertexBuffer(*vertexBuffer, offset));
+    assert(commandBuffer->BindIndexBuffer(*indexBuffer));
+    assert(commandBuffer->DrawIndexed(3, 0));
+
+    assert(renderer.BeginFrame());
+    assert(renderer.EndFrame(*commandBuffer));
+
+    uint32_t color = 0;
+
+    assert(renderer.GetPixel(60, 15, color));
+    assert(color == 0x00FF00FF);
+
+    assert(renderer.GetPixel(20, 15, color));
+    assert(color != 0xFF0000FF);
+}
+
 static void TestCopyBuffer()
 {
     myrenderer::Renderer renderer;
@@ -1207,6 +1249,7 @@ int main()
     TestIndexedTriangle();
     TestIndexedDrawValidation();
     TestIndexedFirstIndex();
+    TestIndexedVertexBufferOffset();
 
     TestCopyBuffer();
     TestCopyBufferWithOffsets();

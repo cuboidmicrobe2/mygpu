@@ -216,6 +216,7 @@ namespace myrenderer
 
         command.opcode = MYGPU_CMD_DRAW_INDEXED;
         command.vertex_address = m_vertexBuffer->Address();
+        command.vertex_offset = static_cast<uint32_t>(m_vertexBufferOffset);
         command.index_address = m_indexBuffer->Address();
         command.index_count = indexCount;
         command.first_index = firstIndex;

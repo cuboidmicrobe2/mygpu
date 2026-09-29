@@ -1579,6 +1579,7 @@ static void test_draw_indexed_validation_zero_count(void)
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = 0;
+    command.vertex_offset = 0;
     command.index_address = 0;
     command.index_count = 0;
 
@@ -1617,6 +1618,7 @@ static void test_draw_indexed_validation_invalid_count(void)
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = 0;
+    command.vertex_offset = 0;
     command.index_address = 0;
     command.index_count = 4;
 
@@ -1655,6 +1657,7 @@ static void test_draw_indexed_validation_truncated(void)
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = 0;
+    command.vertex_offset = 0;
     command.index_address = 0;
     command.index_count = 3;
 

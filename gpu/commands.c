@@ -647,7 +647,9 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             size_t vertex_offset;
             size_t index_offset;
             size_t required_index_size;
+            size_t vertex_size_remaining;
             uint64_t last_index;
+            uint32_t vertex_address;
 
             memcpy(
                 &command,
@@ -670,12 +672,26 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                 return -1;
             }
 
+            if (command.vertex_offset > mygpu_buffer_size(vertex_buffer) - vertex_offset) {
+                return -1;
+            }
+
+            vertex_offset += command.vertex_offset;
+
+            if (command.vertex_address > UINT32_MAX - command.vertex_offset) {
+                return -1;
+            }
+
+            vertex_address = command.vertex_address + command.vertex_offset;
+
+            vertex_size_remaining = mygpu_buffer_size(vertex_buffer) - vertex_offset;
+
             index_offset = mygpu_buffer_offset(index_buffer, command.index_address);
             if (index_offset == SIZE_MAX) {
                 return -1;
             }
 
-            last_index = command.first_index + command.index_count;
+            last_index = (uint64_t)command.first_index + (uint64_t)command.index_count;
 
             if (last_index > UINT32_MAX) {
                 return -1;
@@ -724,27 +740,27 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                     return -1;
                 }
 
-                if ((size_t)index0 * sizeof(struct mygpu_vertex) >=
-                    mygpu_buffer_size(vertex_buffer) - vertex_offset) {
+                if (index0 >=
+                    vertex_size_remaining / sizeof(struct mygpu_vertex)) {
                     
                     return -1;
                 }
 
-                if ((size_t)index1 * sizeof(struct mygpu_vertex) >=
-                    mygpu_buffer_size(vertex_buffer) - vertex_offset) {
+                if (index1 >=
+                    vertex_size_remaining / sizeof(struct mygpu_vertex)) {
                     
                     return -1;
                 }
 
-                if ((size_t)index2 * sizeof(struct mygpu_vertex) >=
-                    mygpu_buffer_size(vertex_buffer) - vertex_offset) {
+                if (index2 >=
+                    vertex_size_remaining / sizeof(struct mygpu_vertex)) {
                     
                     return -1;
                 }
 
                 if (mygpu_vertex_fetch(
                     gpu->memory,
-                    command.vertex_address,
+                    vertex_address,
                     index0,
                     &v0) != 0) {
 
@@ -753,7 +769,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
                 if (mygpu_vertex_fetch(
                     gpu->memory,
-                    command.vertex_address,
+                    vertex_address,
                     index1,
                     &v1) != 0) {
 
@@ -762,7 +778,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
                 if (mygpu_vertex_fetch(
                     gpu->memory,
-                    command.vertex_address,
+                    vertex_address,
                     index2,
                     &v2) != 0) {
 

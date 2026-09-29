@@ -65,6 +65,7 @@ struct mygpu_cmd_draw_indexed
 {
     uint32_t opcode;
     uint32_t vertex_address;
+    uint32_t vertex_offset;
     uint32_t index_address;
     uint32_t index_count;
     uint32_t first_index;
