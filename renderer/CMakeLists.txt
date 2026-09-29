@@ -46,22 +46,27 @@ target_compile_options(myrenderer
 # Tests
 # --------------------------------------------------
 
-add_executable(test_renderer
-    tests/testRenderer.cpp 
-)
-
-target_link_libraries(test_renderer PRIVATE myrenderer)
-
-target_compile_options(test_renderer
-    PRIVATE 
-        -Wall
-        -Wextra
-        -Wpedantic
-)
-
 enable_testing()
 
-add_test(
-    NAME renderer
-    COMMAND test_renderer
+set(RENDERER_TESTS
+    testFrame
+    testBuffer
+    testCommandBuffer
+    testDraw
+    testCopy
 )
+
+foreach(test_name IN LISTS RENDERER_TESTS)
+    add_executable(${test_name} tests/${test_name}.cpp)
+
+    target_link_libraries(${test_name} PRIVATE myrenderer)
+
+    target_compile_options(${test_name}
+        PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+    )
+
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endforeach()
