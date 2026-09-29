@@ -12,10 +12,6 @@ struct mygpu_vertex
     uint32_t color;
 };
 
-int mygpu_vertex_fetch(
-    struct mygpu_memory *memory, 
-    uint32_t address, 
-    uint32_t index, 
-    struct mygpu_vertex *vertex);
+int mygpu_vertex_fetch(struct mygpu_memory *memory, uint32_t address, uint32_t index, struct mygpu_vertex *vertex);
 
 #endif

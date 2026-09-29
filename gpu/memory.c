@@ -4,25 +4,26 @@
 
 #include "mygpu/memory.h"
 
-struct mygpu_memory {
-    uint8_t* data;
+struct mygpu_memory
+{
+    uint8_t *data;
     size_t size;
     size_t next_free;
 };
 
 struct mygpu_memory *mygpu_memory_create(void)
 {
-    struct mygpu_memory* memory;
+    struct mygpu_memory *memory;
 
     memory = malloc(sizeof(*memory));
 
-    if(memory == NULL) {
+    if (memory == NULL) {
         return NULL;
     }
 
     memory->data = malloc(MYGPU_MEMORY_SIZE);
 
-    if(memory->data == NULL) {
+    if (memory->data == NULL) {
         free(memory);
         return NULL;
     }
@@ -37,7 +38,7 @@ struct mygpu_memory *mygpu_memory_create(void)
 
 void mygpu_memory_destroy(struct mygpu_memory *memory)
 {
-    if(memory == NULL) {
+    if (memory == NULL) {
         return;
     }
 
@@ -47,11 +48,11 @@ void mygpu_memory_destroy(struct mygpu_memory *memory)
 
 int mygpu_memory_read(struct mygpu_memory *memory, uint32_t address, void *data, size_t size)
 {
-    if(memory == NULL || data == NULL) {
+    if (memory == NULL || data == NULL) {
         return -1;
     }
 
-    if((uint64_t)address + size > memory->size) {
+    if ((uint64_t)address + size > memory->size) {
         return -1;
     }
 
@@ -62,11 +63,11 @@ int mygpu_memory_read(struct mygpu_memory *memory, uint32_t address, void *data,
 
 int mygpu_memory_write(struct mygpu_memory *memory, uint32_t address, const void *data, size_t size)
 {
-    if(memory == NULL || data == NULL) {
+    if (memory == NULL || data == NULL) {
         return -1;
     }
 
-    if((uint64_t)address + size > memory->size) {
+    if ((uint64_t)address + size > memory->size) {
         return -1;
     }
 

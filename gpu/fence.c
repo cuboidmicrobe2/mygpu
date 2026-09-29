@@ -2,7 +2,8 @@
 
 #include "mygpu/fence.h"
 
-struct mygpu_fence {
+struct mygpu_fence
+{
     uint64_t id;
     int signaled;
     uint32_t refcount;
@@ -63,7 +64,7 @@ void mygpu_fence_destroy(struct mygpu_fence *fence)
 int mygpu_fence_is_signaled(const struct mygpu_fence *fence)
 {
     if (fence == NULL) {
-        return 0;   
+        return 0;
     }
 
     return fence->signaled;

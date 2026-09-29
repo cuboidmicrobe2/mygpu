@@ -31,7 +31,7 @@ struct mygpu *mygpu_create(void)
 
     gpu->registers = mygpu_registers_create();
 
-    if(gpu->registers == NULL) {
+    if (gpu->registers == NULL) {
         mygpu_memory_destroy(gpu->memory);
         free(gpu);
         return NULL;
@@ -39,7 +39,7 @@ struct mygpu *mygpu_create(void)
 
     gpu->framebuffer = mygpu_framebuffer_create(MYGPU_WIDTH, MYGPU_HEIGHT);
 
-    if(gpu->framebuffer == NULL) {
+    if (gpu->framebuffer == NULL) {
         mygpu_registers_destroy(gpu->registers);
         mygpu_memory_destroy(gpu->memory);
         free(gpu);
@@ -48,7 +48,7 @@ struct mygpu *mygpu_create(void)
 
     gpu->queue = mygpu_queue_create();
 
-    if(gpu->queue == NULL) {
+    if (gpu->queue == NULL) {
         mygpu_framebuffer_destroy(gpu->framebuffer);
         mygpu_registers_destroy(gpu->registers);
         mygpu_memory_destroy(gpu->memory);
@@ -137,7 +137,6 @@ int mygpu_submit(struct mygpu *gpu, struct mygpu_command_buffer *buffer, struct 
 
     return mygpu_queue_submit(gpu->queue, buffer, fence);
 }
-
 
 int mygpu_process(struct mygpu *gpu)
 {

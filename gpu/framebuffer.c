@@ -3,7 +3,8 @@
 
 #include "mygpu/framebuffer.h"
 
-struct mygpu_framebuffer {
+struct mygpu_framebuffer
+{
     uint32_t width;
     uint32_t height;
     uint32_t *pixels;
@@ -11,7 +12,7 @@ struct mygpu_framebuffer {
 
 struct mygpu_framebuffer *mygpu_framebuffer_create(uint32_t width, uint32_t height)
 {
-    struct mygpu_framebuffer* framebuffer;
+    struct mygpu_framebuffer *framebuffer;
     size_t pixel_count;
 
     if (width == 0 || height == 0) {

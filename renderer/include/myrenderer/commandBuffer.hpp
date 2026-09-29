@@ -7,53 +7,52 @@ struct mygpu_command_buffer;
 
 class Buffer;
 
-namespace myrenderer
-{
-    class CommandBuffer
-    {
-    public:
-        ~CommandBuffer();
+namespace myrenderer {
+class CommandBuffer {
+public:
+    ~CommandBuffer();
 
-        CommandBuffer(const CommandBuffer &) = delete;
-        CommandBuffer &operator=(const CommandBuffer &) = delete;
+    CommandBuffer(const CommandBuffer &) = delete;
+    CommandBuffer &operator=(const CommandBuffer &) = delete;
 
-        CommandBuffer(const CommandBuffer &&) = delete;
-        CommandBuffer &operator=(const CommandBuffer &&) = delete;
+    CommandBuffer(const CommandBuffer &&) = delete;
+    CommandBuffer &operator=(const CommandBuffer &&) = delete;
 
-        bool Valid() const;
+    bool Valid() const;
 
-        bool IsEmpty() const;
+    bool IsEmpty() const;
 
-        bool Reset();
+    bool Reset();
 
-        bool Clear(uint32_t color);
+    bool Clear(uint32_t color);
 
-        bool Copy(uint32_t srcX, uint32_t srcY, uint32_t dstX, uint32_t dstY, uint32_t width, uint32_t height);
+    bool Copy(uint32_t srcX, uint32_t srcY, uint32_t dstX, uint32_t dstY, uint32_t width, uint32_t height);
 
-        bool Present();
+    bool Present();
 
-        bool DrawRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color);
+    bool DrawRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color);
 
-        bool BindVertexBuffer(const Buffer &vertexBuffer, size_t offset);
+    bool BindVertexBuffer(const Buffer &vertexBuffer, size_t offset);
 
-        bool DrawTriangles(uint32_t vertexCount, uint32_t firstVertex);
+    bool DrawTriangles(uint32_t vertexCount, uint32_t firstVertex);
 
-        bool BindIndexBuffer(const Buffer &indexBuffer);
+    bool BindIndexBuffer(const Buffer &indexBuffer);
 
-        bool DrawIndexed(uint32_t indexCount, uint32_t firstIndex);
+    bool DrawIndexed(uint32_t indexCount, uint32_t firstIndex);
 
-        bool CopyBuffer(const Buffer &source, size_t sourceOffset, const Buffer &destination, size_t destinationOffset, size_t size);
+    bool CopyBuffer(const Buffer &source, size_t sourceOffset, const Buffer &destination, size_t destinationOffset,
+                    size_t size);
 
-    private:
-        friend class Renderer;
+private:
+    friend class Renderer;
 
-        explicit CommandBuffer(struct mygpu_command_buffer *CommandBuffer);
+    explicit CommandBuffer(struct mygpu_command_buffer *CommandBuffer);
 
-        struct mygpu_command_buffer *m_commandBuffer;
+    struct mygpu_command_buffer *m_commandBuffer;
 
-        const Buffer *m_vertexBuffer;
-        size_t m_vertexBufferOffset;
+    const Buffer *m_vertexBuffer;
+    size_t m_vertexBufferOffset;
 
-        const Buffer *m_indexBuffer;
-    };
+    const Buffer *m_indexBuffer;
+};
 } // namespace myrenderer

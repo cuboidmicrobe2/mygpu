@@ -1128,7 +1128,7 @@ int main(void)
     test_triangle_outside_framebuffer();
     test_degenerate_triangle();
     test_multiple_triangles();
-    
+
     test_vertex_buffer_offset();
 
     test_unknown_vertex_buffer();

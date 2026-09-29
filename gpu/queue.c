@@ -5,13 +5,15 @@
 #include "mygpu/fence.h"
 #include "mygpu/gpu_internal.h"
 
-struct mygpu_queue_entry {
+struct mygpu_queue_entry
+{
     struct mygpu_command_buffer *buffer;
     struct mygpu_fence *fence;
     struct mygpu_queue_entry *next;
 };
 
-struct mygpu_queue {
+struct mygpu_queue
+{
     struct mygpu_queue_entry *head;
     struct mygpu_queue_entry *tail;
 };

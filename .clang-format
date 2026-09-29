@@ -1,0 +1,20 @@
+# Style for the C library. renderer/ has its own .clang-format for the C++ code.
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 120
+
+# Functions, structs and enums open on the next line; everything else keeps the brace on the same line.
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterStruct: true
+  AfterEnum: true
+  AfterUnion: true
+
+AllowShortFunctionsOnASingleLine: None
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AlignTrailingComments: false
+PenaltyReturnTypeOnItsOwnLine: 1000
+InsertNewlineAtEOF: true
+SortIncludes: Never

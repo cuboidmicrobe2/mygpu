@@ -388,11 +388,7 @@ static void test_failed_command_stops_queue(void)
     bad_fence = mygpu_fence_create(40);
     good_fence = mygpu_fence_create(41);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        bad_buffer == NULL ||
-        good_buffer == NULL ||
-        bad_fence == NULL ||
+    if (gpu == NULL || queue == NULL || bad_buffer == NULL || good_buffer == NULL || bad_fence == NULL ||
         good_fence == NULL) {
 
         check(0, "failed queue setup");
@@ -492,11 +488,7 @@ static void test_queue_recovery_after_failure(void)
     bad_fence = mygpu_fence_create(50);
     good_fence = mygpu_fence_create(51);
 
-    if (gpu == NULL ||
-        queue == NULL ||
-        bad_buffer == NULL ||
-        good_buffer == NULL ||
-        bad_fence == NULL ||
+    if (gpu == NULL || queue == NULL || bad_buffer == NULL || good_buffer == NULL || bad_fence == NULL ||
         good_fence == NULL) {
 
         check(0, "queue recovery setup");

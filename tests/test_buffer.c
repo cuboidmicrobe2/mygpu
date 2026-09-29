@@ -165,14 +165,9 @@ static void test_partial_write_read(void)
     struct mygpu *gpu;
     struct mygpu_buffer *buffer;
 
-    uint8_t write_data[] = {
-        0x10,
-        0x20,
-        0x30,
-        0x40
-    };
+    uint8_t write_data[] = {0x10, 0x20, 0x30, 0x40};
 
-    uint8_t read_data[4] = { 0 };
+    uint8_t read_data[4] = {0};
 
     gpu = mygpu_create();
 
@@ -193,13 +188,8 @@ static void test_partial_write_read(void)
 
     check(mygpu_buffer_read(buffer, 4, read_data, sizeof(read_data)) == 0, "read buffer at offset");
 
-    check(
-        read_data[0] == 0x10 &&
-        read_data[1] == 0x20 &&
-        read_data[2] == 0x30 &&
-        read_data[3] == 0x40,
-        "partial buffer data matches"
-    );
+    check(read_data[0] == 0x10 && read_data[1] == 0x20 && read_data[2] == 0x30 && read_data[3] == 0x40,
+          "partial buffer data matches");
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -210,9 +200,7 @@ static void test_write_past_end(void)
     struct mygpu *gpu;
     struct mygpu_buffer *buffer;
 
-    uint8_t data[4] = {
-        1, 2, 3, 4
-    };
+    uint8_t data[4] = {1, 2, 3, 4};
 
     gpu = mygpu_create();
 

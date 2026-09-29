@@ -6,8 +6,7 @@
 #include "myrenderer/renderer.hpp"
 #include "myrenderer/vertex.hpp"
 
-static void TestRendererBasics()
-{
+static void TestRendererBasics() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -25,8 +24,7 @@ static void TestRendererBasics()
     assert(color == clearColor);
 }
 
-static void TestBuffer()
-{
+static void TestBuffer() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -37,10 +35,7 @@ static void TestBuffer()
     assert(buffer->Valid());
     assert(buffer->Size() == 3 * sizeof(uint32_t));
 
-    const uint32_t values[3] = {
-        0x11111111u,
-        0x22222222u,
-        0x33333333u};
+    const uint32_t values[3] = {0x11111111u, 0x22222222u, 0x33333333u};
 
     assert(buffer->Write(0, values, sizeof(values)));
 
@@ -53,8 +48,7 @@ static void TestBuffer()
     assert(result[2] == values[2]);
 }
 
-static void TestCommandBufferClearAndReset()
-{
+static void TestCommandBufferClearAndReset() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -91,8 +85,7 @@ static void TestCommandBufferClearAndReset()
     assert(color == 0x11223344u);
 }
 
-static void TestDrawRect()
-{
+static void TestDrawRect() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -126,8 +119,7 @@ static void TestDrawRect()
     assert(!commandBuffer->DrawRect(10, 10, 20, 0, rectColor));
 }
 
-static void TestMultipleCommands()
-{
+static void TestMultipleCommands() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -162,20 +154,15 @@ static void TestMultipleCommands()
     assert(color == 0x00000000u);
 }
 
-static void TestMultipleTriangles()
-{
+static void TestMultipleTriangles() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
     const myrenderer::Vertex vertices[6] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu},
+        {10.0f, 10.0f, 0xFFFFFFFFu}, {30.0f, 10.0f, 0xFFFFFFFFu}, {20.0f, 30.0f, 0xFFFFFFFFu},
 
-        {50.0f, 10.0f, 0xFFFFFFFFu},
-        {70.0f, 10.0f, 0xFFFFFFFFu},
-        {60.0f, 30.0f, 0xFFFFFFFFu}};
+        {50.0f, 10.0f, 0xFFFFFFFFu}, {70.0f, 10.0f, 0xFFFFFFFFu}, {60.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
 
@@ -203,20 +190,15 @@ static void TestMultipleTriangles()
     assert(color == 0xFFFFFFFFu);
 }
 
-static void TestFirstVertex()
-{
+static void TestFirstVertex() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
     const myrenderer::Vertex vertices[6] = {
-        {10.0f, 10.0f, 0xFF0000FFu},
-        {30.0f, 10.0f, 0xFF0000FFu},
-        {20.0f, 30.0f, 0xFF0000FFu},
+        {10.0f, 10.0f, 0xFF0000FFu}, {30.0f, 10.0f, 0xFF0000FFu}, {20.0f, 30.0f, 0xFF0000FFu},
 
-        {50.0f, 10.0f, 0x00FF00FFu},
-        {70.0f, 10.0f, 0x00FF00FFu},
-        {60.0f, 30.0f, 0x00FF00FFu}};
+        {50.0f, 10.0f, 0x00FF00FFu}, {70.0f, 10.0f, 0x00FF00FFu}, {60.0f, 30.0f, 0x00FF00FFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
 
@@ -240,21 +222,16 @@ static void TestFirstVertex()
     assert(color != 0xFF0000FFu);
 }
 
-void TestVertexBufferOffset()
-{
+void TestVertexBufferOffset() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
     assert(renderer.BeginFrame());
 
     const myrenderer::Vertex vertices[] = {
-        {3.0f, 3.0f, 0xFFFF0000},
-        {13.0f, 3.0f, 0xFFFF0000},
-        {8.0f, 13.0f, 0xFFFF0000},
+        {3.0f, 3.0f, 0xFFFF0000},   {13.0f, 3.0f, 0xFFFF0000},  {8.0f, 13.0f, 0xFFFF0000},
 
-        {21.0f, 21.0f, 0xFF00FF00},
-        {31.0f, 21.0f, 0xFF00FF00},
-        {26.0f, 31.0f, 0xFF00FF00}};
+        {21.0f, 21.0f, 0xFF00FF00}, {31.0f, 21.0f, 0xFF00FF00}, {26.0f, 31.0f, 0xFF00FF00}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
     assert(vertexBuffer);
@@ -279,8 +256,7 @@ void TestVertexBufferOffset()
     assert(color != 0xFFFF0000);
 }
 
-void TestVertexBufferOffsetValidation()
-{
+void TestVertexBufferOffsetValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -298,16 +274,14 @@ void TestVertexBufferOffsetValidation()
     assert(!commands->BindVertexBuffer(*vertexBuffer, vertexBuffer->Size() + 1));
 }
 
-static void TestBufferLifetime()
-{
+static void TestBufferLifetime() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
+    const myrenderer::Vertex vertices[3] = {{10.0f, 10.0f, 0xFFFFFFFFu},
+                                            {30.0f, 10.0f, 0xFFFFFFFFu},
+                                            {20.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
 
@@ -324,20 +298,15 @@ static void TestBufferLifetime()
     assert(renderer.EndFrame(*commands));
 }
 
-static void TestTriangleCommandBuffer()
-{
+static void TestTriangleCommandBuffer() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
     const myrenderer::Vertex vertices[6] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu},
+        {10.0f, 10.0f, 0xFFFFFFFFu}, {30.0f, 10.0f, 0xFFFFFFFFu}, {20.0f, 30.0f, 0xFFFFFFFFu},
 
-        {50.0f, 10.0f, 0xFFFFFFFFu},
-        {70.0f, 10.0f, 0xFFFFFFFFu},
-        {60.0f, 30.0f, 0xFFFFFFFFu}};
+        {50.0f, 10.0f, 0xFFFFFFFFu}, {70.0f, 10.0f, 0xFFFFFFFFu}, {60.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
 
@@ -376,8 +345,7 @@ static void TestTriangleCommandBuffer()
     assert(!commandBuffer->DrawTriangles(3, 0));
 }
 
-static void TestFrameLifecycle()
-{
+static void TestFrameLifecycle() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -412,8 +380,7 @@ static void TestFrameLifecycle()
     assert(!renderer.EndFrame(*frameCommands));
 }
 
-static void TestFrameCommandValidation()
-{
+static void TestFrameCommandValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -437,16 +404,14 @@ static void TestFrameCommandValidation()
     assert(color == 0x01020304u);
 }
 
-static void TestCommandBufferResetState()
-{
+static void TestCommandBufferResetState() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
+    const myrenderer::Vertex vertices[3] = {{10.0f, 10.0f, 0xFFFFFFFFu},
+                                            {30.0f, 10.0f, 0xFFFFFFFFu},
+                                            {20.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
 
@@ -465,20 +430,15 @@ static void TestCommandBufferResetState()
     assert(!commandBuffer->DrawTriangles(3, 0));
 }
 
-static void TestIndexedTriangle()
-{
+static void TestIndexedTriangle() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
     const myrenderer::Vertex vertices[6] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu},
+        {10.0f, 10.0f, 0xFFFFFFFFu}, {30.0f, 10.0f, 0xFFFFFFFFu}, {20.0f, 30.0f, 0xFFFFFFFFu},
 
-        {50.0f, 10.0f, 0xFFFFFFFFu},
-        {70.0f, 10.0f, 0xFFFFFFFFu},
-        {60.0f, 30.0f, 0xFFFFFFFFu}};
+        {50.0f, 10.0f, 0xFFFFFFFFu}, {70.0f, 10.0f, 0xFFFFFFFFu}, {60.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
 
@@ -510,20 +470,15 @@ static void TestIndexedTriangle()
     assert(color == 0xFFFFFFFFu);
 }
 
-static void TestIndexedDrawValidation()
-{
+static void TestIndexedDrawValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
     const myrenderer::Vertex vertices[6] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu},
+        {10.0f, 10.0f, 0xFFFFFFFFu}, {30.0f, 10.0f, 0xFFFFFFFFu}, {20.0f, 30.0f, 0xFFFFFFFFu},
 
-        {50.0f, 10.0f, 0xFFFFFFFFu},
-        {70.0f, 10.0f, 0xFFFFFFFFu},
-        {60.0f, 30.0f, 0xFFFFFFFFu}};
+        {50.0f, 10.0f, 0xFFFFFFFFu}, {70.0f, 10.0f, 0xFFFFFFFFu}, {60.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
 
@@ -571,23 +526,16 @@ static void TestIndexedDrawValidation()
     assert(!commands->DrawIndexed(3, 0));
 }
 
-void TestIndexedFirstIndex()
-{
+void TestIndexedFirstIndex() {
     myrenderer::Renderer renderer;
     assert(renderer.Valid());
 
     myrenderer::Vertex vertices[] = {
-        {10.0f, 10.0f, 0xFF0000FF},
-        {30.0f, 10.0f, 0xFF0000FF},
-        {20.0f, 30.0f, 0xFF0000FF},
+        {10.0f, 10.0f, 0xFF0000FF}, {30.0f, 10.0f, 0xFF0000FF}, {20.0f, 30.0f, 0xFF0000FF},
 
-        {50.0f, 10.0f, 0x00FF00FF},
-        {70.0f, 10.0f, 0x00FF00FF},
-        {60.0f, 30.0f, 0x00FF00FF}};
+        {50.0f, 10.0f, 0x00FF00FF}, {70.0f, 10.0f, 0x00FF00FF}, {60.0f, 30.0f, 0x00FF00FF}};
 
-    uint32_t indices[] = {
-        0, 1, 2,
-        3, 4, 5};
+    uint32_t indices[] = {0, 1, 2, 3, 4, 5};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 6);
     auto indexBuffer = renderer.CreateIndexBuffer(indices, 6);
@@ -613,19 +561,14 @@ void TestIndexedFirstIndex()
     assert(color != 0xFF0000FF);
 }
 
-static void TestIndexedVertexBufferOffset()
-{
+static void TestIndexedVertexBufferOffset() {
     myrenderer::Renderer renderer;
     assert(renderer.Valid());
 
     myrenderer::Vertex vertices[] = {
-        {10.0f, 10.0f, 0xFF0000FF},
-        {30.0f, 10.0f, 0xFF0000FF},
-        {20.0f, 30.0f, 0xFF0000FF},
+        {10.0f, 10.0f, 0xFF0000FF}, {30.0f, 10.0f, 0xFF0000FF}, {20.0f, 30.0f, 0xFF0000FF},
 
-        {50.0f, 10.0f, 0x00FF00FF},
-        {70.0f, 10.0f, 0x00FF00FF},
-        {60.0f, 30.0f, 0x00FF00FF}};
+        {50.0f, 10.0f, 0x00FF00FF}, {70.0f, 10.0f, 0x00FF00FF}, {60.0f, 30.0f, 0x00FF00FF}};
 
     uint32_t indices[] = {0, 1, 2};
 
@@ -655,8 +598,7 @@ static void TestIndexedVertexBufferOffset()
     assert(color != 0xFF0000FF);
 }
 
-static void TestCopyBuffer()
-{
+static void TestCopyBuffer() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -668,10 +610,7 @@ static void TestCopyBuffer()
     assert(source != nullptr);
     assert(destination != nullptr);
 
-    const uint32_t sourceValues[3] = {
-        0x11111111u,
-        0x22222222u,
-        0x33333333u};
+    const uint32_t sourceValues[3] = {0x11111111u, 0x22222222u, 0x33333333u};
 
     uint32_t destinationValues[3] = {};
 
@@ -694,8 +633,7 @@ static void TestCopyBuffer()
     assert(destinationValues[2] == sourceValues[2]);
 }
 
-static void TestCopyBufferWithOffsets()
-{
+static void TestCopyBufferWithOffsets() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -706,11 +644,7 @@ static void TestCopyBufferWithOffsets()
     assert(source != nullptr);
     assert(destination != nullptr);
 
-    const uint32_t sourceValues[4] = {
-        0x11111111u,
-        0x22222222u,
-        0x33333333u,
-        0x44444444u};
+    const uint32_t sourceValues[4] = {0x11111111u, 0x22222222u, 0x33333333u, 0x44444444u};
 
     uint32_t destinationValues[4] = {};
 
@@ -734,8 +668,7 @@ static void TestCopyBufferWithOffsets()
     assert(destinationValues[3] == 0);
 }
 
-static void TestCopyBufferValidation()
-{
+static void TestCopyBufferValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -757,8 +690,7 @@ static void TestCopyBufferValidation()
     assert(!commands->CopyBuffer(*source, 0, *destination, 0, sizeof(uint32_t) * 2));
 }
 
-static void TestCopyBufferDifferentSizes()
-{
+static void TestCopyBufferDifferentSizes() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -769,11 +701,7 @@ static void TestCopyBufferDifferentSizes()
     assert(source != nullptr);
     assert(destination != nullptr);
 
-    const uint32_t sourceValues[4] = {
-        0x11111111u,
-        0x22222222u,
-        0x33333333u,
-        0x44444444u};
+    const uint32_t sourceValues[4] = {0x11111111u, 0x22222222u, 0x33333333u, 0x44444444u};
 
     uint32_t destinationValues[2] = {};
 
@@ -795,8 +723,7 @@ static void TestCopyBufferDifferentSizes()
     assert(destinationValues[1] == sourceValues[2]);
 }
 
-static void TestPresented()
-{
+static void TestPresented() {
     myrenderer::Renderer renderer;
     myrenderer::CommandBuffer *invalidCommands = nullptr;
 
@@ -818,8 +745,7 @@ static void TestPresented()
     assert(renderer.Presented());
 }
 
-static void TestNotPresented()
-{
+static void TestNotPresented() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -837,8 +763,7 @@ static void TestNotPresented()
     assert(!renderer.Presented());
 }
 
-static void TestCopyValidation()
-{
+static void TestCopyValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -852,8 +777,7 @@ static void TestCopyValidation()
     assert(!commands->Copy(0, 0, 0, 0, 10, 0));
 }
 
-static void TestCopy()
-{
+static void TestCopy() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -888,8 +812,7 @@ static void TestCopy()
     assert(color == 0x00000000u);
 }
 
-static void TestCopyOverlap()
-{
+static void TestCopyOverlap() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -921,8 +844,7 @@ static void TestCopyOverlap()
     assert(color == 0xFF0000FFu);
 }
 
-static void TestCommandBufferReuse()
-{
+static void TestCommandBufferReuse() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -940,8 +862,7 @@ static void TestCommandBufferReuse()
     assert(renderer.EndFrame(*commands));
 }
 
-static void TestPresentedAcrossFrames()
-{
+static void TestPresentedAcrossFrames() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -965,8 +886,7 @@ static void TestPresentedAcrossFrames()
     assert(!renderer.Presented());
 }
 
-static void TestBeginFramePreservesFramebuffer()
-{
+static void TestBeginFramePreservesFramebuffer() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -993,8 +913,7 @@ static void TestBeginFramePreservesFramebuffer()
     assert(!renderer.Presented());
 }
 
-static void TestWriteIndices()
-{
+static void TestWriteIndices() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -1015,8 +934,7 @@ static void TestWriteIndices()
     assert(readBack[2] == 2);
 }
 
-static void TestWriteIndicesValidation()
-{
+static void TestWriteIndicesValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -1032,8 +950,7 @@ static void TestWriteIndicesValidation()
     assert(!buffer->WriteIndices(indices, 0));
 }
 
-static void TestCreateIndexBuffer()
-{
+static void TestCreateIndexBuffer() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -1055,8 +972,7 @@ static void TestCreateIndexBuffer()
     assert(readBack[2] == 2);
 }
 
-static void TestCreateIndexBufferValidation()
-{
+static void TestCreateIndexBufferValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -1067,16 +983,14 @@ static void TestCreateIndexBufferValidation()
     assert(renderer.CreateIndexBuffer(indices, 0) == nullptr);
 }
 
-static void TestCreateVertexBuffer()
-{
+static void TestCreateVertexBuffer() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
+    const myrenderer::Vertex vertices[3] = {{10.0f, 10.0f, 0xFFFFFFFFu},
+                                            {30.0f, 10.0f, 0xFFFFFFFFu},
+                                            {20.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto buffer = renderer.CreateVertexBuffer(vertices, 3);
 
@@ -1094,23 +1008,20 @@ static void TestCreateVertexBuffer()
     assert(readBack[2].y == 30.0f);
 }
 
-static void TestCreateVertexBufferValidation()
-{
+static void TestCreateVertexBufferValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
+    const myrenderer::Vertex vertices[3] = {{10.0f, 10.0f, 0xFFFFFFFFu},
+                                            {30.0f, 10.0f, 0xFFFFFFFFu},
+                                            {20.0f, 30.0f, 0xFFFFFFFFu}};
 
     assert(renderer.CreateVertexBuffer(nullptr, 3) == nullptr);
     assert(renderer.CreateVertexBuffer(vertices, 0) == nullptr);
 }
 
-static void TestClearValidation()
-{
+static void TestClearValidation() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -1126,8 +1037,7 @@ static void TestClearValidation()
     assert(commands->IsEmpty());
 }
 
-static void TestCommandBufferCapacity()
-{
+static void TestCommandBufferCapacity() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -1141,8 +1051,7 @@ static void TestCommandBufferCapacity()
     assert(!commands->Present());
 }
 
-static void TestCommandBufferResetCapacity()
-{
+static void TestCommandBufferResetCapacity() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
@@ -1161,16 +1070,14 @@ static void TestCommandBufferResetCapacity()
     assert(commands->Present());
 }
 
-static void TestResetClearsAllBindings()
-{
+static void TestResetClearsAllBindings() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
+    const myrenderer::Vertex vertices[3] = {{10.0f, 10.0f, 0xFFFFFFFFu},
+                                            {30.0f, 10.0f, 0xFFFFFFFFu},
+                                            {20.0f, 30.0f, 0xFFFFFFFFu}};
 
     const uint32_t indices[3] = {0, 1, 2};
 
@@ -1193,16 +1100,14 @@ static void TestResetClearsAllBindings()
     assert(!commands->DrawIndexed(3, 0));
 }
 
-static void TestCommandBufferReuseAfterReset()
-{
+static void TestCommandBufferReuseAfterReset() {
     myrenderer::Renderer renderer;
 
     assert(renderer.Valid());
 
-    const myrenderer::Vertex vertices[3] = {
-        {10.0f, 10.0f, 0xFFFFFFFFu},
-        {30.0f, 10.0f, 0xFFFFFFFFu},
-        {20.0f, 30.0f, 0xFFFFFFFFu}};
+    const myrenderer::Vertex vertices[3] = {{10.0f, 10.0f, 0xFFFFFFFFu},
+                                            {30.0f, 10.0f, 0xFFFFFFFFu},
+                                            {20.0f, 30.0f, 0xFFFFFFFFu}};
 
     auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
 
@@ -1225,8 +1130,7 @@ static void TestCommandBufferReuseAfterReset()
     assert(renderer.EndFrame(*commands));
 }
 
-int main()
-{
+int main() {
     TestRendererBasics();
     TestBuffer();
     TestCommandBufferClearAndReset();

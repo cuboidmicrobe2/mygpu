@@ -1037,7 +1037,7 @@ static void test_validate_truncated_copy(void)
 static void test_validate_truncated_present(void)
 {
     struct mygpu_command_buffer *buffer;
-    uint8_t data[2] = { 0 };
+    uint8_t data[2] = {0};
 
     buffer = mygpu_command_buffer_create(64);
 
@@ -1098,10 +1098,8 @@ static void test_draw_indexed_validation_invalid_count(void)
     command.index_address = 0;
     command.index_count = 4;
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
-        "write invalid-count DRAW_INDEXED"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
+          "write invalid-count DRAW_INDEXED");
 
     check(mygpu_command_buffer_validate(command_buffer) != 0, "reject invalid-count DRAW_INDEXED");
 
@@ -1127,10 +1125,8 @@ static void test_draw_indexed_validation_truncated(void)
     command.index_address = 0;
     command.index_count = 3;
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command) - 1) == 0,
-        "write truncated DRAW_INDEXED"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command) - 1) == 0,
+          "write truncated DRAW_INDEXED");
 
     check(mygpu_command_buffer_validate(command_buffer) != 0, "reject truncated DRAW_INDEXED");
 
@@ -1205,10 +1201,8 @@ static void test_buffer_copy_validation_truncated(void)
     command.dst_address = 100;
     command.size = 16;
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command) - 1) == 0,
-        "write truncated BUFFER_COPY"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command) - 1) == 0,
+          "write truncated BUFFER_COPY");
 
     check(mygpu_command_buffer_validate(command_buffer) != 0, "reject truncated BUFFER_COPY");
 
@@ -1222,10 +1216,7 @@ static void test_buffer_copy_execution(void)
     struct mygpu_buffer *destination_buffer;
     struct mygpu_command_buffer *command_buffer;
 
-    uint32_t source_values[3] = {
-        0x11111111u,
-        0x22222222u,
-        0x33333333u};
+    uint32_t source_values[3] = {0x11111111u, 0x22222222u, 0x33333333u};
 
     uint32_t destination_values[3] = {0};
 
@@ -1278,17 +1269,12 @@ static void test_buffer_copy_execution(void)
 
     check(mygpu_command_buffer_execute(gpu, command_buffer) == 0, "execute BUFFER_COPY command");
 
-    check(
-        mygpu_buffer_read(destination_buffer, 0, destination_values, sizeof(destination_values)) == 0,
-        "read BUFFER_COPY destination"
-    );
+    check(mygpu_buffer_read(destination_buffer, 0, destination_values, sizeof(destination_values)) == 0,
+          "read BUFFER_COPY destination");
 
-    check(
-        destination_values[0] == source_values[0] &&
-        destination_values[1] == source_values[1] &&
-        destination_values[2] == source_values[2],
-        "BUFFER_COPY copied data"
-    );
+    check(destination_values[0] == source_values[0] && destination_values[1] == source_values[1] &&
+              destination_values[2] == source_values[2],
+          "BUFFER_COPY copied data");
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(destination_buffer);
@@ -1303,11 +1289,7 @@ static void test_buffer_copy_execution_with_offsets(void)
     struct mygpu_buffer *destination_buffer;
     struct mygpu_command_buffer *command_buffer;
 
-    uint32_t source_values[4] = {
-        0x11111111u,
-        0x22222222u,
-        0x33333333u,
-        0x44444444u};
+    uint32_t source_values[4] = {0x11111111u, 0x22222222u, 0x33333333u, 0x44444444u};
 
     uint32_t destination_values[4] = {0};
 
@@ -1336,10 +1318,8 @@ static void test_buffer_copy_execution_with_offsets(void)
         return;
     }
 
-    check(
-        mygpu_buffer_write(source_buffer, 0, source_values, sizeof(source_values)) == 0,
-        "write offset BUFFER_COPY source"
-    );
+    check(mygpu_buffer_write(source_buffer, 0, source_values, sizeof(source_values)) == 0,
+          "write offset BUFFER_COPY source");
 
     command_buffer = mygpu_command_buffer_create(sizeof(command));
 
@@ -1357,27 +1337,19 @@ static void test_buffer_copy_execution_with_offsets(void)
     command.dst_address = mygpu_buffer_address(destination_buffer) + sizeof(uint32_t);
     command.size = sizeof(uint32_t) * 2;
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
-        "write offset BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
+          "write offset BUFFER_COPY command");
 
     check(mygpu_command_buffer_validate(command_buffer) == 0, "validate offset BUFFER_COPY command");
 
     check(mygpu_command_buffer_execute(gpu, command_buffer) == 0, "execute offset BUFFER_COPY command");
 
-    check(
-        mygpu_buffer_read(destination_buffer, 0, destination_values, sizeof(destination_values)) == 0,
-        "read offset BUFFER_COPY destination"
-    );
+    check(mygpu_buffer_read(destination_buffer, 0, destination_values, sizeof(destination_values)) == 0,
+          "read offset BUFFER_COPY destination");
 
-    check(
-        destination_values[0] == 0 &&
-        destination_values[1] == source_values[1] &&
-        destination_values[2] == source_values[2] &&
-        destination_values[3] == 0,
-        "BUFFER_COPY copied offset data"
-    );
+    check(destination_values[0] == 0 && destination_values[1] == source_values[1] &&
+              destination_values[2] == source_values[2] && destination_values[3] == 0,
+          "BUFFER_COPY copied offset data");
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(destination_buffer);
@@ -1425,10 +1397,8 @@ static void test_buffer_copy_unknown_source(void)
     command.dst_address = mygpu_buffer_address(destination_buffer);
     command.size = sizeof(uint32_t);
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
-        "write unknown BUFFER_COPY source command"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
+          "write unknown BUFFER_COPY source command");
 
     check(mygpu_command_buffer_validate(command_buffer) == 0, "validate unknown BUFFER_COPY source command");
 
@@ -1487,10 +1457,8 @@ static void test_buffer_copy_unknown_destination(void)
     command.dst_address = MYGPU_MEMORY_SIZE - sizeof(uint32_t);
     command.size = sizeof(uint32_t);
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
-        "write unknown destination BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
+          "write unknown destination BUFFER_COPY command");
 
     check(mygpu_command_buffer_validate(command_buffer) == 0, "validate unknown destination BUFFER_COPY command");
 
@@ -1550,10 +1518,8 @@ static void test_buffer_copy_source_too_small(void)
     command.dst_address = mygpu_buffer_address(destination_buffer);
     command.size = sizeof(uint32_t) * 2;
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
-        "write small-source BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
+          "write small-source BUFFER_COPY command");
 
     check(mygpu_command_buffer_validate(command_buffer) == 0, "validate small-source BUFFER_COPY command");
 
@@ -1613,10 +1579,8 @@ static void test_buffer_copy_destination_too_small(void)
     command.dst_address = mygpu_buffer_address(destination_buffer);
     command.size = sizeof(uint32_t) * 2;
 
-    check(
-        mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
-        "write small-destination BUFFER_COPY command"
-    );
+    check(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0,
+          "write small-destination BUFFER_COPY command");
 
     check(mygpu_command_buffer_validate(command_buffer) == 0, "validate small-destination BUFFER_COPY command");
 
@@ -1649,7 +1613,7 @@ int main(void)
     test_copy_overlap();
     test_copy_zero_size();
     test_copy_outside();
-    
+
     test_present();
 
     test_validate_null();

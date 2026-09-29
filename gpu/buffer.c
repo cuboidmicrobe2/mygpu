@@ -5,7 +5,8 @@
 #include "mygpu/gpu_internal.h"
 #include "mygpu/memory.h"
 
-struct mygpu_buffer {
+struct mygpu_buffer
+{
     struct mygpu *gpu;
     uint32_t address;
     size_t size;
@@ -51,7 +52,7 @@ void mygpu_buffer_destroy(struct mygpu_buffer *buffer)
     current = buffer->gpu->buffers;
     previous = NULL;
 
-    while(current != NULL) {
+    while (current != NULL) {
         if (current == buffer) {
             if (previous == NULL) {
                 buffer->gpu->buffers = current->next;
@@ -132,8 +133,7 @@ struct mygpu_buffer *mygpu_buffer_lookup(struct mygpu *gpu, uint32_t address)
     buffer = gpu->buffers;
 
     while (buffer != NULL) {
-        if (address >= buffer->address &&
-            address - buffer->address < buffer->size) {
+        if (address >= buffer->address && address - buffer->address < buffer->size) {
             return buffer;
         }
 
@@ -142,7 +142,6 @@ struct mygpu_buffer *mygpu_buffer_lookup(struct mygpu *gpu, uint32_t address)
 
     return NULL;
 }
-
 
 size_t mygpu_buffer_offset(const struct mygpu_buffer *buffer, uint32_t address)
 {

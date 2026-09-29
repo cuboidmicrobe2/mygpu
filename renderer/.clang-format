@@ -1,0 +1,6 @@
+# Style for the C++ renderer: same as the root C style, but every brace on the same line.
+BasedOnStyle: InheritParentConfig
+BreakBeforeBraces: Attach
+AccessModifierOffset: -4
+PackConstructorInitializers: Never
+AllowShortFunctionsOnASingleLine: Empty

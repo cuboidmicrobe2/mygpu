@@ -84,13 +84,7 @@ static void test_write_and_read(void)
 static void test_write_bytes(void)
 {
     struct mygpu_memory *memory;
-    uint8_t write_data[] = {
-        0x10,
-        0x20,
-        0x30,
-        0x40,
-        0x50
-    };
+    uint8_t write_data[] = {0x10, 0x20, 0x30, 0x40, 0x50};
 
     uint8_t read_data[sizeof(write_data)];
     int result;

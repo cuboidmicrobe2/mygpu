@@ -135,14 +135,9 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
             return -1;
         }
 
-        memcpy(
-            &opcode,
-            buffer->data + offset,
-            sizeof(opcode)
-        );
+        memcpy(&opcode, buffer->data + offset, sizeof(opcode));
 
-        switch (opcode)
-        {
+        switch (opcode) {
         case MYGPU_CMD_CLEAR: {
             if (buffer->used - offset < sizeof(struct mygpu_cmd_clear)) {
                 return -1;
@@ -151,7 +146,7 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
             offset += sizeof(struct mygpu_cmd_clear);
             break;
         }
-        
+
         case MYGPU_CMD_DRAW_RECT: {
             struct mygpu_cmd_draw_rect command;
 
@@ -159,11 +154,7 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
                 return -1;
             }
 
-            memcpy(
-                &command,
-                buffer->data + offset,
-                sizeof(command)
-            );
+            memcpy(&command, buffer->data + offset, sizeof(command));
 
             if (command.width == 0 || command.height == 0) {
                 return -1;
@@ -174,8 +165,7 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
         }
 
         case MYGPU_CMD_COPY: {
-            if (buffer->used - offset <
-                sizeof(struct mygpu_cmd_copy)) {
+            if (buffer->used - offset < sizeof(struct mygpu_cmd_copy)) {
                 return -1;
             }
 
@@ -189,9 +179,8 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
         }
 
         case MYGPU_CMD_BUFFER_COPY: {
-            if (buffer->used - offset <
-                sizeof(struct mygpu_cmd_buffer_copy)) {
-            
+            if (buffer->used - offset < sizeof(struct mygpu_cmd_buffer_copy)) {
+
                 return -1;
             }
 
@@ -202,20 +191,14 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
         case MYGPU_CMD_DRAW_TRIANGLES: {
             struct mygpu_cmd_draw_triangles command;
 
-            if (buffer->used - offset < 
-                sizeof(struct mygpu_cmd_draw_triangles)) {
-                    
+            if (buffer->used - offset < sizeof(struct mygpu_cmd_draw_triangles)) {
+
                 return -1;
             }
 
-            memcpy(
-                &command, 
-                buffer->data + offset, 
-                sizeof(command))
-            ;
+            memcpy(&command, buffer->data + offset, sizeof(command));
 
-            if (command.vertex_count == 0 ||
-                command.vertex_count % 3 != 0) {
+            if (command.vertex_count == 0 || command.vertex_count % 3 != 0) {
                 return -1;
             }
 
@@ -226,20 +209,14 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
         case MYGPU_CMD_DRAW_INDEXED: {
             struct mygpu_cmd_draw_indexed command;
 
-            if (buffer->used - offset <
-                sizeof(struct mygpu_cmd_draw_indexed)) {
+            if (buffer->used - offset < sizeof(struct mygpu_cmd_draw_indexed)) {
 
                 return -1;
             }
 
-            memcpy(
-                &command,
-                buffer->data + offset,
-                sizeof(command)
-            );
+            memcpy(&command, buffer->data + offset, sizeof(command));
 
-            if (command.index_count == 0 ||
-                command.index_count % 3 != 0) {
+            if (command.index_count == 0 || command.index_count % 3 != 0) {
 
                 return -1;
             }
@@ -247,7 +224,7 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
             offset += sizeof(command);
             break;
         }
-        
+
         default:
             return -1;
         }
@@ -273,8 +250,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
         memcpy(&opcode, buffer->data + offset, sizeof(opcode));
 
-        switch (opcode)
-        {
+        switch (opcode) {
         case MYGPU_CMD_CLEAR: {
             struct mygpu_cmd_clear command;
 
@@ -289,7 +265,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
         case MYGPU_CMD_DRAW_RECT: {
             struct mygpu_cmd_draw_rect command;
 
-            uint32_t framebuffer_width; 
+            uint32_t framebuffer_width;
             uint32_t framebuffer_height;
 
             uint64_t end_x;
@@ -302,16 +278,15 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             framebuffer_height = mygpu_framebuffer_height(gpu->framebuffer);
 
             /* Rectangle has no visible pixels */
-            if (command.x >= framebuffer_width ||
-                command.y >= framebuffer_height) {
+            if (command.x >= framebuffer_width || command.y >= framebuffer_height) {
 
-                    offset += sizeof(command);
-                    break;
-                }
-            
+                offset += sizeof(command);
+                break;
+            }
+
             end_x = (uint64_t)command.x + command.width;
             end_y = (uint64_t)command.y + command.height;
-            
+
             /* Clip ending coordinates */
             if (end_x > framebuffer_width) {
                 end_x = framebuffer_width;
@@ -323,7 +298,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
             /* Draw visible portion */
             for (uint32_t y = command.y; y < end_y; y++) {
-                for(uint32_t x = command.x; x < end_x; x++) {
+                for (uint32_t x = command.x; x < end_x; x++) {
                     int result = mygpu_framebuffer_set_pixel(gpu->framebuffer, x, y, command.color);
 
                     if (result != 0) {
@@ -360,10 +335,8 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             framebuffer_width = mygpu_framebuffer_width(gpu->framebuffer);
             framebuffer_height = mygpu_framebuffer_height(gpu->framebuffer);
 
-            if (command.src_x >= framebuffer_width ||
-                command.src_y >= framebuffer_height ||
-                command.dst_x >= framebuffer_width ||
-                command.dst_y >= framebuffer_height) {
+            if (command.src_x >= framebuffer_width || command.src_y >= framebuffer_height ||
+                command.dst_x >= framebuffer_width || command.dst_y >= framebuffer_height) {
 
                 offset += sizeof(command);
                 break;
@@ -419,11 +392,8 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                     uint32_t color;
                     size_t index = (size_t)y * command.width + x;
 
-                    if (mygpu_framebuffer_get_pixel(
-                            gpu->framebuffer,
-                            command.src_x + x,
-                            command.src_y + y,
-                            &color) != 0) {
+                    if (mygpu_framebuffer_get_pixel(gpu->framebuffer, command.src_x + x, command.src_y + y, &color) !=
+                        0) {
 
                         free(pixels);
                         return -1;
@@ -437,12 +407,9 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                 for (uint32_t x = 0; x < command.width; x++) {
                     size_t index = (size_t)y * command.width + x;
 
-                    if (mygpu_framebuffer_set_pixel(
-                        gpu->framebuffer,
-                        command.dst_x + x,
-                        command.dst_y + y,
-                        pixels[index]) != 0) {
-                        
+                    if (mygpu_framebuffer_set_pixel(gpu->framebuffer, command.dst_x + x, command.dst_y + y,
+                                                    pixels[index]) != 0) {
+
                         free(pixels);
                         return -1;
                     }
@@ -470,11 +437,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             size_t destination_offset;
             uint8_t *data;
 
-            memcpy(
-                &command,
-                buffer->data + offset,
-                sizeof(command)
-            );
+            memcpy(&command, buffer->data + offset, sizeof(command));
 
             if (command.size == 0) {
                 offset += sizeof(command);
@@ -495,16 +458,13 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
 
             destination_offset = mygpu_buffer_offset(destination_buffer, command.dst_address);
 
-            if (source_offset == SIZE_MAX ||
-                destination_offset == SIZE_MAX) {
-                    
+            if (source_offset == SIZE_MAX || destination_offset == SIZE_MAX) {
+
                 return -1;
             }
 
-            if ((size_t)command.size >
-                    mygpu_buffer_size(source_buffer) - source_offset ||
-                (size_t)command.size >
-                    mygpu_buffer_size(destination_buffer) - destination_offset) {
+            if ((size_t)command.size > mygpu_buffer_size(source_buffer) - source_offset ||
+                (size_t)command.size > mygpu_buffer_size(destination_buffer) - destination_offset) {
 
                 return -1;
             }
@@ -515,22 +475,14 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                 return -1;
             }
 
-            if (mygpu_memory_read(
-                gpu->memory,
-                command.src_address,
-                data,
-                command.size) != 0) {
+            if (mygpu_memory_read(gpu->memory, command.src_address, data, command.size) != 0) {
 
                 free(data);
                 return -1;
             }
 
-            if (mygpu_memory_write(
-                gpu->memory,
-                command.dst_address,
-                data,
-                command.size) != 0) {
-                
+            if (mygpu_memory_write(gpu->memory, command.dst_address, data, command.size) != 0) {
+
                 free(data);
                 return -1;
             }
@@ -550,11 +502,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             uint64_t last_vertex;
             uint32_t vertex_address;
 
-            memcpy(
-                &command, 
-                buffer->data + offset, 
-                sizeof(command)
-            );
+            memcpy(&command, buffer->data + offset, sizeof(command));
 
             vertex_buffer = mygpu_buffer_lookup(gpu, command.vertex_address);
 
@@ -599,38 +547,22 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                 struct mygpu_vertex v1;
                 struct mygpu_vertex v2;
 
-                if (mygpu_vertex_fetch(
-                    gpu->memory, 
-                    vertex_address, 
-                    vertex_index, 
-                    &v0) != 0) {
+                if (mygpu_vertex_fetch(gpu->memory, vertex_address, vertex_index, &v0) != 0) {
 
                     return -1;
                 }
 
-                if (mygpu_vertex_fetch(
-                    gpu->memory, 
-                    vertex_address, 
-                    vertex_index + 1, 
-                    &v1) != 0) {
+                if (mygpu_vertex_fetch(gpu->memory, vertex_address, vertex_index + 1, &v1) != 0) {
 
                     return -1;
                 }
 
-                if (mygpu_vertex_fetch(
-                    gpu->memory, 
-                    vertex_address, 
-                    vertex_index + 2, 
-                    &v2) != 0) {
+                if (mygpu_vertex_fetch(gpu->memory, vertex_address, vertex_index + 2, &v2) != 0) {
 
                     return -1;
                 }
 
-                if (mygpu_rasterize_triangle(
-                    gpu->framebuffer,
-                    &v0,
-                    &v1,
-                    &v2) != 0) {
+                if (mygpu_rasterize_triangle(gpu->framebuffer, &v0, &v1, &v2) != 0) {
 
                     return -1;
                 }
@@ -651,11 +583,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             uint64_t last_index;
             uint32_t vertex_address;
 
-            memcpy(
-                &command,
-                buffer->data + offset,
-                sizeof(command)
-            );
+            memcpy(&command, buffer->data + offset, sizeof(command));
 
             vertex_buffer = mygpu_buffer_lookup(gpu, command.vertex_address);
             if (vertex_buffer == NULL) {
@@ -713,80 +641,55 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                 struct mygpu_vertex v1;
                 struct mygpu_vertex v2;
 
-                if (mygpu_memory_read(
-                    gpu->memory,
-                    command.index_address + (index_position * sizeof(uint32_t)),
-                    &index0,
-                    sizeof(index0)) != 0) {
-                    
+                if (mygpu_memory_read(gpu->memory, command.index_address + (index_position * sizeof(uint32_t)), &index0,
+                                      sizeof(index0)) != 0) {
+
                     return -1;
                 }
 
-                if (mygpu_memory_read(
-                    gpu->memory,
-                    command.index_address + ((index_position + 1) * sizeof(uint32_t)),
-                    &index1,
-                    sizeof(index1)) != 0) {
-                    
+                if (mygpu_memory_read(gpu->memory, command.index_address + ((index_position + 1) * sizeof(uint32_t)),
+                                      &index1, sizeof(index1)) != 0) {
+
                     return -1;
                 }
 
-                if (mygpu_memory_read(
-                    gpu->memory,
-                    command.index_address + ((index_position + 2) * sizeof(uint32_t)),
-                    &index2,
-                    sizeof(index2)) != 0) {
-                    
+                if (mygpu_memory_read(gpu->memory, command.index_address + ((index_position + 2) * sizeof(uint32_t)),
+                                      &index2, sizeof(index2)) != 0) {
+
                     return -1;
                 }
 
                 if (index0 >= vertex_size_remaining / sizeof(struct mygpu_vertex)) {
-                    
+
                     return -1;
                 }
 
                 if (index1 >= vertex_size_remaining / sizeof(struct mygpu_vertex)) {
-                    
+
                     return -1;
                 }
 
                 if (index2 >= vertex_size_remaining / sizeof(struct mygpu_vertex)) {
-                    
-                    return -1;
-                }
-
-                if (mygpu_vertex_fetch(
-                    gpu->memory,
-                    vertex_address,
-                    index0,
-                    &v0) != 0) {
 
                     return -1;
                 }
 
-                if (mygpu_vertex_fetch(
-                    gpu->memory,
-                    vertex_address,
-                    index1,
-                    &v1) != 0) {
+                if (mygpu_vertex_fetch(gpu->memory, vertex_address, index0, &v0) != 0) {
 
                     return -1;
                 }
 
-                if (mygpu_vertex_fetch(
-                    gpu->memory,
-                    vertex_address,
-                    index2,
-                    &v2) != 0) {
+                if (mygpu_vertex_fetch(gpu->memory, vertex_address, index1, &v1) != 0) {
 
                     return -1;
                 }
 
-                if (mygpu_rasterize_triangle(
-                    gpu->framebuffer,
-                    &v0,
-                    &v1,
-                    &v2) != 0) {
+                if (mygpu_vertex_fetch(gpu->memory, vertex_address, index2, &v2) != 0) {
+
+                    return -1;
+                }
+
+                if (mygpu_rasterize_triangle(gpu->framebuffer, &v0, &v1, &v2) != 0) {
 
                     return -1;
                 }
@@ -795,7 +698,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             offset += sizeof(command);
             break;
         }
-        
+
         default:
             return -1;
         }
