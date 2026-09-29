@@ -6,7 +6,16 @@
 struct mygpu_framebuffer;
 struct mygpu_vertex;
 
-int mygpu_rasterize_triangle(struct mygpu_framebuffer *framebuffer, const struct mygpu_vertex *v0,
-                             const struct mygpu_vertex *v1, const struct mygpu_vertex *v2);
+struct mygpu_rect
+{
+    uint32_t x;
+    uint32_t y;
+    uint32_t width;
+    uint32_t height;
+};
+
+int mygpu_rasterize_triangle(struct mygpu_framebuffer *framebuffer, const struct mygpu_rect *clip,
+                             const struct mygpu_vertex *v0, const struct mygpu_vertex *v1,
+                             const struct mygpu_vertex *v2);
 
 #endif

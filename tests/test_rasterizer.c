@@ -32,7 +32,9 @@ static void test_triangle(void)
     v2.y = 12.0f;
     v2.color = 0xff0000ffu;
 
-    require(mygpu_rasterize_triangle(framebuffer, &v0, &v1, &v2) == 0);
+    struct mygpu_rect clip = {0, 0, 16, 16};
+
+    require(mygpu_rasterize_triangle(framebuffer, &clip, &v0, &v1, &v2) == 0);
 
     require(mygpu_framebuffer_get_pixel(framebuffer, 3, 3, &color) == 0);
 

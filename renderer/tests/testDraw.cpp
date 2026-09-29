@@ -41,6 +41,44 @@ static void TestDrawRect() {
     REQUIRE(!commandBuffer->DrawRect(10, 10, 20, 0, rectColor));
 }
 
+static void TestScissor() {
+    myrenderer::Renderer renderer;
+
+    REQUIRE(renderer.Valid());
+
+    constexpr uint32_t background = 0x12345678u;
+    constexpr uint32_t triangleColor = 0xFF0000FFu;
+
+    const myrenderer::Vertex vertices[3] = {{0.0f, 0.0f, triangleColor},
+                                            {80.0f, 0.0f, triangleColor},
+                                            {0.0f, 80.0f, triangleColor}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
+    auto commands = renderer.CreateCommandBuffer(1024);
+
+    REQUIRE(vertexBuffer != nullptr);
+    REQUIRE(commands != nullptr);
+
+    REQUIRE(commands->Clear(background));
+    REQUIRE(commands->SetScissor(10, 10, 10, 10));
+    REQUIRE(commands->BindVertexBuffer(*vertexBuffer, 0));
+    REQUIRE(commands->DrawTriangles(3, 0));
+
+    REQUIRE(renderer.BeginFrame());
+    REQUIRE(renderer.EndFrame(*commands));
+
+    uint32_t color = 0;
+
+    REQUIRE(renderer.GetPixel(15, 15, color));
+    REQUIRE(color == triangleColor);
+
+    REQUIRE(renderer.GetPixel(5, 5, color));
+    REQUIRE(color == background);
+
+    REQUIRE(renderer.GetPixel(30, 30, color));
+    REQUIRE(color == background);
+}
+
 static void TestMultipleTriangles() {
     myrenderer::Renderer renderer;
 
@@ -418,6 +456,7 @@ int main() {
     RUN_TEST(TestIndexedFirstIndex);
     RUN_TEST(TestIndexedVertexBufferOffset);
     RUN_TEST(TestDrawTrianglesRangeValidation);
+    RUN_TEST(TestScissor);
 
     return TEST_FINISH();
 }

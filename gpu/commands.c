@@ -178,6 +178,15 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
             break;
         }
 
+        case MYGPU_CMD_SET_SCISSOR: {
+            if (buffer->used - offset < sizeof(struct mygpu_cmd_set_scissor)) {
+                return -1;
+            }
+
+            offset += sizeof(struct mygpu_cmd_set_scissor);
+            break;
+        }
+
         case MYGPU_CMD_BUFFER_COPY: {
             if (buffer->used - offset < sizeof(struct mygpu_cmd_buffer_copy)) {
 
@@ -236,6 +245,7 @@ int mygpu_command_buffer_validate(const struct mygpu_command_buffer *buffer)
 int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer *buffer)
 {
     uint32_t offset = 0;
+    struct mygpu_rect scissor;
 
     if (gpu == NULL || buffer == NULL) {
         return -1;
@@ -244,6 +254,12 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
     if (mygpu_command_buffer_validate(buffer) != 0) {
         return -1;
     }
+
+    /* Every execution starts with a scissor covering the whole framebuffer. */
+    scissor.x = 0;
+    scissor.y = 0;
+    scissor.width = mygpu_framebuffer_width(gpu->framebuffer);
+    scissor.height = mygpu_framebuffer_height(gpu->framebuffer);
 
     while (offset < buffer->used) {
         uint32_t opcode;
@@ -429,6 +445,20 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
             break;
         }
 
+        case MYGPU_CMD_SET_SCISSOR: {
+            struct mygpu_cmd_set_scissor command;
+
+            memcpy(&command, buffer->data + offset, sizeof(command));
+
+            scissor.x = command.x;
+            scissor.y = command.y;
+            scissor.width = command.width;
+            scissor.height = command.height;
+
+            offset += sizeof(command);
+            break;
+        }
+
         case MYGPU_CMD_BUFFER_COPY: {
             struct mygpu_cmd_buffer_copy command;
             struct mygpu_buffer *source_buffer;
@@ -562,7 +592,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                     return -1;
                 }
 
-                if (mygpu_rasterize_triangle(gpu->framebuffer, &v0, &v1, &v2) != 0) {
+                if (mygpu_rasterize_triangle(gpu->framebuffer, &scissor, &v0, &v1, &v2) != 0) {
 
                     return -1;
                 }
@@ -689,7 +719,7 @@ int mygpu_command_buffer_execute(struct mygpu *gpu, struct mygpu_command_buffer 
                     return -1;
                 }
 
-                if (mygpu_rasterize_triangle(gpu->framebuffer, &v0, &v1, &v2) != 0) {
+                if (mygpu_rasterize_triangle(gpu->framebuffer, &scissor, &v0, &v1, &v2) != 0) {
 
                     return -1;
                 }

@@ -32,6 +32,8 @@ public:
 
     bool DrawRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color);
 
+    bool SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+
     bool BindVertexBuffer(const Buffer &vertexBuffer, size_t offset);
 
     bool DrawTriangles(uint32_t vertexCount, uint32_t firstVertex);

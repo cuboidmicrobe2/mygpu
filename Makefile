@@ -58,6 +58,7 @@ DRAW_TRIANGLES_TEST = $(TEST_BUILD_DIR)/test_draw_triangles
 VERTEX_TEST = $(TEST_BUILD_DIR)/test_vertex
 RASTERIZER_TEST = $(TEST_BUILD_DIR)/test_rasterizer
 FENCE_TEST = $(TEST_BUILD_DIR)/test_fence
+SCISSOR_TEST = $(TEST_BUILD_DIR)/test_scissor
 
 # --------------------------------------------------
 # Test source files
@@ -75,6 +76,7 @@ DRAW_TRIANGLES_TEST_SOURCE = tests/test_draw_triangles.c
 VERTEX_TEST_SOURCE = tests/test_vertex.c
 RASTERIZER_TEST_SOURCE = tests/test_rasterizer.c
 FENCE_TEST_SOURCE = tests/test_fence.c
+SCISSOR_TEST_SOURCE = tests/test_scissor.c
 
 # --------------------------------------------------
 # Phony targets
@@ -93,6 +95,7 @@ FENCE_TEST_SOURCE = tests/test_fence.c
 	test-vertex \
 	test-rasterizer \
 	test-fence \
+	test-scissor \
 	clean
 
 # --------------------------------------------------
@@ -111,7 +114,8 @@ all: $(LIBRARY) \
 	$(DRAW_TRIANGLES_TEST) \
 	$(VERTEX_TEST) \
 	$(RASTERIZER_TEST) \
-	$(FENCE_TEST)
+	$(FENCE_TEST) \
+	$(SCISSOR_TEST)
 
 # --------------------------------------------------
 # Build tests
@@ -165,6 +169,10 @@ $(FENCE_TEST): $(LIBRARY) $(FENCE_TEST_SOURCE)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(FENCE_TEST_SOURCE) $(LIBRARY) -o $@
 
+$(SCISSOR_TEST): $(LIBRARY) $(SCISSOR_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(SCISSOR_TEST_SOURCE) $(LIBRARY) -o $@
+
 # --------------------------------------------------
 # Run tests
 # --------------------------------------------------
@@ -181,7 +189,8 @@ TEST_BINARIES = \
 	$(DRAW_TRIANGLES_TEST) \
 	$(VERTEX_TEST) \
 	$(RASTERIZER_TEST) \
-	$(FENCE_TEST)
+	$(FENCE_TEST) \
+	$(SCISSOR_TEST)
 
 $(TEST_BINARIES): tests/test.h
 
@@ -226,6 +235,9 @@ test-rasterizer: $(RASTERIZER_TEST)
 
 test-fence: $(FENCE_TEST)
 	@./$(FENCE_TEST)
+
+test-scissor: $(SCISSOR_TEST)
+	@./$(SCISSOR_TEST)
 
 # --------------------------------------------------
 # Clean

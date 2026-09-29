@@ -10,11 +10,18 @@ static float edge_function(float ax, float ay, float bx, float by, float px, flo
     return (px - ax) * (by - ay) - (py - ay) * (bx - ax);
 }
 
-int mygpu_rasterize_triangle(struct mygpu_framebuffer *framebuffer, const struct mygpu_vertex *v0,
-                             const struct mygpu_vertex *v1, const struct mygpu_vertex *v2)
+int mygpu_rasterize_triangle(struct mygpu_framebuffer *framebuffer, const struct mygpu_rect *clip,
+                             const struct mygpu_vertex *v0, const struct mygpu_vertex *v1,
+                             const struct mygpu_vertex *v2)
 {
     uint32_t framebuffer_width;
     uint32_t framebuffer_height;
+
+    /* Pixels that may be written: [clip_left, clip_right) x [clip_top, clip_bottom). */
+    uint64_t clip_left;
+    uint64_t clip_top;
+    uint64_t clip_right;
+    uint64_t clip_bottom;
 
     float min_x;
     float min_y;
@@ -28,13 +35,28 @@ int mygpu_rasterize_triangle(struct mygpu_framebuffer *framebuffer, const struct
 
     float area;
 
-    if (framebuffer == NULL || v0 == NULL || v1 == NULL || v2 == NULL) {
+    if (framebuffer == NULL || clip == NULL || v0 == NULL || v1 == NULL || v2 == NULL) {
 
         return -1;
     }
 
     framebuffer_width = mygpu_framebuffer_width(framebuffer);
     framebuffer_height = mygpu_framebuffer_height(framebuffer);
+
+    /* 64-bit so x + width can't wrap around; then keep the rect inside the framebuffer. */
+    clip_left = clip->x;
+    clip_top = clip->y;
+    clip_right = (uint64_t)clip->x + clip->width;
+    clip_bottom = (uint64_t)clip->y + clip->height;
+
+    if (clip_right > framebuffer_width)
+        clip_right = framebuffer_width;
+    if (clip_bottom > framebuffer_height)
+        clip_bottom = framebuffer_height;
+
+    if (clip_left >= clip_right || clip_top >= clip_bottom) {
+        return 0;
+    }
 
     area = edge_function(v0->x, v0->y, v1->x, v1->y, v2->x, v2->y);
 
@@ -67,7 +89,8 @@ int mygpu_rasterize_triangle(struct mygpu_framebuffer *framebuffer, const struct
     if (v2->y > max_y)
         max_y = v2->y;
 
-    if (max_x < 0.0f || max_y < 0.0f || min_x >= (float)framebuffer_width || min_y >= (float)framebuffer_height) {
+    if (max_x < (float)clip_left || max_y < (float)clip_top || min_x >= (float)clip_right ||
+        min_y >= (float)clip_bottom) {
         return 0;
     }
 
@@ -76,17 +99,17 @@ int mygpu_rasterize_triangle(struct mygpu_framebuffer *framebuffer, const struct
     end_x = (int32_t)max_x;
     end_y = (int32_t)max_y;
 
-    if (start_x < 0)
-        start_x = 0;
-    if (start_y < 0)
-        start_y = 0;
+    if (start_x < (int32_t)clip_left)
+        start_x = (int32_t)clip_left;
+    if (start_y < (int32_t)clip_top)
+        start_y = (int32_t)clip_top;
 
-    if (end_x >= (int32_t)framebuffer_width) {
-        end_x = (int32_t)framebuffer_width - 1;
+    if (end_x >= (int32_t)clip_right) {
+        end_x = (int32_t)clip_right - 1;
     }
 
-    if (end_y >= (int32_t)framebuffer_height) {
-        end_y = (int32_t)framebuffer_height - 1;
+    if (end_y >= (int32_t)clip_bottom) {
+        end_y = (int32_t)clip_bottom - 1;
     }
 
     for (int32_t y = start_y; y <= end_y; y++) {

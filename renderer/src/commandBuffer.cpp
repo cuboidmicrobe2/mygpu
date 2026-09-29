@@ -107,6 +107,22 @@ bool CommandBuffer::DrawRect(uint32_t x, uint32_t y, uint32_t width, uint32_t he
     return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
 }
 
+bool CommandBuffer::SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
+    if (m_commandBuffer == nullptr) {
+        return false;
+    }
+
+    struct mygpu_cmd_set_scissor command;
+
+    command.opcode = MYGPU_CMD_SET_SCISSOR;
+    command.x = x;
+    command.y = y;
+    command.width = width;
+    command.height = height;
+
+    return mygpu_command_buffer_write(m_commandBuffer, &command, sizeof(command)) == 0;
+}
+
 bool CommandBuffer::BindVertexBuffer(const Buffer &vertexBuffer, size_t offset) {
     if (m_commandBuffer == nullptr || !vertexBuffer.Valid() || offset > vertexBuffer.Size()) {
         return false;

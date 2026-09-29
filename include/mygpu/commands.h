@@ -11,7 +11,8 @@ enum mygpu_opcode
     MYGPU_CMD_PRESENT = 0x04,
     MYGPU_CMD_BUFFER_COPY = 0x05,
     MYGPU_CMD_DRAW_TRIANGLES = 0x06,
-    MYGPU_CMD_DRAW_INDEXED = 0x07
+    MYGPU_CMD_DRAW_INDEXED = 0x07,
+    MYGPU_CMD_SET_SCISSOR = 0x08
 };
 
 struct mygpu;
@@ -69,6 +70,15 @@ struct mygpu_cmd_draw_indexed
     uint32_t index_address;
     uint32_t index_count;
     uint32_t first_index;
+};
+
+struct mygpu_cmd_set_scissor
+{
+    uint32_t opcode;
+    uint32_t x;
+    uint32_t y;
+    uint32_t width;
+    uint32_t height;
 };
 
 struct mygpu_command_buffer *mygpu_command_buffer_create(uint32_t size);
