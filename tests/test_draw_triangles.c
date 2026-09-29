@@ -1427,6 +1427,129 @@ static void test_indexed_vertex_offset_index_out_of_bounds(void)
     mygpu_destroy(gpu);
 }
 
+static void test_indexed_first_index_overflow(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *vertex_buffer;
+    struct mygpu_buffer *decoy_buffer;
+    struct mygpu_buffer *index_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_vertex vertices[3];
+    uint32_t indices[3];
+
+    struct mygpu_cmd_draw_indexed command;
+
+    gpu = mygpu_create();
+    assert(gpu != NULL);
+
+    vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
+    vertices[1] = (struct mygpu_vertex){30.0f, 10.0f, 0xff0000ffu};
+    vertices[2] = (struct mygpu_vertex){20.0f, 30.0f, 0xff0000ffu};
+
+    vertex_buffer = create_vertex_buffer(gpu, vertices, 3);
+
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+
+    /* valid indices placed directly before the index buffer, so a wrapped index address reads a drawable triangle */
+    decoy_buffer = mygpu_buffer_create(gpu, sizeof(indices));
+
+    assert(decoy_buffer != NULL);
+
+    assert(mygpu_buffer_write(decoy_buffer, 0, indices, sizeof(indices)) == 0);
+
+    index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
+
+    assert(index_buffer != NULL);
+
+    assert(mygpu_buffer_address(index_buffer) == mygpu_buffer_address(decoy_buffer) + sizeof(indices));
+
+    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+
+    command_buffer = mygpu_command_buffer_create(64);
+    assert(command_buffer != NULL);
+
+    /* first_index + index_count wraps to 0 in 32-bit arithmetic */
+    command.opcode = MYGPU_CMD_DRAW_INDEXED;
+    command.vertex_address = mygpu_buffer_address(vertex_buffer);
+    command.vertex_offset = 0;
+    command.index_address = mygpu_buffer_address(index_buffer);
+    command.index_count = 3;
+    command.first_index = UINT32_MAX - 2u;
+
+    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+
+    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+
+    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(index_buffer);
+    mygpu_buffer_destroy(decoy_buffer);
+    mygpu_buffer_destroy(vertex_buffer);
+    mygpu_destroy(gpu);
+}
+
+static void test_indexed_partial_vertex_out_of_bounds(void)
+{
+    struct mygpu *gpu;
+    struct mygpu_buffer *vertex_buffer;
+    struct mygpu_buffer *index_buffer;
+    struct mygpu_command_buffer *command_buffer;
+
+    struct mygpu_vertex vertices[3];
+    uint32_t indices[3];
+
+    struct mygpu_cmd_draw_indexed command;
+
+    gpu = mygpu_create();
+    assert(gpu != NULL);
+
+    vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
+    vertices[1] = (struct mygpu_vertex){30.0f, 10.0f, 0xff0000ffu};
+    vertices[2] = (struct mygpu_vertex){20.0f, 30.0f, 0xff0000ffu};
+
+    /* room for three vertices plus four bytes: vertex 3 starts inside the buffer but does not fit */
+    vertex_buffer = mygpu_buffer_create(gpu, sizeof(vertices) + 4u);
+
+    assert(vertex_buffer != NULL);
+
+    assert(mygpu_buffer_write(vertex_buffer, 0, vertices, sizeof(vertices)) == 0);
+
+    index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
+
+    assert(index_buffer != NULL);
+
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 3;
+
+    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+
+    command_buffer = mygpu_command_buffer_create(64);
+    assert(command_buffer != NULL);
+
+    command.opcode = MYGPU_CMD_DRAW_INDEXED;
+    command.vertex_address = mygpu_buffer_address(vertex_buffer);
+    command.vertex_offset = 0;
+    command.index_address = mygpu_buffer_address(index_buffer);
+    command.index_count = 3;
+    command.first_index = 0;
+
+    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+
+    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+
+    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+
+    mygpu_command_buffer_destroy(command_buffer);
+    mygpu_buffer_destroy(index_buffer);
+    mygpu_buffer_destroy(vertex_buffer);
+    mygpu_destroy(gpu);
+}
+
 int main(void)
 {
     test_basic_triangle();
@@ -1448,6 +1571,8 @@ int main(void)
     test_indexed_unknown_index_buffer();
     test_indexed_index_buffer_too_small();
     test_indexed_vertex_index_out_of_bounds();
+    test_indexed_first_index_overflow();
+    test_indexed_partial_vertex_out_of_bounds();
 
     test_indexed_vertex_buffer_offset();
     test_indexed_vertex_offset_past_end();
