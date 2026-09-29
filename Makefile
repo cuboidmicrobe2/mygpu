@@ -55,6 +55,9 @@ VERTEX_BUFFER_TEST = $(TEST_BUILD_DIR)/test_vertex_buffer
 COMMANDS_TEST = $(TEST_BUILD_DIR)/test_commands
 QUEUE_TEST = $(TEST_BUILD_DIR)/test_queue
 DRAW_TRIANGLES_TEST = $(TEST_BUILD_DIR)/test_draw_triangles
+VERTEX_TEST = $(TEST_BUILD_DIR)/test_vertex
+RASTERIZER_TEST = $(TEST_BUILD_DIR)/test_rasterizer
+FENCE_TEST = $(TEST_BUILD_DIR)/test_fence
 
 # --------------------------------------------------
 # Test source files
@@ -69,6 +72,9 @@ VERTEX_BUFFER_TEST_SOURCE = tests/test_vertex_buffer.c
 COMMANDS_TEST_SOURCE = tests/test_commands.c
 QUEUE_TEST_SOURCE = tests/test_queue.c
 DRAW_TRIANGLES_TEST_SOURCE = tests/test_draw_triangles.c
+VERTEX_TEST_SOURCE = tests/test_vertex.c
+RASTERIZER_TEST_SOURCE = tests/test_rasterizer.c
+FENCE_TEST_SOURCE = tests/test_fence.c
 
 # --------------------------------------------------
 # Phony targets
@@ -84,6 +90,9 @@ DRAW_TRIANGLES_TEST_SOURCE = tests/test_draw_triangles.c
 	test-commands \
 	test-queue \
 	test-draw-triangles \
+	test-vertex \
+	test-rasterizer \
+	test-fence \
 	clean
 
 # --------------------------------------------------
@@ -99,7 +108,10 @@ all: $(LIBRARY) \
 	$(VERTEX_BUFFER_TEST) \
 	$(COMMANDS_TEST) \
 	$(QUEUE_TEST) \
-	$(DRAW_TRIANGLES_TEST)
+	$(DRAW_TRIANGLES_TEST) \
+	$(VERTEX_TEST) \
+	$(RASTERIZER_TEST) \
+	$(FENCE_TEST)
 
 # --------------------------------------------------
 # Build tests
@@ -141,6 +153,18 @@ $(DRAW_TRIANGLES_TEST): $(LIBRARY) $(DRAW_TRIANGLES_TEST_SOURCE)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(DRAW_TRIANGLES_TEST_SOURCE) $(LIBRARY) -o $@
 
+$(VERTEX_TEST): $(LIBRARY) $(VERTEX_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(VERTEX_TEST_SOURCE) $(LIBRARY) -o $@
+
+$(RASTERIZER_TEST): $(LIBRARY) $(RASTERIZER_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(RASTERIZER_TEST_SOURCE) $(LIBRARY) -o $@
+
+$(FENCE_TEST): $(LIBRARY) $(FENCE_TEST_SOURCE)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(FENCE_TEST_SOURCE) $(LIBRARY) -o $@
+
 # --------------------------------------------------
 # Run tests
 # --------------------------------------------------
@@ -154,7 +178,10 @@ TEST_BINARIES = \
 	$(VERTEX_BUFFER_TEST) \
 	$(COMMANDS_TEST) \
 	$(QUEUE_TEST) \
-	$(DRAW_TRIANGLES_TEST)
+	$(DRAW_TRIANGLES_TEST) \
+	$(VERTEX_TEST) \
+	$(RASTERIZER_TEST) \
+	$(FENCE_TEST)
 
 $(TEST_BINARIES): tests/test.h
 
@@ -190,6 +217,15 @@ test-queue: $(QUEUE_TEST)
 
 test-draw-triangles: $(DRAW_TRIANGLES_TEST)
 	@./$(DRAW_TRIANGLES_TEST)
+
+test-vertex: $(VERTEX_TEST)
+	@./$(VERTEX_TEST)
+
+test-rasterizer: $(RASTERIZER_TEST)
+	@./$(RASTERIZER_TEST)
+
+test-fence: $(FENCE_TEST)
+	@./$(FENCE_TEST)
 
 # --------------------------------------------------
 # Clean
