@@ -123,17 +123,16 @@ bool CommandBuffer::DrawTriangles(uint32_t vertexCount, uint32_t firstVertex) {
         return false;
     }
 
-    if (vertexCount > SIZE_MAX / sizeof(Vertex)) {
-        return false;
-    }
-
     if (vertexCount % 3 != 0) {
         return false;
     }
 
-    const size_t requiredSize = static_cast<size_t>(vertexCount) * sizeof(Vertex);
+    const size_t availableBytes = m_vertexBuffer->Size() - m_vertexBufferOffset;
+    const uint64_t availableVertices = availableBytes / sizeof(Vertex);
 
-    if (m_vertexBuffer->Size() < requiredSize) {
+    const uint64_t endVertex = static_cast<uint64_t>(firstVertex) + vertexCount;
+
+    if (endVertex > availableVertices) {
         return false;
     }
 

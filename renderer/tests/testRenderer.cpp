@@ -1021,6 +1021,36 @@ static void TestCreateVertexBufferValidation() {
     assert(renderer.CreateVertexBuffer(vertices, 0) == nullptr);
 }
 
+static void TestDrawTrianglesRangeValidation() {
+    myrenderer::Renderer renderer;
+
+    assert(renderer.Valid());
+
+    const myrenderer::Vertex vertices[3] = {{10.0f, 10.0f, 0xFFFFFFFFu},
+                                            {30.0f, 10.0f, 0xFFFFFFFFu},
+                                            {20.0f, 30.0f, 0xFFFFFFFFu}};
+
+    auto vertexBuffer = renderer.CreateVertexBuffer(vertices, 3);
+    auto commands = renderer.CreateCommandBuffer(1024);
+
+    assert(vertexBuffer != nullptr);
+    assert(commands != nullptr);
+
+    // All three vertices fit
+    assert(commands->BindVertexBuffer(*vertexBuffer, 0));
+    assert(commands->DrawTriangles(3, 0));
+
+    // Starting at vertex 1
+    assert(!commands->DrawTriangles(3, 1));
+
+    // Huge first vertex
+    assert(!commands->DrawTriangles(3, UINT32_MAX - 1));
+
+    // Skipping one vertex
+    assert(commands->BindVertexBuffer(*vertexBuffer, sizeof(myrenderer::Vertex)));
+    assert(!commands->DrawTriangles(3, 0));
+}
+
 static void TestClearValidation() {
     myrenderer::Renderer renderer;
 
@@ -1180,6 +1210,8 @@ int main() {
 
     TestCreateVertexBuffer();
     TestCreateVertexBufferValidation();
+
+    TestDrawTrianglesRangeValidation();
 
     TestClearValidation();
 
