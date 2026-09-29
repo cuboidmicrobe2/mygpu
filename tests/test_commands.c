@@ -6,22 +6,9 @@
 #include "mygpu/commands.h"
 #include "mygpu/memory.h"
 
+#include "test.h"
+
 #define TEST_CLEAR_COLOR 0x000000FFu
-
-static int tests_run = 0;
-static int tests_passed = 0;
-
-static void check(int condition, const char *name)
-{
-    tests_run++;
-
-    if (condition) {
-        printf("PASS: %s\n", name);
-        tests_passed++;
-    } else {
-        printf("FAIL: %s\n", name);
-    }
-}
 
 static void check_pixel(struct mygpu *gpu, uint32_t x, uint32_t y, uint32_t expected, const char *name)
 {
@@ -1594,62 +1581,50 @@ static void test_buffer_copy_destination_too_small(void)
 
 int main(void)
 {
-    printf("=== MyGPU Command Tests ===\n\n");
+    run_test(test_create_destroy);
+    run_test(test_create_zero_size);
+    run_test(test_write_command);
+    run_test(test_write_too_large);
+    run_test(test_execute_clear);
+    run_test(test_invalid_opcode);
+    run_test(test_truncated_command);
 
-    test_create_destroy();
-    test_create_zero_size();
-    test_write_command();
-    test_write_too_large();
-    test_execute_clear();
-    test_invalid_opcode();
-    test_truncated_command();
+    run_test(test_draw_rect);
+    run_test(test_draw_rect_right_edge);
+    run_test(test_draw_rect_bottom_edge);
+    run_test(test_draw_rect_outside);
 
-    test_draw_rect();
-    test_draw_rect_right_edge();
-    test_draw_rect_bottom_edge();
-    test_draw_rect_outside();
+    run_test(test_copy);
+    run_test(test_copy_overlap);
+    run_test(test_copy_zero_size);
+    run_test(test_copy_outside);
 
-    test_copy();
-    test_copy_overlap();
-    test_copy_zero_size();
-    test_copy_outside();
+    run_test(test_present);
 
-    test_present();
+    run_test(test_validate_null);
+    run_test(test_validate_clear);
+    run_test(test_validate_draw_rect);
+    run_test(test_validate_copy);
+    run_test(test_validate_present);
+    run_test(test_validate_invalid_opcode);
+    run_test(test_validate_truncated_clear);
+    run_test(test_validate_truncated_draw_rect);
+    run_test(test_validate_truncated_copy);
+    run_test(test_validate_truncated_present);
 
-    test_validate_null();
-    test_validate_clear();
-    test_validate_draw_rect();
-    test_validate_copy();
-    test_validate_present();
-    test_validate_invalid_opcode();
-    test_validate_truncated_clear();
-    test_validate_truncated_draw_rect();
-    test_validate_truncated_copy();
-    test_validate_truncated_present();
+    run_test(test_draw_indexed_validation_zero_count);
+    run_test(test_draw_indexed_validation_invalid_count);
+    run_test(test_draw_indexed_validation_truncated);
 
-    test_draw_indexed_validation_zero_count();
-    test_draw_indexed_validation_invalid_count();
-    test_draw_indexed_validation_truncated();
+    run_test(test_buffer_copy_validation);
+    run_test(test_buffer_copy_validation_zero_size);
+    run_test(test_buffer_copy_validation_truncated);
+    run_test(test_buffer_copy_execution);
+    run_test(test_buffer_copy_execution_with_offsets);
+    run_test(test_buffer_copy_unknown_source);
+    run_test(test_buffer_copy_unknown_destination);
+    run_test(test_buffer_copy_source_too_small);
+    run_test(test_buffer_copy_destination_too_small);
 
-    test_buffer_copy_validation();
-    test_buffer_copy_validation_zero_size();
-    test_buffer_copy_validation_truncated();
-    test_buffer_copy_execution();
-    test_buffer_copy_execution_with_offsets();
-    test_buffer_copy_unknown_source();
-    test_buffer_copy_unknown_destination();
-    test_buffer_copy_source_too_small();
-    test_buffer_copy_destination_too_small();
-
-    printf("\n=== Results ===\n");
-
-    printf("%d/%d tests passed\n", tests_passed, tests_run);
-
-    if (tests_passed == tests_run) {
-        printf("All tests passed!\n");
-        return 0;
-    }
-
-    printf("Some tests failed!\n");
-    return 1;
+    return test_finish();
 }

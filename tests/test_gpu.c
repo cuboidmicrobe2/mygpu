@@ -4,20 +4,7 @@
 #include "mygpu/commands.h"
 #include "mygpu/fence.h"
 
-static int tests_run = 0;
-static int tests_passed = 0;
-
-static void check(int condition, const char *name)
-{
-    tests_run++;
-
-    if (condition) {
-        printf("PASS: %s\n", name);
-        tests_passed++;
-    } else {
-        printf("FAIL: %s\n", name);
-    }
-}
+#include "test.h"
 
 static void test_create(void)
 {
@@ -677,35 +664,23 @@ static void test_submit_empty_command_buffer(void)
 
 int main(void)
 {
-    printf("=== MyGPU Tests ===\n\n");
+    run_test(test_create);
+    run_test(test_destroy_null);
+    run_test(test_reset);
+    run_test(test_multiple_gpus);
+    run_test(test_multiple_resets);
+    run_test(test_clear_integration);
+    run_test(test_submit);
+    run_test(test_submit_invalid_arguments);
+    run_test(test_submit_invalid_command);
+    run_test(test_submit_fifo);
+    run_test(test_fence_wait);
+    run_test(test_fence_wait_already_signaled);
+    run_test(test_fence_wait_invalid_arguments);
+    run_test(test_fence_reuse);
+    run_test(test_fence_failure_recovery);
+    run_test(test_process_is_idempotent);
+    run_test(test_submit_empty_command_buffer);
 
-    test_create();
-    test_destroy_null();
-    test_reset();
-    test_multiple_gpus();
-    test_multiple_resets();
-    test_clear_integration();
-    test_submit();
-    test_submit_invalid_arguments();
-    test_submit_invalid_command();
-    test_submit_fifo();
-    test_fence_wait();
-    test_fence_wait_already_signaled();
-    test_fence_wait_invalid_arguments();
-    test_fence_reuse();
-    test_fence_failure_recovery();
-    test_process_is_idempotent();
-    test_submit_empty_command_buffer();
-
-    printf("\n=== Results ===\n");
-
-    printf("%d/%d tests passed\n", tests_passed, tests_run);
-
-    if (tests_passed == tests_run) {
-        printf("All tests passed!\n");
-        return 0;
-    }
-
-    printf("Some tests failed!\n");
-    return 1;
+    return test_finish();
 }

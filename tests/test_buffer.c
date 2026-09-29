@@ -4,20 +4,7 @@
 #include "mygpu/gpu.h"
 #include "mygpu/buffer.h"
 
-static int tests_run = 0;
-static int tests_passed = 0;
-
-static void check(int condition, const char *name)
-{
-    tests_run++;
-
-    if (condition) {
-        printf("PASS: %s\n", name);
-        tests_passed++;
-    } else {
-        printf("FAIL: %s\n", name);
-    }
-}
+#include "test.h"
 
 static void test_create_destroy(void)
 {
@@ -550,35 +537,23 @@ static void test_buffer_lookup_after_destroy(void)
 
 int main(void)
 {
-    printf("=== MyGPU Buffer Tests ===\n\n");
+    run_test(test_create_destroy);
+    run_test(test_create_zero_size);
+    run_test(test_create_null_gpu);
+    run_test(test_size);
+    run_test(test_write_read);
+    run_test(test_new_buffer_is_zeroed);
+    run_test(test_partial_write_read);
+    run_test(test_write_past_end);
+    run_test(test_read_past_end);
+    run_test(test_offset_past_end);
+    run_test(test_null_arguments);
+    run_test(test_multiple_buffers);
+    run_test(test_address);
+    run_test(test_buffer_addresses_and_isolation);
+    run_test(test_buffer_lookup);
+    run_test(test_buffer_lookup_unknown);
+    run_test(test_buffer_lookup_after_destroy);
 
-    test_create_destroy();
-    test_create_zero_size();
-    test_create_null_gpu();
-    test_size();
-    test_write_read();
-    test_new_buffer_is_zeroed();
-    test_partial_write_read();
-    test_write_past_end();
-    test_read_past_end();
-    test_offset_past_end();
-    test_null_arguments();
-    test_multiple_buffers();
-    test_address();
-    test_buffer_addresses_and_isolation();
-    test_buffer_lookup();
-    test_buffer_lookup_unknown();
-    test_buffer_lookup_after_destroy();
-
-    printf("\n=== Results ===\n");
-
-    printf("%d/%d tests passed\n", tests_passed, tests_run);
-
-    if (tests_passed == tests_run) {
-        printf("All tests passed!\n");
-        return 0;
-    }
-
-    printf("Some tests failed!\n");
-    return 1;
+    return test_finish();
 }

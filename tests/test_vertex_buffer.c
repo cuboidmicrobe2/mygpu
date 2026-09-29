@@ -1,10 +1,11 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 
 #include "mygpu/buffer.h"
 #include "mygpu/gpu.h"
 #include "mygpu/vertex.h"
+
+#include "test.h"
 
 static void test_vertex_fetch(void)
 {
@@ -14,11 +15,11 @@ static void test_vertex_fetch(void)
     struct mygpu_vertex vertex;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     buffer = mygpu_buffer_create(gpu, sizeof(vertices));
 
-    assert(buffer != NULL);
+    require(buffer != NULL);
 
     vertices[0].x = 10.0f;
     vertices[0].y = 20.0f;
@@ -32,24 +33,24 @@ static void test_vertex_fetch(void)
     vertices[2].y = 60.0f;
     vertices[2].color = 0x0000ffffu;
 
-    assert(mygpu_buffer_write(buffer, 0, vertices, sizeof(vertices)) == 0);
+    require(mygpu_buffer_write(buffer, 0, vertices, sizeof(vertices)) == 0);
 
-    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 0, &vertex) == 0);
-    assert(vertex.x == 10.0f);
-    assert(vertex.y == 20.0f);
-    assert(vertex.color == 0xff0000ffu);
+    require(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 0, &vertex) == 0);
+    require(vertex.x == 10.0f);
+    require(vertex.y == 20.0f);
+    require(vertex.color == 0xff0000ffu);
 
-    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 1, &vertex) == 0);
-    assert(vertex.x == 30.0f);
-    assert(vertex.y == 40.0f);
-    assert(vertex.color == 0x00ff00ffu);
+    require(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 1, &vertex) == 0);
+    require(vertex.x == 30.0f);
+    require(vertex.y == 40.0f);
+    require(vertex.color == 0x00ff00ffu);
 
-    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 2, &vertex) == 0);
-    assert(vertex.x == 50.0f);
-    assert(vertex.y == 60.0f);
-    assert(vertex.color == 0x0000ffffu);
+    require(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 2, &vertex) == 0);
+    require(vertex.x == 50.0f);
+    require(vertex.y == 60.0f);
+    require(vertex.color == 0x0000ffffu);
 
-    assert(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 3, &vertex) == 0);
+    require(mygpu_vertex_fetch(mygpu_get_memory(gpu), mygpu_buffer_address(buffer), 3, &vertex) == 0);
 
     mygpu_buffer_destroy(buffer);
     mygpu_destroy(gpu);
@@ -57,9 +58,7 @@ static void test_vertex_fetch(void)
 
 int main(void)
 {
-    test_vertex_fetch();
+    run_test(test_vertex_fetch);
 
-    printf("vertex buffer tests passed\n");
-
-    return 0;
+    return test_finish();
 }

@@ -3,20 +3,7 @@
 
 #include "mygpu/fence.h"
 
-static int tests_run = 0;
-static int tests_passed = 0;
-
-static void check(int condition, const char *name)
-{
-    tests_run++;
-
-    if (condition) {
-        printf("PASS: %s\n", name);
-        tests_passed++;
-    } else {
-        printf("FAIL: %s\n", name);
-    }
-}
+#include "test.h"
 
 static void test_create_destroy(void)
 {
@@ -170,25 +157,13 @@ static void test_null_arguments(void)
 
 int main(void)
 {
-    printf("=== MyGPU Fence Tests ===\n\n");
+    run_test(test_create_destroy);
+    run_test(test_initial_state);
+    run_test(test_id);
+    run_test(test_signal);
+    run_test(test_reset);
+    run_test(test_multiple_fences);
+    run_test(test_null_arguments);
 
-    test_create_destroy();
-    test_initial_state();
-    test_id();
-    test_signal();
-    test_reset();
-    test_multiple_fences();
-    test_null_arguments();
-
-    printf("\n=== Results ===\n");
-
-    printf("%d/%d tests passed\n", tests_passed, tests_run);
-
-    if (tests_passed == tests_run) {
-        printf("All tests passed!\n");
-        return 0;
-    }
-
-    printf("Some tests failed!\n");
-    return 1;
+    return test_finish();
 }

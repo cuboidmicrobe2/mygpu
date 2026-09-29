@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -8,15 +7,17 @@
 #include "mygpu/gpu.h"
 #include "mygpu/vertex.h"
 
+#include "test.h"
+
 static struct mygpu_buffer *create_vertex_buffer(struct mygpu *gpu, const struct mygpu_vertex *vertices, uint32_t count)
 {
     struct mygpu_buffer *buffer;
 
     buffer = mygpu_buffer_create(gpu, sizeof(*vertices) * count);
 
-    assert(buffer != NULL);
+    require(buffer != NULL);
 
-    assert(mygpu_buffer_write(buffer, 0, vertices, sizeof(*vertices) * count) == 0);
+    require(mygpu_buffer_write(buffer, 0, vertices, sizeof(*vertices) * count) == 0);
 
     return buffer;
 }
@@ -27,7 +28,7 @@ static struct mygpu_command_buffer *create_draw_command(struct mygpu_buffer *ver
     struct mygpu_cmd_draw_triangles command;
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -35,9 +36,9 @@ static struct mygpu_command_buffer *create_draw_command(struct mygpu_buffer *ver
     command.vertex_count = 3;
     command.first_vertex = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
     return command_buffer;
 }
@@ -53,7 +54,7 @@ static void test_basic_triangle(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){2.0f, 2.0f, 0xff0000ffu};
 
@@ -65,15 +66,15 @@ static void test_basic_triangle(void)
 
     command_buffer = create_draw_command(vertex_buffer);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
 
-    assert(color == 0xff0000ffu);
+    require(color == 0xff0000ffu);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 12, 12, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 12, 12, &color) == 0);
 
-    assert(color != 0xff0000ffu);
+    require(color != 0xff0000ffu);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -91,7 +92,7 @@ static void test_reverse_winding(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){2.0f, 12.0f, 0xff00ff00u};
 
@@ -103,11 +104,11 @@ static void test_reverse_winding(void)
 
     command_buffer = create_draw_command(vertex_buffer);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
 
-    assert(color == 0xff00ff00u);
+    require(color == 0xff00ff00u);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -125,7 +126,7 @@ static void test_triangle_at_framebuffer_edge(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){0.0f, 0.0f, 0xffff0000u};
 
@@ -137,11 +138,11 @@ static void test_triangle_at_framebuffer_edge(void)
 
     command_buffer = create_draw_command(vertex_buffer);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 1, 1, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 1, 1, &color) == 0);
 
-    assert(color == 0xffff0000u);
+    require(color == 0xffff0000u);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -161,15 +162,15 @@ static void test_triangle_outside_framebuffer(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     clear_command.opcode = MYGPU_CMD_CLEAR;
     clear_command.color = 0x12345678u;
 
     command_buffer = mygpu_command_buffer_create(128);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
-    assert(mygpu_command_buffer_write(command_buffer, &clear_command, sizeof(clear_command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &clear_command, sizeof(clear_command)) == 0);
 
     vertices[0] = (struct mygpu_vertex){-20.0f, -20.0f, 0xff00ffffu};
 
@@ -188,16 +189,16 @@ static void test_triangle_outside_framebuffer(void)
         draw_command.vertex_count = 3;
         draw_command.first_vertex = 0;
 
-        assert(mygpu_command_buffer_write(command_buffer, &draw_command, sizeof(draw_command)) == 0);
+        require(mygpu_command_buffer_write(command_buffer, &draw_command, sizeof(draw_command)) == 0);
     }
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 0, 0, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 0, 0, &color) == 0);
 
-    assert(color == 0x12345678u);
+    require(color == 0x12345678u);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -218,7 +219,7 @@ static void test_degenerate_triangle(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){2.0f, 2.0f, 0xffffff00u};
 
@@ -229,12 +230,12 @@ static void test_degenerate_triangle(void)
     vertex_buffer = create_vertex_buffer(gpu, vertices, 3);
 
     command_buffer = mygpu_command_buffer_create(128);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     clear_command.opcode = MYGPU_CMD_CLEAR;
     clear_command.color = 0x12345678u;
 
-    assert(mygpu_command_buffer_write(command_buffer, &clear_command, sizeof(clear_command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &clear_command, sizeof(clear_command)) == 0);
 
     draw_command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     draw_command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -242,15 +243,15 @@ static void test_degenerate_triangle(void)
     draw_command.vertex_count = 3;
     draw_command.first_vertex = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &draw_command, sizeof(draw_command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &draw_command, sizeof(draw_command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 5, 5, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 5, 5, &color) == 0);
 
-    assert(color == 0x12345678u);
+    require(color == 0x12345678u);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -270,7 +271,7 @@ static void test_multiple_triangles(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){2.0f, 2.0f, 0xff0000ffu};
 
@@ -287,7 +288,7 @@ static void test_multiple_triangles(void)
     vertex_buffer = create_vertex_buffer(gpu, vertices, 6);
 
     command_buffer = mygpu_command_buffer_create(128);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -295,23 +296,23 @@ static void test_multiple_triangles(void)
     command.vertex_count = 3;
     command.first_vertex = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
     command.vertex_address = mygpu_buffer_address(vertex_buffer) + (3u * (uint32_t)sizeof(struct mygpu_vertex));
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
 
-    assert(color == 0xff0000ffu);
+    require(color == 0xff0000ffu);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 21, 21, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 21, 21, &color) == 0);
 
-    assert(color == 0xff00ff00u);
+    require(color == 0xff00ff00u);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -331,7 +332,7 @@ static void test_vertex_buffer_offset(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){2.0f, 2.0f, 0xff0000ffu};
 
@@ -348,7 +349,7 @@ static void test_vertex_buffer_offset(void)
     vertex_buffer = create_vertex_buffer(gpu, vertices, 6);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -356,19 +357,19 @@ static void test_vertex_buffer_offset(void)
     command.vertex_count = 3;
     command.first_vertex = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 21, 21, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 21, 21, &color) == 0);
 
-    assert(color == 0xff00ff00u);
+    require(color == 0xff00ff00u);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 3, 3, &color) == 0);
 
-    assert(color != 0xff0000ffu);
+    require(color != 0xff0000ffu);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -382,10 +383,10 @@ static void test_unknown_vertex_buffer(void)
     struct mygpu_cmd_draw_triangles command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = 0xFFFFFFFFu;
@@ -393,11 +394,11 @@ static void test_unknown_vertex_buffer(void)
     command.vertex_count = 3;
     command.first_vertex = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_destroy(gpu);
@@ -413,7 +414,7 @@ static void test_vertex_buffer_too_small(void)
     struct mygpu_cmd_draw_triangles command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){2.0f, 2.0f, 0xff0000ffu};
 
@@ -422,7 +423,7 @@ static void test_vertex_buffer_too_small(void)
     vertex_buffer = create_vertex_buffer(gpu, vertices, 2);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -430,11 +431,11 @@ static void test_vertex_buffer_too_small(void)
     command.vertex_count = 3;
     command.first_vertex = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -451,7 +452,7 @@ static void test_vertex_buffer_offset_too_small(void)
     struct mygpu_cmd_draw_triangles command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){2.0f, 2.0f, 0xff0000ffu};
 
@@ -464,7 +465,7 @@ static void test_vertex_buffer_offset_too_small(void)
     vertex_buffer = create_vertex_buffer(gpu, vertices, 4);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_TRIANGLES;
     command.vertex_address = mygpu_buffer_address(vertex_buffer) + (3u * (uint32_t)sizeof(struct mygpu_vertex));
@@ -472,11 +473,11 @@ static void test_vertex_buffer_offset_too_small(void)
     command.vertex_count = 3;
     command.first_vertex = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -498,7 +499,7 @@ static void test_indexed_triangle(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -510,16 +511,16 @@ static void test_indexed_triangle(void)
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -528,15 +529,15 @@ static void test_indexed_triangle(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 20, 15, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 20, 15, &color) == 0);
 
-    assert(color == 0xff0000ffu);
+    require(color == 0xff0000ffu);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -559,7 +560,7 @@ static void test_indexed_first_index(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -577,7 +578,7 @@ static void test_indexed_first_index(void)
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
@@ -586,10 +587,10 @@ static void test_indexed_first_index(void)
     indices[4] = 4;
     indices[5] = 5;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -598,19 +599,19 @@ static void test_indexed_first_index(void)
     command.index_count = 3;
     command.first_index = 3;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 60, 15, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 60, 15, &color) == 0);
 
-    assert(color == 0xff00ff00u);
+    require(color == 0xff00ff00u);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 20, 15, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 20, 15, &color) == 0);
 
-    assert(color != 0xff0000ffu);
+    require(color != 0xff0000ffu);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -629,20 +630,20 @@ static void test_indexed_unknown_vertex_buffer(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = 0;
@@ -651,11 +652,11 @@ static void test_indexed_unknown_vertex_buffer(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -673,7 +674,7 @@ static void test_indexed_unknown_index_buffer(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -684,7 +685,7 @@ static void test_indexed_unknown_index_buffer(void)
     vertex_buffer = create_vertex_buffer(gpu, vertices, 3);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -693,11 +694,11 @@ static void test_indexed_unknown_index_buffer(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(vertex_buffer);
@@ -717,7 +718,7 @@ static void test_indexed_index_buffer_too_small(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -729,15 +730,15 @@ static void test_indexed_index_buffer_too_small(void)
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -746,11 +747,11 @@ static void test_indexed_index_buffer_too_small(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -771,7 +772,7 @@ static void test_indexed_vertex_index_out_of_bounds(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -783,16 +784,16 @@ static void test_indexed_vertex_index_out_of_bounds(void)
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 3;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -801,11 +802,11 @@ static void test_indexed_vertex_index_out_of_bounds(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -828,7 +829,7 @@ static void test_indexed_vertex_buffer_offset(void)
     uint32_t color;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -846,16 +847,16 @@ static void test_indexed_vertex_buffer_offset(void)
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -864,19 +865,19 @@ static void test_indexed_vertex_buffer_offset(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) == 0);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 60, 15, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 60, 15, &color) == 0);
 
-    assert(color == 0xff00ff00u);
+    require(color == 0xff00ff00u);
 
-    assert(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 20, 15, &color) == 0);
+    require(mygpu_framebuffer_get_pixel(mygpu_get_framebuffer(gpu), 20, 15, &color) == 0);
 
-    assert(color != 0xff0000ffu);
+    require(color != 0xff0000ffu);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -897,7 +898,7 @@ static void test_indexed_vertex_offset_past_end(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -909,16 +910,16 @@ static void test_indexed_vertex_offset_past_end(void)
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -927,11 +928,11 @@ static void test_indexed_vertex_offset_past_end(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -952,7 +953,7 @@ static void test_indexed_vertex_offset_index_out_of_bounds(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
 
@@ -966,17 +967,17 @@ static void test_indexed_vertex_offset_index_out_of_bounds(void)
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     /* index 3 is valid without the offset, but not after skipping one vertex */
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 3;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -985,11 +986,11 @@ static void test_indexed_vertex_offset_index_out_of_bounds(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -1011,7 +1012,7 @@ static void test_indexed_first_index_overflow(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
     vertices[1] = (struct mygpu_vertex){30.0f, 10.0f, 0xff0000ffu};
@@ -1026,20 +1027,20 @@ static void test_indexed_first_index_overflow(void)
     /* valid indices placed directly before the index buffer, so a wrapped index address reads a drawable triangle */
     decoy_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(decoy_buffer != NULL);
+    require(decoy_buffer != NULL);
 
-    assert(mygpu_buffer_write(decoy_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(decoy_buffer, 0, indices, sizeof(indices)) == 0);
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
-    assert(mygpu_buffer_address(index_buffer) == mygpu_buffer_address(decoy_buffer) + sizeof(indices));
+    require(mygpu_buffer_address(index_buffer) == mygpu_buffer_address(decoy_buffer) + sizeof(indices));
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     /* first_index + index_count wraps to 0 in 32-bit arithmetic */
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
@@ -1049,11 +1050,11 @@ static void test_indexed_first_index_overflow(void)
     command.index_count = 3;
     command.first_index = UINT32_MAX - 2u;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -1075,7 +1076,7 @@ static void test_indexed_partial_vertex_out_of_bounds(void)
     struct mygpu_cmd_draw_indexed command;
 
     gpu = mygpu_create();
-    assert(gpu != NULL);
+    require(gpu != NULL);
 
     vertices[0] = (struct mygpu_vertex){10.0f, 10.0f, 0xff0000ffu};
     vertices[1] = (struct mygpu_vertex){30.0f, 10.0f, 0xff0000ffu};
@@ -1084,22 +1085,22 @@ static void test_indexed_partial_vertex_out_of_bounds(void)
     /* room for three vertices plus four bytes: vertex 3 starts inside the buffer but does not fit */
     vertex_buffer = mygpu_buffer_create(gpu, sizeof(vertices) + 4u);
 
-    assert(vertex_buffer != NULL);
+    require(vertex_buffer != NULL);
 
-    assert(mygpu_buffer_write(vertex_buffer, 0, vertices, sizeof(vertices)) == 0);
+    require(mygpu_buffer_write(vertex_buffer, 0, vertices, sizeof(vertices)) == 0);
 
     index_buffer = mygpu_buffer_create(gpu, sizeof(indices));
 
-    assert(index_buffer != NULL);
+    require(index_buffer != NULL);
 
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 3;
 
-    assert(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
+    require(mygpu_buffer_write(index_buffer, 0, indices, sizeof(indices)) == 0);
 
     command_buffer = mygpu_command_buffer_create(64);
-    assert(command_buffer != NULL);
+    require(command_buffer != NULL);
 
     command.opcode = MYGPU_CMD_DRAW_INDEXED;
     command.vertex_address = mygpu_buffer_address(vertex_buffer);
@@ -1108,11 +1109,11 @@ static void test_indexed_partial_vertex_out_of_bounds(void)
     command.index_count = 3;
     command.first_index = 0;
 
-    assert(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
+    require(mygpu_command_buffer_write(command_buffer, &command, sizeof(command)) == 0);
 
-    assert(mygpu_command_buffer_validate(command_buffer) == 0);
+    require(mygpu_command_buffer_validate(command_buffer) == 0);
 
-    assert(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
+    require(mygpu_command_buffer_execute(gpu, command_buffer) != 0);
 
     mygpu_command_buffer_destroy(command_buffer);
     mygpu_buffer_destroy(index_buffer);
@@ -1122,33 +1123,31 @@ static void test_indexed_partial_vertex_out_of_bounds(void)
 
 int main(void)
 {
-    test_basic_triangle();
-    test_reverse_winding();
-    test_triangle_at_framebuffer_edge();
-    test_triangle_outside_framebuffer();
-    test_degenerate_triangle();
-    test_multiple_triangles();
+    run_test(test_basic_triangle);
+    run_test(test_reverse_winding);
+    run_test(test_triangle_at_framebuffer_edge);
+    run_test(test_triangle_outside_framebuffer);
+    run_test(test_degenerate_triangle);
+    run_test(test_multiple_triangles);
 
-    test_vertex_buffer_offset();
+    run_test(test_vertex_buffer_offset);
 
-    test_unknown_vertex_buffer();
-    test_vertex_buffer_too_small();
-    test_vertex_buffer_offset_too_small();
+    run_test(test_unknown_vertex_buffer);
+    run_test(test_vertex_buffer_too_small);
+    run_test(test_vertex_buffer_offset_too_small);
 
-    test_indexed_triangle();
-    test_indexed_first_index();
-    test_indexed_unknown_vertex_buffer();
-    test_indexed_unknown_index_buffer();
-    test_indexed_index_buffer_too_small();
-    test_indexed_vertex_index_out_of_bounds();
-    test_indexed_first_index_overflow();
-    test_indexed_partial_vertex_out_of_bounds();
+    run_test(test_indexed_triangle);
+    run_test(test_indexed_first_index);
+    run_test(test_indexed_unknown_vertex_buffer);
+    run_test(test_indexed_unknown_index_buffer);
+    run_test(test_indexed_index_buffer_too_small);
+    run_test(test_indexed_vertex_index_out_of_bounds);
+    run_test(test_indexed_first_index_overflow);
+    run_test(test_indexed_partial_vertex_out_of_bounds);
 
-    test_indexed_vertex_buffer_offset();
-    test_indexed_vertex_offset_past_end();
-    test_indexed_vertex_offset_index_out_of_bounds();
+    run_test(test_indexed_vertex_buffer_offset);
+    run_test(test_indexed_vertex_offset_past_end);
+    run_test(test_indexed_vertex_offset_index_out_of_bounds);
 
-    printf("draw triangles tests passed\n");
-
-    return 0;
+    return test_finish();
 }

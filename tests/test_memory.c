@@ -4,20 +4,7 @@
 
 #include "mygpu/memory.h"
 
-static int tests_run = 0;
-static int tests_passed = 0;
-
-static void check(int condition, const char *name)
-{
-    tests_run++;
-
-    if (condition) {
-        printf("PASS: %s\n", name);
-        tests_passed++;
-    } else {
-        printf("FAIL: %s\n", name);
-    }
-}
+#include "test.h"
 
 static void test_create_destroy(void)
 {
@@ -347,32 +334,21 @@ static void test_alloc_null_arguments(void)
 
 int main(void)
 {
-    printf("=== MyGPU Memory Tests ===\n\n");
+    run_test(test_create_destroy);
+    run_test(test_memory_is_zero_initialized);
+    run_test(test_write_and_read);
+    run_test(test_write_bytes);
+    run_test(test_first_byte_boundary);
+    run_test(test_last_byte_boundary);
+    run_test(test_write_out_of_bounds);
+    run_test(test_read_out_of_bounds);
+    run_test(test_null_arguments);
+    run_test(test_zero_size_operations);
 
-    test_create_destroy();
-    test_memory_is_zero_initialized();
-    test_write_and_read();
-    test_write_bytes();
-    test_first_byte_boundary();
-    test_last_byte_boundary();
-    test_write_out_of_bounds();
-    test_read_out_of_bounds();
-    test_null_arguments();
-    test_zero_size_operations();
+    run_test(test_alloc);
+    run_test(test_alloc_zero_size);
+    run_test(test_alloc_out_of_memory);
+    run_test(test_alloc_null_arguments);
 
-    test_alloc();
-    test_alloc_zero_size();
-    test_alloc_out_of_memory();
-    test_alloc_null_arguments();
-
-    printf("\n=== Results ===\n");
-    printf("%d/%d tests passed\n", tests_passed, tests_run);
-
-    if (tests_passed == tests_run) {
-        printf("All tests passed!\n");
-        return 0;
-    }
-
-    printf("Some tests failed!\n");
-    return 1;
+    return test_finish();
 }

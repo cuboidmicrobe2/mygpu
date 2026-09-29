@@ -6,22 +6,9 @@
 #include "mygpu/fence.h"
 #include "mygpu/queue.h"
 
+#include "test.h"
+
 #define TEST_CLEAR_COLOR 0x000000FFu
-
-static int tests_run = 0;
-static int tests_passed = 0;
-
-static void check(int condition, const char *name)
-{
-    tests_run++;
-
-    if (condition) {
-        printf("PASS: %s\n", name);
-        tests_passed++;
-    } else {
-        printf("FAIL: %s\n", name);
-    }
-}
 
 static void check_pixel(struct mygpu *gpu, uint32_t x, uint32_t y, uint32_t expected, const char *name)
 {
@@ -757,30 +744,18 @@ static void test_duplicate_submission(void)
 
 int main(void)
 {
-    printf("=== MyGPU Queue Tests ===\n\n");
+    run_test(test_create_destroy);
+    run_test(test_invalid_arguments);
+    run_test(test_submit_and_process_clear);
+    run_test(test_fifo_order);
+    run_test(test_empty_queue);
+    run_test(test_present_fence);
+    run_test(test_invalid_command_fence);
+    run_test(test_failed_command_stops_queue);
+    run_test(test_queue_recovery_after_failure);
+    run_test(test_queue_retains_resources);
+    run_test(test_queue_owns_resources);
+    run_test(test_duplicate_submission);
 
-    test_create_destroy();
-    test_invalid_arguments();
-    test_submit_and_process_clear();
-    test_fifo_order();
-    test_empty_queue();
-    test_present_fence();
-    test_invalid_command_fence();
-    test_failed_command_stops_queue();
-    test_queue_recovery_after_failure();
-    test_queue_retains_resources();
-    test_queue_owns_resources();
-    test_duplicate_submission();
-
-    printf("\n=== Results ===\n");
-
-    printf("%d/%d tests passed\n", tests_passed, tests_run);
-
-    if (tests_passed == tests_run) {
-        printf("All tests passed!\n");
-        return 0;
-    }
-
-    printf("Some tests failed!\n");
-    return 1;
+    return test_finish();
 }

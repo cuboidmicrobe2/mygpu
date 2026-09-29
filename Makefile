@@ -145,42 +145,51 @@ $(DRAW_TRIANGLES_TEST): $(LIBRARY) $(DRAW_TRIANGLES_TEST_SOURCE)
 # Run tests
 # --------------------------------------------------
 
-test: test-gpu \
-	test-memory \
-	test-registers \
-	test-framebuffer \
-	test-buffer \
-	test-vertex-buffer \
-	test-commands \
-	test-queue \
-	test-draw-triangles
+TEST_BINARIES = \
+	$(GPU_TEST) \
+	$(MEMORY_TEST) \
+	$(REGISTERS_TEST) \
+	$(FRAMEBUFFER_TEST) \
+	$(BUFFER_TEST) \
+	$(VERTEX_BUFFER_TEST) \
+	$(COMMANDS_TEST) \
+	$(QUEUE_TEST) \
+	$(DRAW_TRIANGLES_TEST)
+
+$(TEST_BINARIES): tests/test.h
+
+# Run every suite even if one fails, then report the overall result.
+test: $(TEST_BINARIES)
+	@failed=0; \
+	for t in $(TEST_BINARIES); do ./$$t || failed=1; done; \
+	if [ $$failed -eq 0 ]; then echo "all tests passed"; else echo "some tests failed"; exit 1; fi
 
 test-gpu: $(GPU_TEST)
-	./$(GPU_TEST)
+	@./$(GPU_TEST)
 
 test-memory: $(MEMORY_TEST)
-	./$(MEMORY_TEST)
+	@./$(MEMORY_TEST)
 
 test-registers: $(REGISTERS_TEST)
-	./$(REGISTERS_TEST)
+	@./$(REGISTERS_TEST)
 
 test-framebuffer: $(FRAMEBUFFER_TEST)
-	./$(FRAMEBUFFER_TEST)
+	@./$(FRAMEBUFFER_TEST)
 
 test-buffer: $(BUFFER_TEST)
-	./$(BUFFER_TEST)
+	@./$(BUFFER_TEST)
 
 test-vertex-buffer: $(VERTEX_BUFFER_TEST)
-	./$(VERTEX_BUFFER_TEST)
+	@./$(VERTEX_BUFFER_TEST)
 
 test-commands: $(COMMANDS_TEST)
-	./$(COMMANDS_TEST)
+	@./$(COMMANDS_TEST)
 
 test-queue: $(QUEUE_TEST)
-	./$(QUEUE_TEST)
+	@./$(QUEUE_TEST)
 
 test-draw-triangles: $(DRAW_TRIANGLES_TEST)
-	./$(DRAW_TRIANGLES_TEST)
+	@./$(DRAW_TRIANGLES_TEST)
 
 # --------------------------------------------------
 # Clean

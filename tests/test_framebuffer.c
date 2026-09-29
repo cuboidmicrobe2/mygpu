@@ -3,20 +3,7 @@
 
 #include "mygpu/framebuffer.h"
 
-static int tests_run = 0;
-static int tests_passed = 0;
-
-static void check(int condition, const char *name)
-{
-    tests_run++;
-
-    if (condition) {
-        printf("PASS: %s\n", name);
-        tests_passed++;
-    } else {
-        printf("FAIL: %s\n", name);
-    }
-}
+#include "test.h"
 
 static void test_create_destroy(void)
 {
@@ -358,31 +345,19 @@ static void test_null_arguments(void)
 
 int main(void)
 {
-    printf("=== MyGPU Framebuffer Tests ===\n\n");
+    run_test(test_create_destroy);
+    run_test(test_dimensions);
+    run_test(test_initial_pixels_are_zero);
+    run_test(test_set_and_get_pixel);
+    run_test(test_multiple_pixels);
+    run_test(test_clear);
+    run_test(test_clear_overwrites_existing_pixels);
+    run_test(test_first_pixel_boundary);
+    run_test(test_last_pixel_boundary);
+    run_test(test_x_out_of_bounds);
+    run_test(test_y_out_of_bounds);
+    run_test(test_zero_dimensions);
+    run_test(test_null_arguments);
 
-    test_create_destroy();
-    test_dimensions();
-    test_initial_pixels_are_zero();
-    test_set_and_get_pixel();
-    test_multiple_pixels();
-    test_clear();
-    test_clear_overwrites_existing_pixels();
-    test_first_pixel_boundary();
-    test_last_pixel_boundary();
-    test_x_out_of_bounds();
-    test_y_out_of_bounds();
-    test_zero_dimensions();
-    test_null_arguments();
-
-    printf("\n=== Results ===\n");
-
-    printf("%d/%d tests passed\n", tests_passed, tests_run);
-
-    if (tests_passed == tests_run) {
-        printf("All tests passed!\n");
-        return 0;
-    }
-
-    printf("Some tests failed!\n");
-    return 1;
+    return test_finish();
 }
